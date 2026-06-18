@@ -24,15 +24,20 @@ class UserFactory extends Factory
      */
     public function definition(): array
     {
+        $studentId = fake()->unique()->numerify('##########');
+        
         return [
-            'name' => fake()->name(),
-            'email' => fake()->unique()->safeEmail(),
+            'first_name' => fake()->firstName(),
+            'last_name' => fake()->lastName(),
+            'student_id' => $studentId,
+            'email' => $studentId . '@htu.edu.gh',
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),
             'two_factor_secret' => null,
             'two_factor_recovery_codes' => null,
             'two_factor_confirmed_at' => null,
+            'role' => 'student',
         ];
     }
 
