@@ -1,15 +1,81 @@
-@extends('errors.layout')
-
-@section('title', 'Forbidden')
-
-@section('content')
-    <div style="display: flex; align-items: center; justify-content: center; margin-bottom: 1.5rem;">
-        <svg width="56" height="56" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <rect width="48" height="48" rx="12" fill="#2563EB" />
-            <text x="24" y="32" textAnchor="middle" fill="white" fontFamily="system-ui, sans-serif" fontSize="22" fontWeight="700">EV</text>
-        </svg>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>403 — {{ config('app.name', 'HTU E-Voting') }}</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            background: #f8fafc;
+            color: #0f172a;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+        }
+        .card {
+            text-align: center;
+            max-width: 28rem;
+            width: 100%;
+        }
+        .logo {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 56px;
+            height: 56px;
+            background: #2563eb;
+            color: white;
+            font-weight: 700;
+            font-size: 1rem;
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+        }
+        .code {
+            font-size: 3.75rem;
+            font-weight: 700;
+            line-height: 1;
+            color: #2563eb;
+            margin-bottom: .5rem;
+        }
+        .title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin-bottom: .5rem;
+        }
+        .desc {
+            font-size: .875rem;
+            color: #64748b;
+            margin-bottom: 2rem;
+        }
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            height: 2.5rem;
+            padding: 0 1.5rem;
+            font-size: .875rem;
+            font-weight: 500;
+            border-radius: .5rem;
+            background: #2563eb;
+            color: white;
+            text-decoration: none;
+            transition: background .15s;
+        }
+        .btn:hover { background: #1d4ed8; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div class="logo">EV</div>
+        <h1 class="code">403</h1>
+        <p class="title">Access Denied</p>
+        <p class="desc">You don't have permission to access this page.</p>
+        <a href="/" class="btn">Back to Home</a>
     </div>
-    <h1 style="font-size: 3.75rem; font-weight: 700; line-height: 1; margin-bottom: 0.5rem;" role="status">403</h1>
-    <p style="font-size: 1.125rem; font-weight: 600; margin-bottom: 0.5rem;">Access Denied</p>
-    <p style="font-size: 0.875rem; color: var(--muted-foreground);">You don't have permission to access this page.</p>
-@endsection
+</body>
+</html>
