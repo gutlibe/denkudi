@@ -11,9 +11,11 @@ export default function AppSidebarLayout({
     return (
         <AppShell variant="sidebar">
             <AppSidebar />
-            <AppContent variant="sidebar" className="overflow-x-hidden">
-                <AppSidebarHeader breadcrumbs={breadcrumbs} />
-                {children}
+            <AppContent variant="sidebar" className="max-lg:max-h-svh max-lg:overflow-y-auto [&::-webkit-scrollbar]:hidden [scrollbar-width:none]">
+                <AppSidebarHeader breadcrumbs={breadcrumbs} className="bg-transparent" />
+                <div className="flex flex-1 flex-col gap-4 px-4 py-6 lg:px-6 lg:py-8">
+                    {children}
+                </div>
             </AppContent>
         </AppShell>
     );
