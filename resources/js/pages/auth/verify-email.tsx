@@ -1,7 +1,7 @@
-// Components
 import { Form, Head } from '@inertiajs/react';
 import TextLink from '@/components/text-link';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Spinner } from '@/components/ui/spinner';
 import { logout } from '@/routes';
 import { send } from '@/routes/verification';
@@ -13,34 +13,40 @@ export default function VerifyEmail({ status }: { status?: string }) {
 
             {status === 'verification-link-sent' && (
                 <div className="mb-4 text-center text-sm font-medium text-green-600">
-                    A new verification link has been sent to the email address
-                    you provided during registration.
+                    A new verification link has been sent to your email.
                 </div>
             )}
 
-            <Form {...send.form()} className="space-y-6 text-center">
-                {({ processing }) => (
-                    <>
-                        <Button disabled={processing} variant="secondary">
-                            {processing && <Spinner />}
-                            Resend verification email
-                        </Button>
+            <Card>
+                <CardHeader className="text-center">
+                    <CardTitle className="text-xl">Verify your email</CardTitle>
+                    <CardDescription>
+                        Check your inbox for the verification link we sent you.
+                    </CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <Form {...send.form()} className="flex flex-col gap-6">
+                        {({ processing }) => (
+                            <>
+                                <Button type="submit" className="w-full" disabled={processing} variant="secondary">
+                                    {processing && <Spinner />}
+                                    Resend verification email
+                                </Button>
 
-                        <TextLink
-                            href={logout()}
-                            className="mx-auto block text-sm"
-                        >
-                            Log out
-                        </TextLink>
-                    </>
-                )}
-            </Form>
+                                <div className="text-center text-sm">
+                                    <TextLink href={logout()}>
+                                        Log out
+                                    </TextLink>
+                                </div>
+                            </>
+                        )}
+                    </Form>
+                </CardContent>
+            </Card>
         </>
     );
 }
 
 VerifyEmail.layout = {
-    title: 'Email verification',
-    description:
-        'Please verify your email address by clicking on the link we just emailed to you.',
+    title: 'Verify your email',
 };
