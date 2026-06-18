@@ -42,7 +42,7 @@ export default function Login({ status, canResetPassword }: Props) {
                             <>
                                 <div className="grid gap-4">
                                     <div className="grid gap-2">
-                                        <Label htmlFor="email">Student email</Label>
+                                        <Label htmlFor="email">Student ID or email</Label>
                                         <Input
                                             id="email"
                                             type="text"
@@ -50,8 +50,8 @@ export default function Login({ status, canResetPassword }: Props) {
                                             required
                                             autoFocus
                                             tabIndex={1}
-                                            autoComplete="email"
-                                            placeholder="0000000000@htu.edu.gh"
+                                            autoComplete="username"
+                                            placeholder="0000000000 or 0000000000@htu.edu.gh"
                                         />
                                         <InputError message={errors.email} />
                                     </div>
