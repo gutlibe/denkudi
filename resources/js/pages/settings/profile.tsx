@@ -34,7 +34,7 @@ export default function Profile({
                 <Heading
                     variant="small"
                     title="Profile"
-                    description="Update your name and email address"
+                    description="Update your profile information"
                 />
 
                 <Form
@@ -46,43 +46,81 @@ export default function Profile({
                 >
                     {({ processing, errors }) => (
                         <>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="grid gap-2">
+                                    <Label htmlFor="first_name">First name</Label>
+
+                                    <Input
+                                        id="first_name"
+                                        className="mt-1 block w-full"
+                                        defaultValue={auth.user.first_name}
+                                        name="first_name"
+                                        required
+                                        autoComplete="given-name"
+                                        placeholder="First name"
+                                    />
+
+                                    <InputError
+                                        className="mt-2"
+                                        message={errors.first_name}
+                                    />
+                                </div>
+
+                                <div className="grid gap-2">
+                                    <Label htmlFor="last_name">Last name</Label>
+
+                                    <Input
+                                        id="last_name"
+                                        className="mt-1 block w-full"
+                                        defaultValue={auth.user.last_name}
+                                        name="last_name"
+                                        required
+                                        autoComplete="family-name"
+                                        placeholder="Last name"
+                                    />
+
+                                    <InputError
+                                        className="mt-2"
+                                        message={errors.last_name}
+                                    />
+                                </div>
+                            </div>
+
                             <div className="grid gap-2">
-                                <Label htmlFor="name">Name</Label>
+                                <Label htmlFor="student_id">Student ID</Label>
 
                                 <Input
-                                    id="name"
+                                    id="student_id"
                                     className="mt-1 block w-full"
-                                    defaultValue={auth.user.name}
-                                    name="name"
+                                    defaultValue={auth.user.student_id}
+                                    name="student_id"
                                     required
-                                    autoComplete="name"
-                                    placeholder="Full name"
+                                    maxLength={10}
+                                    placeholder="0000000000"
                                 />
 
                                 <InputError
                                     className="mt-2"
-                                    message={errors.name}
+                                    message={errors.student_id}
                                 />
                             </div>
 
                             <div className="grid gap-2">
-                                <Label htmlFor="email">Email address</Label>
+                                <Label htmlFor="email">Email</Label>
 
                                 <Input
                                     id="email"
                                     type="email"
                                     className="mt-1 block w-full"
                                     defaultValue={auth.user.email}
+                                    disabled
                                     name="email"
-                                    required
-                                    autoComplete="username"
                                     placeholder="Email address"
                                 />
 
-                                <InputError
-                                    className="mt-2"
-                                    message={errors.email}
-                                />
+                                <p className="text-xs text-muted-foreground">
+                                    Your email is generated from your student ID.
+                                </p>
                             </div>
 
                             {mustVerifyEmail &&
