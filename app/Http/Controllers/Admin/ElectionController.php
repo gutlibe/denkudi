@@ -1,0 +1,113 @@
+<?php
+
+namespace App\Http\Controllers\Admin;
+
+use App\Enums\ElectionStatus;
+use App\Enums\ElectionType;
+use App\Http\Controllers\Controller;
+use App\Models\Election;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
+use Inertia\Inertia;
+use Inertia\Response;
+
+class ElectionController extends Controller
+{
+    public function index(): Response
+    {
+        $elections = Election::with('createdBy')
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->map(fn (Election $election) => [
+                'id' => $election->id,
+                'title' => $election->title,
+                'type' => $election->type->value,
+                'type_label' => $election->type->label(),
+                'status' => $election->status->value,
+                'status_label' => $election->status->label(),
+                'scope' => $election->scope,
+                'starts_at' => $election->starts_at?->toISOString(),
+                'ends_at' => $election->ends_at?->toISOString(),
+                'created_by' => $election->createdBy->first_name . ' ' . $election->createdBy->last_name,
+                'created_at' => $election->created_at->toISOString(),
+            ]);
+
+        return Inertia::render('admin/elections/index', [
+            'elections' => $elections,
+        ]);
+    }
+
+    public function create(): Response
+    {
+        return Inertia::render('admin/elections/create', [
+            'types' => ElectionType::options(),
+        ]);
+    }
+
+    public function store(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'title' => ['required', 'string', 'max:255'],
+            'type' => ['required', Rule::enum(ElectionType::class)],
+            'scope' => ['required', 'string', 'max:255'],
+            'description' => ['nullable', 'string'],
+            'starts_at' => ['nullable', 'date'],
+            'ends_at' => ['nullable', 'date', 'after_or_equal:starts_at'],
+        ]);
+
+        $validated['slug'] = Str::slug($validated['title']) . '-' . Str::random(6);
+        $validated['status'] = ElectionStatus::Draft;
+        $validated['created_by'] = $request->user()->id;
+
+        Election::create($validated);
+
+        return redirect()->route('admin.elections.index')
+            ->with('toast', ['type' => 'success', 'message' => 'Election created.']);
+    }
+
+    public function edit(Election $election): Response
+    {
+        return Inertia::render('admin/elections/edit', [
+            'election' => [
+                'id' => $election->id,
+                'title' => $election->title,
+                'type' => $election->type->value,
+                'type_label' => $election->type->label(),
+                'scope' => $election->scope,
+                'description' => $election->description,
+                'status' => $election->status->value,
+                'status_label' => $election->status->label(),
+                'starts_at' => $election->starts_at?->format('Y-m-d\TH:i'),
+                'ends_at' => $election->ends_at?->format('Y-m-d\TH:i'),
+            ],
+            'types' => ElectionType::options(),
+        ]);
+    }
+
+    public function update(Request $request, Election $election): RedirectResponse
+    {
+        $validated = $request->validate([
+            'title' => ['required', 'string', 'max:255'],
+            'type' => ['required', Rule::enum(ElectionType::class)],
+            'scope' => ['required', 'string', 'max:255'],
+            'description' => ['nullable', 'string'],
+            'starts_at' => ['nullable', 'date'],
+            'ends_at' => ['nullable', 'date', 'after_or_equal:starts_at'],
+        ]);
+
+        $election->update($validated);
+
+        return redirect()->route('admin.elections.index')
+            ->with('toast', ['type' => 'success', 'message' => 'Election updated.']);
+    }
+
+    public function destroy(Election $election): RedirectResponse
+    {
+        $election->delete();
+
+        return redirect()->route('admin.elections.index')
+            ->with('toast', ['type' => 'success', 'message' => 'Election deleted.']);
+    }
+}

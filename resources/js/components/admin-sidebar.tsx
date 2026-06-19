@@ -33,7 +33,7 @@ const mainNavItems: NavItem[] = [
     },
     {
         title: 'Elections',
-        href: '#',
+        href: '/admin/elections',
         icon: () => <HugeiconsIcon icon={Analytics01Icon} size={18} />,
     },
 ];
