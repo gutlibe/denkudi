@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Enums\ElectionStatus;
 use App\Enums\ElectionType;
 use App\Http\Controllers\Controller;
+use App\Models\AdminAuditLog;
 use App\Models\Election;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -39,7 +40,7 @@ class ElectionController extends Controller
                 'scope' => $election->scope,
                 'starts_at' => $election->starts_at?->toISOString(),
                 'ends_at' => $election->ends_at?->toISOString(),
-                'created_by' => $election->createdBy->first_name . ' ' . $election->createdBy->last_name,
+                'created_by' => $election->createdBy->first_name.' '.$election->createdBy->last_name,
                 'created_at' => $election->created_at->toISOString(),
             ]);
 
@@ -71,11 +72,20 @@ class ElectionController extends Controller
             'ends_at' => ['nullable', 'date', 'after_or_equal:starts_at'],
         ]);
 
-        $validated['slug'] = Str::slug($validated['title']) . '-' . Str::random(6);
+        $validated['slug'] = Str::slug($validated['title']).'-'.Str::random(6);
         $validated['status'] = ElectionStatus::Draft;
         $validated['created_by'] = $request->user()->id;
 
-        Election::create($validated);
+        $election = Election::create($validated);
+
+        AdminAuditLog::create([
+            'admin_id' => $request->user()->id,
+            'action' => 'election_created',
+            'description' => "Election \"{$election->title}\" created.",
+            'metadata' => ['election_id' => $election->id, 'type' => $validated['type']],
+            'ip_address' => $request->ip(),
+            'created_at' => now(),
+        ]);
 
         return redirect()->route('admin.elections.index')
             ->with('toast', ['type' => 'success', 'message' => 'Election created.']);
@@ -124,6 +134,13 @@ class ElectionController extends Controller
 
     public function update(Request $request, Election $election): RedirectResponse
     {
+        if ($election->isActive()) {
+            return back()->with('toast', [
+                'type' => 'error',
+                'message' => 'Cannot edit an election while voting is active.',
+            ]);
+        }
+
         $validated = $request->validate([
             'title' => ['required', 'string', 'max:255'],
             'type' => ['required', Rule::enum(ElectionType::class)],
@@ -135,13 +152,39 @@ class ElectionController extends Controller
 
         $election->update($validated);
 
+        AdminAuditLog::create([
+            'admin_id' => $request->user()->id,
+            'action' => 'election_updated',
+            'description' => "Election \"{$election->title}\" updated.",
+            'metadata' => ['election_id' => $election->id],
+            'ip_address' => $request->ip(),
+            'created_at' => now(),
+        ]);
+
         return redirect()->route('admin.elections.index')
             ->with('toast', ['type' => 'success', 'message' => 'Election updated.']);
     }
 
-    public function destroy(Election $election): RedirectResponse
+    public function destroy(Request $request, Election $election): RedirectResponse
     {
+        if ($election->isActive()) {
+            return back()->with('toast', [
+                'type' => 'error',
+                'message' => 'Cannot delete an election while voting is active. Close it first.',
+            ]);
+        }
+
+        $title = $election->title;
         $election->delete();
+
+        AdminAuditLog::create([
+            'admin_id' => $request->user()->id,
+            'action' => 'election_deleted',
+            'description' => "Election \"{$title}\" deleted.",
+            'metadata' => ['election_id' => $election->id],
+            'ip_address' => $request->ip(),
+            'created_at' => now(),
+        ]);
 
         return redirect()->route('admin.elections.index')
             ->with('toast', ['type' => 'success', 'message' => 'Election deleted.']);

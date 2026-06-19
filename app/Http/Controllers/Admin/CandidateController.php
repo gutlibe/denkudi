@@ -3,8 +3,9 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Election;
+use App\Models\AdminAuditLog;
 use App\Models\Candidate;
+use App\Models\Election;
 use App\Models\Position;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -33,7 +34,7 @@ class CandidateController extends Controller
                     'name' => $c->name,
                     'department' => $c->department,
                     'manifesto' => $c->manifesto,
-                    'photo_url' => $c->photo_url ? asset('storage/' . $c->photo_url) : null,
+                    'photo_url' => $c->photo_url ? asset('storage/'.$c->photo_url) : null,
                 ])->toArray(),
             ],
         ]);
@@ -41,6 +42,13 @@ class CandidateController extends Controller
 
     public function store(Request $request, Election $election): RedirectResponse
     {
+        if ($election->isActive()) {
+            return back()->with('toast', [
+                'type' => 'error',
+                'message' => 'Cannot add candidates while voting is active.',
+            ]);
+        }
+
         try {
             Log::info('Candidate store attempt', [
                 'election_id' => $election->id,
@@ -67,8 +75,17 @@ class CandidateController extends Controller
 
             Log::info('Candidate created', ['id' => $candidate->id]);
 
+            AdminAuditLog::create([
+                'admin_id' => $request->user()->id,
+                'action' => 'candidate_created',
+                'description' => "Candidate \"{$candidate->name}\" added to election \"{$election->title}\".",
+                'metadata' => ['election_id' => $election->id, 'candidate_id' => $candidate->id],
+                'ip_address' => $request->ip(),
+                'created_at' => now(),
+            ]);
+
             return back()->with('toast', ['type' => 'success', 'message' => 'Candidate added.']);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             Log::error('Candidate store failed', [
                 'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
@@ -79,6 +96,13 @@ class CandidateController extends Controller
 
     public function update(Request $request, Election $election, Candidate $candidate): RedirectResponse
     {
+        if ($election->isActive()) {
+            return back()->with('toast', [
+                'type' => 'error',
+                'message' => 'Cannot edit candidates while voting is active.',
+            ]);
+        }
+
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'position_id' => ['required', 'exists:evote_positions,id'],
@@ -98,12 +122,38 @@ class CandidateController extends Controller
 
         $candidate->update($data);
 
+        AdminAuditLog::create([
+            'admin_id' => $request->user()->id,
+            'action' => 'candidate_updated',
+            'description' => "Candidate \"{$candidate->name}\" updated in election \"{$election->title}\".",
+            'metadata' => ['election_id' => $election->id, 'candidate_id' => $candidate->id],
+            'ip_address' => $request->ip(),
+            'created_at' => now(),
+        ]);
+
         return back()->with('toast', ['type' => 'success', 'message' => 'Candidate updated.']);
     }
 
-    public function destroy(Election $election, Candidate $candidate): RedirectResponse
+    public function destroy(Request $request, Election $election, Candidate $candidate): RedirectResponse
     {
+        if ($election->isActive()) {
+            return back()->with('toast', [
+                'type' => 'error',
+                'message' => 'Cannot delete candidates while voting is active.',
+            ]);
+        }
+
+        $name = $candidate->name;
         $candidate->delete();
+
+        AdminAuditLog::create([
+            'admin_id' => $request->user()->id,
+            'action' => 'candidate_deleted',
+            'description' => "Candidate \"{$name}\" removed from election \"{$election->title}\".",
+            'metadata' => ['election_id' => $election->id, 'candidate_id' => $candidate->id],
+            'ip_address' => $request->ip(),
+            'created_at' => now(),
+        ]);
 
         return back()->with('toast', ['type' => 'success', 'message' => 'Candidate removed.']);
     }
