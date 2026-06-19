@@ -65,7 +65,7 @@ export default function ElectionsIndex({ elections, filters, statuses }: Props) 
                 </div>
 
                 <Card>
-                    <CardContent className="flex items-end gap-4 p-4">
+                    <CardContent className="flex items-end gap-4 p-3">
                         <div className="grid flex-1 gap-1.5">
                             <Label htmlFor="search" className="text-xs">Search</Label>
                             <div className="relative">
@@ -124,8 +124,8 @@ export default function ElectionsIndex({ elections, filters, statuses }: Props) 
                     </Card>
                 ) : (
                     <Card>
-                        <CardContent className="p-0">
-                            <table className="w-full">
+                        <CardContent className="overflow-x-auto p-0">
+                            <table className="w-full whitespace-nowrap">
                                 <thead>
                                     <tr className="border-b text-left text-sm text-muted-foreground">
                                         <th className="px-6 py-3 font-medium">Title</th>
