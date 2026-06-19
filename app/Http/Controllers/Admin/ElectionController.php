@@ -100,6 +100,28 @@ class ElectionController extends Controller
         ]);
     }
 
+    public function manage(Election $election): Response
+    {
+        $election->load(['positions' => fn ($q) => $q->orderBy('sort_order'), 'positions.candidates']);
+
+        return Inertia::render('admin/elections/manage', [
+            'election' => [
+                'id' => $election->id,
+                'title' => $election->title,
+                'type' => $election->type->value,
+                'status' => $election->status->value,
+                'scope' => $election->scope,
+                'positions' => $election->positions->map(fn ($p) => [
+                    'id' => $p->id,
+                    'title' => $p->title,
+                    'max_selections' => $p->max_selections,
+                    'sort_order' => $p->sort_order,
+                    'candidate_count' => $p->candidates->count(),
+                ])->toArray(),
+            ],
+        ]);
+    }
+
     public function update(Request $request, Election $election): RedirectResponse
     {
         $validated = $request->validate([

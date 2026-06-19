@@ -1,9 +1,17 @@
 import { Head, Link, router } from '@inertiajs/react';
 import { HugeiconsIcon } from '@hugeicons/react';
-import { PlusSignIcon, PencilEdit02Icon, Delete01Icon, Analytics01Icon, Search01Icon } from '@hugeicons/core-free-icons';
+import { PlusSignIcon, PencilEdit02Icon, Delete01Icon, Analytics01Icon, Search01Icon, Settings01Icon } from '@hugeicons/core-free-icons';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -43,6 +51,7 @@ const statusBadge = (status: string) => {
 
 export default function ElectionsIndex({ elections, filters, statuses }: Props) {
     const [search, setSearch] = useState(filters.search);
+    const [deleteId, setDeleteId] = useState<number | null>(null);
 
     const applyFilters = (overrides: Record<string, string>) => {
         router.get('/admin/elections', { ...filters, ...overrides }, { preserveState: true, replace: true });
@@ -156,6 +165,16 @@ export default function ElectionsIndex({ elections, filters, statuses }: Props) 
                                                     <Tooltip>
                                                         <TooltipTrigger asChild>
                                                             <Button asChild variant="ghost" size="icon-sm">
+                                                                <Link href={`/admin/elections/${election.id}/manage`}>
+                                                                    <HugeiconsIcon icon={Settings01Icon} size={16} />
+                                                                </Link>
+                                                            </Button>
+                                                        </TooltipTrigger>
+                                                        <TooltipContent>Manage</TooltipContent>
+                                                    </Tooltip>
+                                                    <Tooltip>
+                                                        <TooltipTrigger asChild>
+                                                            <Button asChild variant="ghost" size="icon-sm">
                                                                 <Link href={`/admin/elections/${election.id}/edit`}>
                                                                     <HugeiconsIcon icon={PencilEdit02Icon} size={16} />
                                                                 </Link>
@@ -166,7 +185,7 @@ export default function ElectionsIndex({ elections, filters, statuses }: Props) 
                                                     <Tooltip>
                                                         <TooltipTrigger asChild>
                                                             <Button asChild variant="ghost" size="icon-sm">
-                                                                <Link href={`/admin/elections/${election.id}`} method="delete" as="button">
+                                                                <Link href={`/admin/elections/${election.id}`} method="delete" as="button" onClick={(e: React.MouseEvent) => { e.preventDefault(); setDeleteId(election.id); }}>
                                                                     <HugeiconsIcon icon={Delete01Icon} size={16} />
                                                                 </Link>
                                                             </Button>
@@ -183,6 +202,22 @@ export default function ElectionsIndex({ elections, filters, statuses }: Props) 
                     </Card>
                 )}
             </div>
+
+            <Dialog open={deleteId !== null} onOpenChange={() => setDeleteId(null)}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Delete Election</DialogTitle>
+                        <DialogDescription>This will permanently delete the election and all its data.</DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => setDeleteId(null)}>Cancel</Button>
+                        <Button variant="destructive" onClick={() => {
+                            if (deleteId) router.delete(`/admin/elections/${deleteId}`);
+                            setDeleteId(null);
+                        }}>Delete</Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </>
     );
 }
