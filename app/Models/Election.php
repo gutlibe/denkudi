@@ -57,7 +57,7 @@ class Election extends Model
 
     public function isActive(): bool
     {
-        if ($this->status !== 'active') {
+        if ($this->status !== ElectionStatus::Active) {
             return false;
         }
 
@@ -68,11 +68,11 @@ class Election extends Model
 
     public function isClosed(): bool
     {
-        return $this->status === 'closed';
+        return $this->status === ElectionStatus::Closed;
     }
 
     public function isPaused(): bool
     {
-        return $this->status === 'paused_for_review';
+        return $this->status === ElectionStatus::PausedForReview;
     }
 }
