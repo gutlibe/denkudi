@@ -1,28 +1,24 @@
 import { Form, Head, Link } from '@inertiajs/react';
-import { HugeiconsIcon } from '@hugeicons/react';
-import { ArrowLeft02Icon } from '@hugeicons/core-free-icons';
+import { DateTimePicker } from '@/components/date-time-picker';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
+import { useState } from 'react';
 
 export default function ElectionsCreate() {
+    const [startsAt, setStartsAt] = useState('');
+    const [endsAt, setEndsAt] = useState('');
+
     return (
         <>
             <Head title="Create Election" />
             <div className="space-y-6">
-                <div className="flex items-center gap-4">
-                    <Button asChild variant="ghost" size="icon-sm">
-                        <Link href="/admin/elections">
-                            <HugeiconsIcon icon={ArrowLeft02Icon} size={18} />
-                        </Link>
-                    </Button>
-                    <div>
-                        <h2 className="text-2xl font-bold tracking-tight">Create Election</h2>
-                        <p className="text-muted-foreground">Set up a new election for students to vote in.</p>
-                    </div>
+                <div>
+                    <h2 className="text-2xl font-bold tracking-tight">Create Election</h2>
+                    <p className="text-muted-foreground">Configure an election for voters within the selected scope.</p>
                 </div>
 
                 <Card>
@@ -40,12 +36,7 @@ export default function ElectionsCreate() {
                                 <>
                                     <div className="grid gap-2">
                                         <Label htmlFor="title">Title</Label>
-                                        <Input
-                                            id="title"
-                                            name="title"
-                                            required
-                                            placeholder="2026 SRC Presidential Election"
-                                        />
+                                        <Input id="title" name="title" required placeholder="2026 SRC Presidential Election" />
                                         {errors.title && <p className="text-sm text-destructive">{errors.title}</p>}
                                     </div>
 
@@ -67,44 +58,28 @@ export default function ElectionsCreate() {
                                         </div>
                                         <div className="grid gap-2">
                                             <Label htmlFor="scope">Scope</Label>
-                                            <Input
-                                                id="scope"
-                                                name="scope"
-                                                required
-                                                placeholder="All"
-                                            />
-                                            {errors.scope && <p className="text-sm text-destructive">{errors.scope}</p>}
+                                            <Input id="scope" name="scope" required placeholder="All" />
                                         </div>
                                     </div>
 
                                     <div className="grid gap-2">
                                         <Label htmlFor="description">Description</Label>
-                                        <Textarea
-                                            id="description"
-                                            name="description"
-                                            rows={3}
-                                            placeholder="Describe this election..."
-                                        />
+                                        <Textarea id="description" name="description" rows={3} placeholder="Describe this election..." />
                                     </div>
 
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div className="grid gap-2">
-                                            <Label htmlFor="starts_at">Starts At</Label>
-                                            <Input id="starts_at" name="starts_at" type="datetime-local" />
-                                        </div>
-                                        <div className="grid gap-2">
-                                            <Label htmlFor="ends_at">Ends At</Label>
-                                            <Input id="ends_at" name="ends_at" type="datetime-local" />
+                                    <div className="grid gap-2">
+                                        <Label>Schedule</Label>
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <DateTimePicker id="starts_at" label="Starts" value={startsAt} onChange={setStartsAt} />
+                                            <DateTimePicker id="ends_at" label="Ends" value={endsAt} onChange={setEndsAt} />
                                         </div>
                                     </div>
+                                    <input type="hidden" name="starts_at" value={startsAt} />
+                                    <input type="hidden" name="ends_at" value={endsAt} />
 
                                     <div className="flex items-center gap-3">
-                                        <Button type="submit" disabled={processing}>
-                                            Create Election
-                                        </Button>
-                                        <Button asChild variant="outline">
-                                            <Link href="/admin/elections">Cancel</Link>
-                                        </Button>
+                                        <Button type="submit" disabled={processing}>Create Election</Button>
+                                        <Button asChild variant="outline"><Link href="/admin/elections">Cancel</Link></Button>
                                     </div>
                                 </>
                             )}

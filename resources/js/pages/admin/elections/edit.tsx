@@ -1,12 +1,12 @@
 import { Form, Head, Link } from '@inertiajs/react';
-import { HugeiconsIcon } from '@hugeicons/react';
-import { ArrowLeft02Icon } from '@hugeicons/core-free-icons';
+import { DateTimePicker } from '@/components/date-time-picker';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
+import { useState } from 'react';
 
 type Props = {
     election: {
@@ -22,20 +22,16 @@ type Props = {
 };
 
 export default function ElectionsEdit({ election }: Props) {
+    const [startsAt, setStartsAt] = useState(election.starts_at ?? '');
+    const [endsAt, setEndsAt] = useState(election.ends_at ?? '');
+
     return (
         <>
             <Head title={`Edit — ${election.title}`} />
             <div className="space-y-6">
-                <div className="flex items-center gap-4">
-                    <Button asChild variant="ghost" size="icon-sm">
-                        <Link href="/admin/elections">
-                            <HugeiconsIcon icon={ArrowLeft02Icon} size={18} />
-                        </Link>
-                    </Button>
-                    <div>
-                        <h2 className="text-2xl font-bold tracking-tight">Edit Election</h2>
-                        <p className="text-muted-foreground">{election.title}</p>
-                    </div>
+                <div>
+                    <h2 className="text-2xl font-bold tracking-tight">Edit Election</h2>
+                    <p className="text-muted-foreground">{election.title}</p>
                 </div>
 
                 <Card>
@@ -53,12 +49,7 @@ export default function ElectionsEdit({ election }: Props) {
                                 <>
                                     <div className="grid gap-2">
                                         <Label htmlFor="title">Title</Label>
-                                        <Input
-                                            id="title"
-                                            name="title"
-                                            required
-                                            defaultValue={election.title}
-                                        />
+                                        <Input id="title" name="title" required defaultValue={election.title} />
                                         {errors.title && <p className="text-sm text-destructive">{errors.title}</p>}
                                     </div>
 
@@ -66,9 +57,7 @@ export default function ElectionsEdit({ election }: Props) {
                                         <div className="grid gap-2">
                                             <Label htmlFor="type">Type</Label>
                                             <Select name="type" defaultValue={election.type}>
-                                                <SelectTrigger id="type">
-                                                    <SelectValue />
-                                                </SelectTrigger>
+                                                <SelectTrigger id="type"><SelectValue /></SelectTrigger>
                                                 <SelectContent>
                                                     <SelectItem value="student_body">Student Body</SelectItem>
                                                     <SelectItem value="departmental">Departmental</SelectItem>
@@ -79,53 +68,28 @@ export default function ElectionsEdit({ election }: Props) {
                                         </div>
                                         <div className="grid gap-2">
                                             <Label htmlFor="scope">Scope</Label>
-                                            <Input
-                                                id="scope"
-                                                name="scope"
-                                                required
-                                                defaultValue={election.scope}
-                                            />
+                                            <Input id="scope" name="scope" required defaultValue={election.scope} />
                                         </div>
                                     </div>
 
                                     <div className="grid gap-2">
                                         <Label htmlFor="description">Description</Label>
-                                        <Textarea
-                                            id="description"
-                                            name="description"
-                                            rows={3}
-                                            defaultValue={election.description ?? ''}
-                                        />
+                                        <Textarea id="description" name="description" rows={3} defaultValue={election.description ?? ''} />
                                     </div>
 
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div className="grid gap-2">
-                                            <Label htmlFor="starts_at">Starts At</Label>
-                                            <Input
-                                                id="starts_at"
-                                                name="starts_at"
-                                                type="datetime-local"
-                                                defaultValue={election.starts_at ?? ''}
-                                            />
-                                        </div>
-                                        <div className="grid gap-2">
-                                            <Label htmlFor="ends_at">Ends At</Label>
-                                            <Input
-                                                id="ends_at"
-                                                name="ends_at"
-                                                type="datetime-local"
-                                                defaultValue={election.ends_at ?? ''}
-                                            />
+                                    <div className="grid gap-2">
+                                        <Label>Schedule</Label>
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <DateTimePicker id="starts_at" label="Starts" value={startsAt} onChange={setStartsAt} />
+                                            <DateTimePicker id="ends_at" label="Ends" value={endsAt} onChange={setEndsAt} />
                                         </div>
                                     </div>
+                                    <input type="hidden" name="starts_at" value={startsAt} />
+                                    <input type="hidden" name="ends_at" value={endsAt} />
 
                                     <div className="flex items-center gap-3">
-                                        <Button type="submit" disabled={processing}>
-                                            Save Changes
-                                        </Button>
-                                        <Button asChild variant="outline">
-                                            <Link href="/admin/elections">Cancel</Link>
-                                        </Button>
+                                        <Button type="submit" disabled={processing}>Save Changes</Button>
+                                        <Button asChild variant="outline"><Link href="/admin/elections">Cancel</Link></Button>
                                     </div>
                                 </>
                             )}
