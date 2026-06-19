@@ -3,8 +3,10 @@
 namespace App\Services;
 
 use App\Exceptions\ElectionPausedException;
+use App\Models\AdminAuditLog;
 use App\Models\Candidate;
 use App\Models\Election;
+use App\Models\Position;
 use App\Models\Vote;
 use App\Models\VoterParticipation;
 use Illuminate\Support\Facades\DB;
@@ -14,7 +16,7 @@ use Illuminate\Support\Str;
 class VotingService
 {
     /**
-     * Consecutive tampered votes required before pausing the election.
+     * Total quarantined votes threshold before pausing the election.
      */
     private const QUARANTINE_HALT_THRESHOLD = 20;
 
@@ -23,8 +25,10 @@ class VotingService
      *
      * The integrity check (getLatestValidVote) runs BEFORE the ballot
      * transaction so that any quarantine or election-pause writes are
-     * truly independent top-level transactions — a subsequent rollback
-     * of the ballot attempt cannot undo a detected quarantine or pause.
+     * truly independent — a subsequent rollback of the ballot attempt
+     * cannot undo a detected quarantine or pause. A guard assertion
+     * warns if an outer transaction is already active (which would
+     * defeat that guarantee).
      *
      * Once a clean predecessor hash is obtained the ballot is written
      * inside a single DB::transaction(). The election row is re-fetched
@@ -59,9 +63,45 @@ class VotingService
             throw new \RuntimeException('Ballot cannot be empty.');
         }
 
-        $positionIds = array_column($ballot, 'position_id');
-        if (count($positionIds) !== count(array_unique($positionIds))) {
-            throw new \RuntimeException('Duplicate position in ballot.');
+        // Validate ballot structure: each entry must have position_id and candidate_id
+        foreach ($ballot as $i => $selection) {
+            if (empty($selection['position_id']) || empty($selection['candidate_id'])) {
+                throw new \RuntimeException("Ballot entry {$i} is missing position_id or candidate_id.");
+            }
+        }
+
+        // Enforce max_selections: group by position and check against limits.
+        // Also verify every election position is covered at least once.
+        $positions = Position::where('election_id', $election->id)->get()->keyBy('id');
+
+        if ($positions->isEmpty()) {
+            throw new \RuntimeException('This election has no positions configured.');
+        }
+
+        $selectionsByPosition = [];
+        foreach ($ballot as $selection) {
+            $pid = $selection['position_id'];
+            $selectionsByPosition[$pid][] = $selection;
+        }
+
+        foreach ($positions as $pos) {
+            $selected = $selectionsByPosition[$pos->id] ?? [];
+
+            if (empty($selected)) {
+                throw new \RuntimeException("No selection made for position: {$pos->title}.");
+            }
+
+            if (count($selected) > $pos->max_selections) {
+                throw new \RuntimeException(
+                    "Too many selections for {$pos->title} (max {$pos->max_selections})."
+                );
+            }
+
+            // No duplicate candidate within the same position
+            $candidateIds = array_column($selected, 'candidate_id');
+            if (count($candidateIds) !== count(array_unique($candidateIds))) {
+                throw new \RuntimeException("Duplicate candidate selection in position: {$pos->title}.");
+            }
         }
 
         // ── Integrity scan (OUTSIDE the ballot transaction) ──────────
@@ -94,7 +134,7 @@ class VotingService
 
             $previousHash = $lastVote
                 ? $lastVote->current_hash
-                : hash('sha256', 'GENESIS_BLOCK');
+                : $this->computeHash('GENESIS_BLOCK', 0, '');
 
             // Re-check participation inside the transaction with the lock held.
             // The DB-level unique constraint is the hardware-backed safety net.
@@ -145,25 +185,31 @@ class VotingService
     /**
      * Fetch the last valid vote, verifying cross-row chain linkage.
      *
-     * Two checks are performed on the candidate row:
+     * Two checks are performed on each candidate row:
      *   1. Self-consistency — does the row hash to its own current_hash?
      *   2. Cross-row linkage — does previous_hash match the actual
      *      preceding valid row's current_hash?
      *
-     * Failing rows are quarantined in their own committed transaction.
-     * If consecutive failures reach the threshold the election is paused.
+     * Failing rows are quarantined immediately (no transaction wrapper —
+     * the single UPDATE is atomic on its own, and the caller ensures this
+     * runs outside any rollback-prone scope). If the total number of
+     * quarantined votes (existing + newly detected) reaches the threshold
+     * the election is paused.
      *
      * Called OUTSIDE the ballot transaction so quarantine and pause
-     * writes are truly independent — a later ballot rollback cannot
-     * undo them.
+     * writes are independent — a later ballot rollback cannot undo them.
      *
      * @throws ElectionPausedException
      */
     private function getLatestValidVote(Election $election): ?Vote
     {
-        $consecutiveTampered = 0;
+        $existingQuarantined = Vote::where('election_id', $election->id)
+            ->where('status', 'quarantined')
+            ->count();
 
-        while ($consecutiveTampered < self::QUARANTINE_HALT_THRESHOLD) {
+        $totalTampered = $existingQuarantined;
+
+        while ($totalTampered < self::QUARANTINE_HALT_THRESHOLD) {
             $lastVote = Vote::where('election_id', $election->id)
                 ->where('status', 'valid')
                 ->orderBy('id', 'desc')
@@ -189,17 +235,20 @@ class VotingService
                     ->first();
 
                 if ($predecessor && $lastVote->previous_hash !== $predecessor->current_hash) {
-                    $this->quarantineRow($lastVote, $election, ++$consecutiveTampered);
+                    $this->quarantineRow($lastVote, $election, $totalTampered + 1);
+                    $totalTampered++;
+
                     continue;
                 }
 
                 return $lastVote;
             }
 
-            $this->quarantineRow($lastVote, $election, ++$consecutiveTampered);
+            $this->quarantineRow($lastVote, $election, $totalTampered + 1);
+            $totalTampered++;
         }
 
-        $this->pauseElection($election, $consecutiveTampered);
+        $this->pauseElection($election, $totalTampered);
 
         throw new ElectionPausedException(
             'Voting has been paused pending administrator review of a detected integrity issue.'
@@ -209,39 +258,54 @@ class VotingService
     /**
      * Quarantine a tampered vote row.
      *
-     * Wrapped in its own DB::transaction() so it commits immediately and
-     * is durable regardless of what the caller does afterwards.
+     * This runs outside any transaction that could roll back — the
+     * single UPDATE is atomic. No DB::transaction() wrapper is used
+     * because the method is called from outside the ballot transaction
+     * by design, and wrapping it would create a savepoint (not a
+     * durable commit) if an outer transaction were active.
      */
     private function quarantineRow(Vote $vote, Election $election, int $count): void
     {
-        DB::transaction(function () use ($vote, $election, $count) {
-            $vote->update(['status' => 'quarantined']);
-
-            Log::critical('Vote tampering detected and quarantined.', [
+        if (DB::transactionLevel() > 0) {
+            Log::warning('quarantineRow called inside an active transaction — durability may be compromised.', [
                 'vote_id' => $vote->id,
                 'election_id' => $election->id,
-                'consecutive_count' => $count,
             ]);
-        });
+        }
+
+        $vote->update(['status' => 'quarantined']);
+
+        Log::critical('Vote tampering detected and quarantined.', [
+            'vote_id' => $vote->id,
+            'election_id' => $election->id,
+            'total_quarantined' => $count,
+        ]);
     }
 
     /**
      * Pause an election and record the reason.
+     *
+     * No DB::transaction() wrapper — the UPDATE is a single atomic
+     * statement and this runs outside any rollback-prone scope.
      */
     private function pauseElection(Election $election, int $count): void
     {
-        DB::transaction(function () use ($election, $count) {
-            $election->update([
-                'status' => 'paused_for_review',
-                'paused_at' => now(),
-                'pause_reason' => "Halted: {$count} consecutive tampered votes detected.",
-            ]);
-
-            Log::critical('Election paused for integrity review.', [
+        if (DB::transactionLevel() > 0) {
+            Log::warning('pauseElection called inside an active transaction — durability may be compromised.', [
                 'election_id' => $election->id,
-                'consecutive_tampered' => $count,
             ]);
-        });
+        }
+
+        $election->update([
+            'status' => 'paused_for_review',
+            'paused_at' => now(),
+            'pause_reason' => "Halted: {$count} total tampered votes detected.",
+        ]);
+
+        Log::critical('Election paused for integrity review.', [
+            'election_id' => $election->id,
+            'total_tampered' => $count,
+        ]);
     }
 
     /**
@@ -249,11 +313,26 @@ class VotingService
      */
     public function resumeElection(Election $election, int $adminId): void
     {
-        $election->update([
-            'status' => 'active',
-            'resumed_at' => now(),
-            'resumed_by' => $adminId,
-        ]);
+        DB::transaction(function () use ($election, $adminId) {
+            $election->update([
+                'status' => 'active',
+                'resumed_at' => now(),
+                'resumed_by' => $adminId,
+            ]);
+
+            AdminAuditLog::create([
+                'admin_id' => $adminId,
+                'action' => 'election_resumed',
+                'description' => "Election \"{$election->title}\" resumed after integrity review.",
+                'metadata' => [
+                    'election_id' => $election->id,
+                    'previous_status' => 'paused_for_review',
+                    'pause_reason' => $election->pause_reason,
+                ],
+                'ip_address' => request()->ip(),
+                'created_at' => now(),
+            ]);
+        });
     }
 
     /**
@@ -278,10 +357,11 @@ class VotingService
     /**
      * Verify the hash chain for an entire election.
      *
-     * Checks both cross-row linkage and self-consistency on every
-     * valid vote. Quarantined rows are counted but skipped.
+     * Checks both cross-row linkage and self-consistency on every valid
+     * vote. Each vote is counted at most once as "broken" regardless of
+     * how many individual checks it fails.
      *
-     * @return array{valid: bool, total: int, broken: int, quarantined: int}
+     * @return array{valid: bool, total: int, broken: int, quarantined: int, details: array}
      */
     public function verifyChain(Election $election): array
     {
@@ -300,15 +380,18 @@ class VotingService
                 'total' => 0,
                 'broken' => 0,
                 'quarantined' => $quarantined,
+                'details' => [],
             ];
         }
 
-        $broken = 0;
+        $brokenVotes = [];
         $previous = null;
 
         foreach ($votes as $vote) {
+            $failures = [];
+
             if ($previous && $vote->previous_hash !== $previous->current_hash) {
-                $broken++;
+                $failures[] = 'chain_link';
             }
 
             $expected = $this->computeHash(
@@ -318,17 +401,25 @@ class VotingService
             );
 
             if ($expected !== $vote->current_hash) {
-                $broken++;
+                $failures[] = 'self_consistency';
+            }
+
+            if (! empty($failures)) {
+                $brokenVotes[] = [
+                    'vote_id' => $vote->id,
+                    'failures' => $failures,
+                ];
             }
 
             $previous = $vote;
         }
 
         return [
-            'valid' => $broken === 0,
+            'valid' => empty($brokenVotes),
             'total' => $votes->count(),
-            'broken' => $broken,
+            'broken' => count($brokenVotes),
             'quarantined' => $quarantined,
+            'details' => $brokenVotes,
         ];
     }
 
@@ -371,10 +462,14 @@ class VotingService
     }
 
     /**
-     * Produce a SHA-256 hash linking a vote to its predecessor.
+     * Produce an HMAC-SHA256 hash linking a vote to its predecessor.
+     *
+     * Uses the application key so that only the server can construct
+     * valid hashes. An attacker with raw database access cannot forge a
+     * vote and recompute the hash to match without the key.
      */
     private function computeHash(string $receipt, int $candidateId, string $previousHash): string
     {
-        return hash('sha256', $receipt . $candidateId . $previousHash);
+        return hash_hmac('sha256', $receipt.$candidateId.$previousHash, config('app.key'));
     }
 }

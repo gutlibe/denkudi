@@ -7,9 +7,12 @@ use App\Enums\ElectionType;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Election extends Model
 {
+    use SoftDeletes;
+
     protected $table = 'evote_elections';
 
     protected $fillable = [
@@ -58,6 +61,10 @@ class Election extends Model
     public function isActive(): bool
     {
         if ($this->status !== ElectionStatus::Active) {
+            return false;
+        }
+
+        if (! $this->starts_at || ! $this->ends_at) {
             return false;
         }
 
