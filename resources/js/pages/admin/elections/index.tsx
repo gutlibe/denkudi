@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useState } from 'react';
 
 type Election = {
@@ -131,7 +132,7 @@ export default function ElectionsIndex({ elections, filters, statuses }: Props) 
                                         <th className="px-6 py-3 font-medium">Title</th>
                                         <th className="px-6 py-3 font-medium">Type</th>
                                         <th className="px-6 py-3 font-medium">Status</th>
-                                        <th className="px-6 py-3 font-medium">Scope</th>
+                                        <th className="px-6 py-3 font-medium hidden md:table-cell">Who can vote</th>
                                         <th className="px-6 py-3 font-medium">Created</th>
                                         <th className="px-6 py-3 font-medium text-right">Actions</th>
                                     </tr>
@@ -146,22 +147,32 @@ export default function ElectionsIndex({ elections, filters, statuses }: Props) 
                                                     {election.status_label}
                                                 </Badge>
                                             </td>
-                                            <td className="px-6 py-3 text-muted-foreground">{election.scope}</td>
+                                            <td className="px-6 py-3 hidden md:table-cell text-muted-foreground">{election.scope}</td>
                                             <td className="px-6 py-3 text-muted-foreground">
                                                 {new Date(election.created_at).toLocaleDateString()}
                                             </td>
                                             <td className="px-6 py-3 text-right">
                                                 <div className="flex items-center justify-end gap-1">
-                                                    <Button asChild variant="ghost" size="icon-sm">
-                                                        <Link href={`/admin/elections/${election.id}/edit`}>
-                                                            <HugeiconsIcon icon={PencilEdit02Icon} size={16} />
-                                                        </Link>
-                                                    </Button>
-                                                    <Button asChild variant="ghost" size="icon-sm">
-                                                        <Link href={`/admin/elections/${election.id}`} method="delete" as="button">
-                                                            <HugeiconsIcon icon={Delete01Icon} size={16} />
-                                                        </Link>
-                                                    </Button>
+                                                    <Tooltip>
+                                                        <TooltipTrigger asChild>
+                                                            <Button asChild variant="ghost" size="icon-sm">
+                                                                <Link href={`/admin/elections/${election.id}/edit`}>
+                                                                    <HugeiconsIcon icon={PencilEdit02Icon} size={16} />
+                                                                </Link>
+                                                            </Button>
+                                                        </TooltipTrigger>
+                                                        <TooltipContent>Edit</TooltipContent>
+                                                    </Tooltip>
+                                                    <Tooltip>
+                                                        <TooltipTrigger asChild>
+                                                            <Button asChild variant="ghost" size="icon-sm">
+                                                                <Link href={`/admin/elections/${election.id}`} method="delete" as="button">
+                                                                    <HugeiconsIcon icon={Delete01Icon} size={16} />
+                                                                </Link>
+                                                            </Button>
+                                                        </TooltipTrigger>
+                                                        <TooltipContent>Delete</TooltipContent>
+                                                    </Tooltip>
                                                 </div>
                                             </td>
                                         </tr>

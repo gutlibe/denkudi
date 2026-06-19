@@ -79,7 +79,7 @@ export default function ElectionsEdit({ election }: Props) {
 
                                     <div className="grid gap-2">
                                         <Label>Schedule</Label>
-                                        <div className="grid grid-cols-2 gap-4">
+                                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                                             <DateTimePicker id="starts_at" label="Starts" value={startsAt} onChange={setStartsAt} />
                                             <DateTimePicker id="ends_at" label="Ends" value={endsAt} onChange={setEndsAt} />
                                         </div>

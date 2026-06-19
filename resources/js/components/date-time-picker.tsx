@@ -34,45 +34,45 @@ export function DateTimePicker({ id, label, value, onChange }: Props) {
     return (
         <div className="grid gap-1.5">
             {label && <span className="text-xs font-medium text-muted-foreground">{label}</span>}
-            <div className="flex gap-2">
-            <Popover open={open} onOpenChange={setOpen}>
-                <PopoverTrigger asChild>
-                    <Button
-                        variant="outline"
-                        id={`${id}-date`}
-                        className="flex-1 justify-between font-normal"
-                    >
-                        <span className="truncate">
-                            {date ? format(date, 'MMM d, yyyy') : 'Pick date'}
-                        </span>
-                        <HugeiconsIcon icon={Calendar02Icon} size={14} className="ml-1 shrink-0 opacity-50" />
-                    </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto overflow-hidden p-0" align="start">
-                    <Calendar
-                        mode="single"
-                        selected={date}
-                        captionLayout="dropdown"
-                        defaultMonth={date}
-                        onSelect={(d) => {
-                            setDate(d);
-                            emit(d, time);
-                            setOpen(false);
-                        }}
-                    />
-                </PopoverContent>
-            </Popover>
-            <Input
-                type="time"
-                id={`${id}-time`}
-                value={time}
-                onChange={(e) => {
-                    setTime(e.target.value);
-                    emit(date, e.target.value);
-                }}
-                className="w-24 shrink-0"
-            />
-        </div>
+            <div className="flex gap-1.5">
+                <Popover open={open} onOpenChange={setOpen}>
+                    <PopoverTrigger asChild>
+                        <Button
+                            variant="outline"
+                            id={`${id}-date`}
+                            className="w-auto min-w-0 justify-between gap-1 px-2.5 text-sm font-normal"
+                        >
+                            <span className="truncate">
+                                {date ? format(date, 'MMM d, yyyy') : 'Date'}
+                            </span>
+                            <HugeiconsIcon icon={Calendar02Icon} size={14} className="shrink-0 opacity-50" />
+                        </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto overflow-hidden p-0" align="start">
+                        <Calendar
+                            mode="single"
+                            selected={date}
+                            captionLayout="dropdown"
+                            defaultMonth={date}
+                            onSelect={(d) => {
+                                setDate(d);
+                                emit(d, time);
+                                setOpen(false);
+                            }}
+                        />
+                    </PopoverContent>
+                </Popover>
+                <Input
+                    type="time"
+                    id={`${id}-time`}
+                    value={time}
+                    onChange={(e) => {
+                        setTime(e.target.value);
+                        emit(date, e.target.value);
+                    }}
+                    className="w-[8.5rem] shrink-0"
+                />
+            </div>
         </div>
     );
 }
