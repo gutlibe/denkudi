@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Enums\ElectionStatus;
+use App\Enums\ElectionType;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -29,6 +31,8 @@ class Election extends Model
     protected function casts(): array
     {
         return [
+            'type' => ElectionType::class,
+            'status' => ElectionStatus::class,
             'starts_at' => 'datetime',
             'ends_at' => 'datetime',
             'paused_at' => 'datetime',
