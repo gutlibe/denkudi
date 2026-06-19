@@ -5,6 +5,7 @@ namespace App\Enums;
 enum ElectionStatus: string
 {
     case Draft = 'draft';
+    case Scheduled = 'scheduled';
     case Active = 'active';
     case PausedForReview = 'paused_for_review';
     case Closed = 'closed';
@@ -13,6 +14,7 @@ enum ElectionStatus: string
     {
         return match ($this) {
             self::Draft => 'Draft',
+            self::Scheduled => 'Scheduled',
             self::Active => 'Active',
             self::PausedForReview => 'Paused for Review',
             self::Closed => 'Closed',

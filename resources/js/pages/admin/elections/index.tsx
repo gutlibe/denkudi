@@ -27,6 +27,7 @@ type Props = {
 const statusBadge = (status: string) => {
     const map: Record<string, string> = {
         draft: 'bg-muted text-muted-foreground',
+        scheduled: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
         active: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
         paused_for_review: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
         closed: 'bg-neutral-100 text-neutral-700 dark:bg-neutral-800 dark:text-neutral-400',
