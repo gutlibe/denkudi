@@ -15,11 +15,20 @@ use Inertia\Response;
 
 class ElectionController extends Controller
 {
-    public function index(): Response
+    public function index(Request $request): Response
     {
-        $elections = Election::with('createdBy')
-            ->orderBy('created_at', 'desc')
-            ->get()
+        $query = Election::with('createdBy')->orderBy('created_at', 'desc');
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->input('status'));
+        }
+
+        if ($request->filled('search')) {
+            $search = $request->input('search');
+            $query->where('title', 'like', "%{$search}%");
+        }
+
+        $elections = $query->get()
             ->map(fn (Election $election) => [
                 'id' => $election->id,
                 'title' => $election->title,
@@ -36,6 +45,11 @@ class ElectionController extends Controller
 
         return Inertia::render('admin/elections/index', [
             'elections' => $elections,
+            'filters' => [
+                'status' => $request->input('status', ''),
+                'search' => $request->input('search', ''),
+            ],
+            'statuses' => ElectionStatus::options(),
         ]);
     }
 
