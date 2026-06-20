@@ -12,6 +12,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('elections/{election}/vote', [DashboardController::class, 'submitVote'])
         ->middleware('throttle:10,1')
         ->name('elections.vote.submit');
+    Route::get('verify', [DashboardController::class, 'verify'])->name('verify');
 });
 
 require __DIR__.'/admin.php';
