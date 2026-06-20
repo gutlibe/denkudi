@@ -201,6 +201,50 @@
         oklch(0.556 0 0);
 }
 
+@keyframes liquid-1 {
+    0%,
+    100% {
+        transform: translate(0, 0) scale(1);
+        opacity: 0.5;
+    }
+    33% {
+        transform: translate(60px, -80px) scale(1.15);
+        opacity: 0.3;
+    }
+    66% {
+        transform: translate(-30px, 40px) scale(0.9);
+        opacity: 0.6;
+    }
+}
+
+@keyframes liquid-2 {
+    0%,
+    100% {
+        transform: translate(0, 0) scale(1);
+        opacity: 0.4;
+    }
+    33% {
+        transform: translate(-50px, 50px) scale(1.1);
+        opacity: 0.6;
+    }
+    66% {
+        transform: translate(30px, -30px) scale(0.85);
+        opacity: 0.3;
+    }
+}
+
+@keyframes liquid-3 {
+    0%,
+    100% {
+        transform: translate(0, 0) scale(1);
+        opacity: 0.35;
+    }
+    50% {
+        transform: translate(40px, 60px) scale(1.2);
+        opacity: 0.55;
+    }
+}
+
 @layer base {
     * {
         @apply border-border outline-ring/50;
