@@ -1,6 +1,7 @@
 import { Link, usePage } from '@inertiajs/react';
 import { HugeiconsIcon } from '@hugeicons/react';
 import {
+    Clock01Icon,
     DashboardSquare02Icon,
     PanelLeftOpenIcon,
     Search01Icon,
@@ -38,6 +39,11 @@ export function AppSidebar() {
             title: 'Dashboard',
             href: dashboard(),
             icon: () => <HugeiconsIcon icon={DashboardSquare02Icon} size={18} />,
+        },
+        {
+            title: 'Past Elections',
+            href: dashboard(),
+            icon: () => <HugeiconsIcon icon={Clock01Icon} size={18} />,
         },
         {
             title: 'Verify Vote',
