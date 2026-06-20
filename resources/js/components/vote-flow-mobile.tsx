@@ -1,7 +1,9 @@
 import { HugeiconsIcon } from '@hugeicons/react';
-import { ArrowRight02Icon, CheckmarkCircle01Icon, ArrowLeft02Icon, UserIcon } from '@hugeicons/core-free-icons';
+import { ArrowRight02Icon, CheckmarkCircle01Icon, ArrowLeft02Icon, UserIcon, Search01Icon } from '@hugeicons/core-free-icons';
 import { Button } from '@/components/ui/button';
+import { Link } from '@inertiajs/react';
 import { useBallot, type Candidate } from '@/hooks/use-ballot';
+import { verify as verifyRoute } from '@/routes';
 
 type Props = {
     election: { id: number; title: string; description: string | null };
@@ -12,12 +14,19 @@ type Props = {
 
 function CandidatePhoto({ candidate, isSelected }: { candidate: Candidate; isSelected: boolean }) {
     return (
-        <div className={`flex h-18 w-18 shrink-0 items-center justify-center rounded-2xl overflow-hidden border-2 transition-all ${isSelected ? 'border-primary shadow-lg shadow-primary/25 scale-105' : 'border-transparent opacity-70'}`}>
-            {candidate.photo_url ? (
-                <img src={candidate.photo_url} alt={candidate.name} className="h-full w-full object-cover" />
-            ) : (
-                <div className="flex h-full w-full items-center justify-center bg-primary/10 text-primary">
-                    <HugeiconsIcon icon={UserIcon} size={32} />
+        <div className="relative flex h-18 w-18 shrink-0 items-center justify-center rounded-2xl overflow-hidden transition-all duration-200">
+            <div className="flex h-full w-full items-center justify-center bg-muted">
+                {candidate.photo_url ? (
+                    <img src={candidate.photo_url} alt={candidate.name} className="h-full w-full object-cover" />
+                ) : (
+                    <div className="flex h-full w-full items-center justify-center bg-primary/10 text-primary">
+                        <HugeiconsIcon icon={UserIcon} size={32} />
+                    </div>
+                )}
+            </div>
+            {isSelected && (
+                <div className="absolute bottom-1.5 right-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-primary shadow-md">
+                    <svg width="10" height="10" viewBox="0 0 12 12" fill="none"><path d="M2 6L5 9L10 3" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
                 </div>
             )}
         </div>
@@ -26,7 +35,7 @@ function CandidatePhoto({ candidate, isSelected }: { candidate: Candidate; isSel
 
 export function VoteFlowMobile({ election, open, onClose, onVoted }: Props) {
     const {
-        ballotData, loading, submitted, receipt,
+        ballotData, loading, submitted, receipt, error,
         currentStep, positions, currentPosition, isLastStep,
         selectedForCurrent, canProceed,
         goNext, goPrev, toggleCandidate, submit,
@@ -36,7 +45,7 @@ export function VoteFlowMobile({ election, open, onClose, onVoted }: Props) {
     if (!open) return null;
 
     return (
-        <div className="fixed inset-0 z-50 flex flex-col bg-background animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-50 flex flex-col bg-gradient-to-b from-background to-card animate-in fade-in duration-200">
             {submitted ? (
                 <div className="flex flex-col items-center justify-center h-full px-6 text-center gap-4">
                     <div className="flex h-20 w-20 items-center justify-center rounded-3xl bg-green-500/15 text-green-500">
@@ -55,7 +64,15 @@ export function VoteFlowMobile({ election, open, onClose, onVoted }: Props) {
                             <p className="text-[10px] text-muted-foreground mt-2">Save this to verify your vote later.</p>
                         </div>
                     )}
-                    <Button variant="outline" className="w-full mt-4" onClick={onClose}>Close</Button>
+                    {receipt && (
+                        <Button asChild className="w-full gap-2" size="lg">
+                            <Link href={verifyRoute.url({ query: { token: receipt } })}>
+                                <HugeiconsIcon icon={Search01Icon} size={16} />
+                                Verify Your Vote
+                            </Link>
+                        </Button>
+                    )}
+                    <Button variant="outline" className="w-full" onClick={onClose}>Back to Dashboard</Button>
                 </div>
             ) : loading ? (
                 <div className="p-6 space-y-6 animate-pulse">
@@ -68,18 +85,18 @@ export function VoteFlowMobile({ election, open, onClose, onVoted }: Props) {
                 </div>
             ) : !ballotData ? (
                 <div className="flex flex-col items-center justify-center h-full px-6 text-center gap-3">
-                    <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-muted text-muted-foreground">
+                    <div className={`flex h-14 w-14 items-center justify-center rounded-2xl ${error ? 'bg-destructive/10 text-destructive' : 'bg-muted text-muted-foreground'}`}>
                         <HugeiconsIcon icon={UserIcon} size={24} />
                     </div>
                     <div>
-                        <p className="text-sm font-semibold">Could not load ballot</p>
+                        <p className="text-sm font-semibold">{error || 'Could not load ballot'}</p>
                         <p className="text-xs text-muted-foreground mt-1">Please try again or visit the election page directly.</p>
                     </div>
                     <Button size="sm" className="mt-2 gap-1.5" onClick={loadBallot}>Retry</Button>
                 </div>
             ) : (
                 <>
-                    <div className="relative shrink-0 bg-gradient-to-b from-muted/50 to-card pt-12 pb-6">
+                    <div className="relative shrink-0 bg-gradient-to-b from-muted/20 to-transparent pt-12 pb-6">
                         {currentStep > 0 && (
                             <button onClick={goPrev} className="absolute top-4 left-4 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-background/80 backdrop-blur-sm border border-border/40 text-muted-foreground hover:text-foreground transition-colors">
                                 <HugeiconsIcon icon={ArrowLeft02Icon} size={14} />
@@ -105,7 +122,7 @@ export function VoteFlowMobile({ election, open, onClose, onVoted }: Props) {
                             ))}
                         </div>
                     </div>
-                    <div className="relative -mt-4 flex-1 flex flex-col rounded-t-3xl bg-card overflow-hidden">
+                    <div className="relative -mt-4 flex-1 flex flex-col rounded-t-3xl bg-muted/60 dark:bg-card border-t border-x border-border/30 shadow-lg shadow-black/5 dark:shadow-none dark:border-border/10 overflow-hidden">
                         <div className="px-6 pt-6 pb-1">
                             <div className="flex items-baseline justify-between">
                                 <h2 className="text-lg font-bold">{currentPosition.title}</h2>
@@ -133,7 +150,7 @@ export function VoteFlowMobile({ election, open, onClose, onVoted }: Props) {
                                 );
                             })}
                         </div>
-                        <div className="shrink-0 px-6 py-4 border-t border-border/40 bg-card">
+                            <div className="shrink-0 px-6 py-4 border-t border-border/40 bg-muted/60 dark:bg-card">
                             <div className="flex items-center justify-between text-xs text-muted-foreground mb-3">
                                 <span>{positionsCompleted} of {positions.length} selected</span>
                                 <span>{selectedForCurrent.length > 0 ? `${selectedForCurrent.length} selected` : 'None selected'}</span>

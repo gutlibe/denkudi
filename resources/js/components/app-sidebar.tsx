@@ -3,6 +3,7 @@ import { HugeiconsIcon } from '@hugeicons/react';
 import {
     DashboardSquare02Icon,
     PanelLeftOpenIcon,
+    Search01Icon,
     Settings01Icon,
     Shield01Icon,
 } from '@hugeicons/core-free-icons';
@@ -24,7 +25,7 @@ import {
 } from '@/components/ui/sidebar';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useAppearance } from '@/hooks/use-appearance';
-import { dashboard } from '@/routes';
+import { dashboard, verify as verifyRoute } from '@/routes';
 import type { NavItem } from '@/types';
 
 export function AppSidebar() {
@@ -37,6 +38,11 @@ export function AppSidebar() {
             title: 'Dashboard',
             href: dashboard(),
             icon: () => <HugeiconsIcon icon={DashboardSquare02Icon} size={18} />,
+        },
+        {
+            title: 'Verify Vote',
+            href: verifyRoute(),
+            icon: () => <HugeiconsIcon icon={Search01Icon} size={18} />,
         },
     ];
 
