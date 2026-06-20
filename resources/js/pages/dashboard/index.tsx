@@ -1,4 +1,4 @@
-import { Head } from '@inertiajs/react';
+import { Head, Link } from '@inertiajs/react';
 import { HugeiconsIcon, IconSvgElement } from '@hugeicons/react';
 import {
     ArrowRight02Icon,
@@ -19,6 +19,7 @@ import { VoteFlowDesktop } from '@/components/vote-flow-desktop';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useState } from 'react';
 import { dashboard } from '@/routes';
+import { results } from '@/routes/elections';
 
 /* ─── Types ─── */
 type Election = {
@@ -166,11 +167,19 @@ function ActiveElectionCard({
                     </div>
 
                     {election.has_voted ? (
-                        <div className="flex items-center gap-2 rounded-lg bg-green-500/10 px-3 py-2 text-sm font-medium text-green-500">
-                            <HugeiconsIcon icon={CheckmarkCircle01Icon} size={15} />
-                            You've already voted
-                        </div>
-                    ) : (
+                        <>
+                            <div className="flex items-center gap-2 rounded-lg bg-green-500/10 px-3 py-2 text-sm font-medium text-green-500">
+                                <HugeiconsIcon icon={CheckmarkCircle01Icon} size={15} />
+                                You've already voted
+                            </div>
+                            <Button asChild variant="outline" className="w-full gap-2" size="sm">
+                                <Link href={results({ election: election.id })}>
+                                    <HugeiconsIcon icon={Analytics01Icon} size={14} />
+                                    View Results
+                                </Link>
+                            </Button>
+                        </>
+                    ) : election.is_active ? (
                         <Button
                             className="w-full gap-2"
                             size="sm"
@@ -178,6 +187,13 @@ function ActiveElectionCard({
                         >
                             Cast Your Vote
                             <HugeiconsIcon icon={ArrowRight02Icon} size={14} />
+                        </Button>
+                    ) : (
+                        <Button asChild variant="outline" className="w-full gap-2" size="sm">
+                            <Link href={results({ election: election.id })}>
+                                <HugeiconsIcon icon={Analytics01Icon} size={14} />
+                                View Results
+                            </Link>
                         </Button>
                     )}
                 </CardContent>
