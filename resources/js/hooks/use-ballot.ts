@@ -53,23 +53,23 @@ export function useBallot(election: { id: number; title: string; description: st
                 {
                     id: 101, title: 'President', max_selections: 1,
                     candidates: [
-                        { id: 1001, name: 'Sarah Jenkins', department: 'Political Science', manifesto: 'Empowering student voices and modernizing campus facilities.', photo_url: null },
-                        { id: 1002, name: 'David Chen', department: 'Computer Science', manifesto: 'Transparency, technology, and trust in student government.', photo_url: null },
-                        { id: 1005, name: 'Ama Serwaa', department: 'Law', manifesto: 'Justice and equity for every student on campus.', photo_url: null },
+                        { id: 1001, name: 'Sarah Jenkins', department: 'Political Science', manifesto: 'Empowering student voices and modernizing campus facilities.', photo_url: 'https://ui-avatars.com/api/?name=Sarah+Jenkins&background=7c3aed&color=fff&size=128' },
+                        { id: 1002, name: 'David Chen', department: 'Computer Science', manifesto: 'Transparency, technology, and trust in student government.', photo_url: 'https://ui-avatars.com/api/?name=David+Chen&background=2563eb&color=fff&size=128' },
+                        { id: 1005, name: 'Ama Serwaa', department: 'Law', manifesto: 'Justice and equity for every student on campus.', photo_url: 'https://ui-avatars.com/api/?name=Ama+Serwaa&background=db2777&color=fff&size=128' },
                     ],
                 },
                 {
                     id: 102, title: 'Vice President', max_selections: 1,
                     candidates: [
-                        { id: 1003, name: 'Elena Rostova', department: 'Economics', manifesto: 'Financial responsibility and student advocacy.', photo_url: null },
-                        { id: 1004, name: 'Marcus Aurelius', department: 'History', manifesto: 'Strengthening community and campus spirit.', photo_url: null },
+                        { id: 1003, name: 'Elena Rostova', department: 'Economics', manifesto: 'Financial responsibility and student advocacy.', photo_url: 'https://ui-avatars.com/api/?name=Elena+Rostova&background=059669&color=fff&size=128' },
+                        { id: 1004, name: 'Marcus Aurelius', department: 'History', manifesto: 'Strengthening community and campus spirit.', photo_url: 'https://ui-avatars.com/api/?name=Marcus+Aurelius&background=dc2626&color=fff&size=128' },
                     ],
                 },
                 {
                     id: 103, title: 'General Secretary', max_selections: 1,
                     candidates: [
-                        { id: 1006, name: 'Kwame Asante', department: 'Communication Studies', manifesto: 'Clear communication between students and administration.', photo_url: null },
-                        { id: 1007, name: 'Naa Koshie', department: 'Business Admin', manifesto: 'Efficient record keeping and transparent minutes.', photo_url: null },
+                        { id: 1006, name: 'Kwame Asante', department: 'Communication Studies', manifesto: 'Clear communication between students and administration.', photo_url: 'https://ui-avatars.com/api/?name=Kwame+Asante&background=ea580c&color=fff&size=128' },
+                        { id: 1007, name: 'Naa Koshie', department: 'Business Admin', manifesto: 'Efficient record keeping and transparent minutes.', photo_url: 'https://ui-avatars.com/api/?name=Naa+Koshie&background=0891b2&color=fff&size=128' },
                     ],
                 },
             ],
@@ -82,8 +82,8 @@ export function useBallot(election: { id: number; title: string; description: st
             positions: mock[election.id] || [{
                 id: 999, title: 'General Representative', max_selections: 1,
                 candidates: [
-                    { id: 9001, name: 'Candidate A', department: 'Liberal Arts', manifesto: 'For a better tomorrow.', photo_url: null },
-                    { id: 9002, name: 'Candidate B', department: 'Sciences', manifesto: 'Science first.', photo_url: null },
+                    { id: 9001, name: 'Candidate A', department: 'Liberal Arts', manifesto: 'For a better tomorrow.', photo_url: 'https://ui-avatars.com/api/?name=Candidate+A&background=6366f1&color=fff&size=128' },
+                    { id: 9002, name: 'Candidate B', department: 'Sciences', manifesto: 'Science first.', photo_url: 'https://ui-avatars.com/api/?name=Candidate+B&background=f59e0b&color=fff&size=128' },
                 ],
             }],
         });
