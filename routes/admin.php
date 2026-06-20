@@ -36,6 +36,10 @@ Route::middleware(['auth', 'verified', EnsureUserIsAdmin::class])
         Route::get('elections/{election}/manage', [ElectionController::class, 'manage'])
             ->name('elections.manage');
 
+        // Toggle results release
+        Route::patch('elections/{election}/release-results', [ElectionController::class, 'releaseResults'])
+            ->name('elections.release-results');
+
         // Position candidate management page
         Route::get('elections/{election}/positions/{position}/candidates', [CandidateController::class, 'index'])
             ->name('elections.positions.candidates');

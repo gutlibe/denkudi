@@ -1,6 +1,6 @@
 import { Head, Link, router } from '@inertiajs/react';
 import { HugeiconsIcon } from '@hugeicons/react';
-import { PlusSignIcon, PencilEdit02Icon, Delete01Icon, Analytics01Icon, Search01Icon, Settings01Icon } from '@hugeicons/core-free-icons';
+import { PlusSignIcon, PencilEdit02Icon, Delete01Icon, Analytics01Icon, Search01Icon, Settings01Icon, CheckmarkCircle01Icon } from '@hugeicons/core-free-icons';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -28,6 +28,7 @@ type Election = {
     scope: string;
     starts_at: string | null;
     ends_at: string | null;
+    results_released: boolean;
     created_by: string;
     created_at: string;
 };
@@ -162,6 +163,19 @@ export default function ElectionsIndex({ elections, filters, statuses }: Props) 
                                             </td>
                                             <td className="px-6 py-3 text-right">
                                                 <div className="flex items-center justify-end gap-1">
+                                                    <Tooltip>
+                                                        <TooltipTrigger asChild>
+                                                            <Button
+                                                                variant="ghost"
+                                                                size="icon-sm"
+                                                                onClick={() => router.patch(`/admin/elections/${election.id}/release-results`)}
+                                                                className={election.results_released ? 'text-green-500 hover:text-green-600' : 'text-muted-foreground'}
+                                                            >
+                                                                <HugeiconsIcon icon={Analytics01Icon} size={16} />
+                                                            </Button>
+                                                        </TooltipTrigger>
+                                                        <TooltipContent>{election.results_released ? 'Withdraw Results' : 'Release Results'}</TooltipContent>
+                                                    </Tooltip>
                                                     <Tooltip>
                                                         <TooltipTrigger asChild>
                                                             <Button asChild variant="ghost" size="icon-sm">

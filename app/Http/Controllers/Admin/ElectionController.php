@@ -40,6 +40,7 @@ class ElectionController extends Controller
                 'scope' => $election->scope,
                 'starts_at' => $election->starts_at?->toISOString(),
                 'ends_at' => $election->ends_at?->toISOString(),
+                'results_released' => $election->results_released,
                 'created_by' => $election->createdBy->first_name.' '.$election->createdBy->last_name,
                 'created_at' => $election->created_at->toISOString(),
             ]);
@@ -188,5 +189,28 @@ class ElectionController extends Controller
 
         return redirect()->route('admin.elections.index')
             ->with('toast', ['type' => 'success', 'message' => 'Election deleted.']);
+    }
+
+    public function releaseResults(Request $request, Election $election): RedirectResponse
+    {
+        $election->update(['results_released' => ! $election->results_released]);
+
+        $action = $election->results_released ? 'released' : 'withdrawn';
+
+        AdminAuditLog::create([
+            'admin_id' => $request->user()->id,
+            'action' => 'results_' . $action,
+            'description' => "Results {$action} for election \"{$election->title}\".",
+            'metadata' => ['election_id' => $election->id],
+            'ip_address' => $request->ip(),
+            'created_at' => now(),
+        ]);
+
+        return back()->with('toast', [
+            'type' => 'success',
+            'message' => $election->results_released
+                ? 'Results published. Students can now view them.'
+                : 'Results withdrawn. Students can no longer view them.',
+        ]);
     }
 }
