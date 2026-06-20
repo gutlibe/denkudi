@@ -44,6 +44,10 @@ Route::middleware(['auth', 'verified', EnsureUserIsAdmin::class])
         Route::patch('elections/{election}/status', [ElectionController::class, 'updateStatus'])
             ->name('elections.status');
 
+        // Chain audit
+        Route::get('elections/{election}/audit', [ElectionController::class, 'audit'])
+            ->name('elections.audit');
+
         // Position candidate management page
         Route::get('elections/{election}/positions/{position}/candidates', [CandidateController::class, 'index'])
             ->name('elections.positions.candidates');

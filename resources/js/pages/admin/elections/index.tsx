@@ -1,6 +1,6 @@
 import { Head, Link, router } from '@inertiajs/react';
 import { HugeiconsIcon } from '@hugeicons/react';
-import { PlusSignIcon, PencilEdit02Icon, Delete01Icon, Analytics01Icon, Search01Icon, Settings01Icon, CheckmarkCircle01Icon } from '@hugeicons/core-free-icons';
+import { PlusSignIcon, PencilEdit02Icon, Delete01Icon, Analytics01Icon, Search01Icon, Settings01Icon, Shield01Icon } from '@hugeicons/core-free-icons';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -210,6 +210,16 @@ export default function ElectionsIndex({ elections, filters, statuses }: Props) 
                                                             </Button>
                                                         </TooltipTrigger>
                                                         <TooltipContent>{election.results_released ? 'Withdraw Results' : 'Release Results'}</TooltipContent>
+                                                    </Tooltip>
+                                                    <Tooltip>
+                                                        <TooltipTrigger asChild>
+                                                            <Button asChild variant="ghost" size="icon-sm">
+                                                                <Link href={`/admin/elections/${election.id}/audit`}>
+                                                                    <HugeiconsIcon icon={Shield01Icon} size={16} />
+                                                                </Link>
+                                                            </Button>
+                                                        </TooltipTrigger>
+                                                        <TooltipContent>Audit Chain</TooltipContent>
                                                     </Tooltip>
                                                     <Tooltip>
                                                         <TooltipTrigger asChild>

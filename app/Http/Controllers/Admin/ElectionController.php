@@ -7,6 +7,7 @@ use App\Enums\ElectionType;
 use App\Http\Controllers\Controller;
 use App\Models\AdminAuditLog;
 use App\Models\Election;
+use App\Services\VotingService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -249,6 +250,34 @@ class ElectionController extends Controller
         return back()->with('toast', [
             'type' => 'success',
             'message' => "Election status updated to {$newStatus}.",
+        ]);
+    }
+
+    public function audit(Election $election, VotingService $voting): \Inertia\Response
+    {
+        $result = $voting->verifyChain($election);
+
+        $votes = \App\Models\Vote::where('election_id', $election->id)
+            ->orderBy('id')
+            ->get()
+            ->map(fn ($v) => [
+                'id' => $v->id,
+                'position' => $v->position?->title ?? '—',
+                'candidate' => $v->candidate?->name ?? '—',
+                'receipt_token' => $v->receipt_token,
+                'previous_hash' => substr($v->previous_hash, 0, 16) . '...',
+                'current_hash' => substr($v->current_hash, 0, 16) . '...',
+                'status' => $v->status,
+            ]);
+
+        return \Inertia::render('admin/elections/audit', [
+            'election' => [
+                'id' => $election->id,
+                'title' => $election->title,
+                'status' => $election->status->value,
+            ],
+            'chain' => $result,
+            'votes' => $votes,
         ]);
     }
 }
