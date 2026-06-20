@@ -6,6 +6,7 @@ import {
     Settings01Icon,
     Shield01Icon,
 } from '@hugeicons/core-free-icons';
+import { Moon, Sun } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
@@ -22,12 +23,14 @@ import {
     useSidebar,
 } from '@/components/ui/sidebar';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { useAppearance } from '@/hooks/use-appearance';
 import { dashboard } from '@/routes';
 import type { NavItem } from '@/types';
 
 export function AppSidebar() {
     const { props } = usePage<{ auth: { admin?: boolean } }>();
     const { state, setOpen } = useSidebar();
+    const { resolvedAppearance, updateAppearance } = useAppearance();
 
     const mainNavItems: NavItem[] = [
         {
@@ -54,7 +57,7 @@ export function AppSidebar() {
     ];
 
     return (
-        <Sidebar collapsible="icon" variant="inset">
+        <Sidebar collapsible="icon" variant="inset" className="[&_[data-sidebar=sidebar]]:rounded-2xl [&_[data-sidebar=sidebar]]:overflow-hidden">
             <SidebarHeader className="flex-row items-center justify-between group-data-[collapsible=icon]:flex-col group-data-[collapsible=icon]:items-center group-data-[collapsible=icon]:gap-0">
                 <SidebarMenu className="flex-1 group-data-[collapsible=icon]:flex-none">
                     <SidebarMenuItem>
@@ -97,6 +100,22 @@ export function AppSidebar() {
             </SidebarContent>
             <SidebarFooter>
                 <NavFooter items={footerNavItems} className="mt-auto" />
+                <SidebarMenu>
+                    <SidebarMenuItem>
+                        <SidebarMenuButton
+                            size="lg"
+                            onClick={() => updateAppearance(resolvedAppearance === 'dark' ? 'light' : 'dark')}
+                            tooltip={{ children: resolvedAppearance === 'dark' ? 'Switch to light mode' : 'Switch to dark mode' }}
+                            className="relative group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0!"
+                        >
+                            <Sun className="size-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+                            <Moon className="absolute size-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+                            <span className="group-data-[collapsible=icon]:hidden">
+                                {resolvedAppearance === 'dark' ? 'Light mode' : 'Dark mode'}
+                            </span>
+                        </SidebarMenuButton>
+                    </SidebarMenuItem>
+                </SidebarMenu>
                 <NavUser />
             </SidebarFooter>
         </Sidebar>

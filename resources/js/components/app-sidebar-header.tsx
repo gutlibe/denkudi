@@ -13,7 +13,7 @@ export function AppSidebarHeader({
     return (
         <header
             className={cn(
-                'sticky top-0 z-40 flex h-13 lg:h-16 shrink-0 items-center gap-2 border-b border-sidebar-border/40 bg-background/80 px-3 lg:px-4 backdrop-blur-md transition-[height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12',
+                'sticky top-0 z-40 hidden h-13 lg:h-16 shrink-0 items-center gap-2 border-b border-sidebar-border/40 bg-background/80 px-3 lg:px-4 backdrop-blur-md transition-[height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12 md:flex',
                 className,
             )}
         >
