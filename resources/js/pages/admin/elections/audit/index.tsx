@@ -3,6 +3,7 @@ import { HugeiconsIcon } from '@hugeicons/react';
 import { ArrowLeft02Icon, CheckmarkCircle01Icon, Cancel01Icon, Shield01Icon } from '@hugeicons/core-free-icons';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { dashboard } from '@/routes/admin';
 
 type Props = {
     election: { id: number; title: string; status: string };
@@ -132,3 +133,11 @@ export default function AuditPage({ election, chain, votes }: Props) {
         </>
     );
 }
+
+AuditPage.layout = {
+    breadcrumbs: [
+        { title: 'Dashboard', href: dashboard() },
+        { title: 'Elections', href: '/admin/elections' },
+        { title: 'Audit', href: '#' },
+    ],
+};

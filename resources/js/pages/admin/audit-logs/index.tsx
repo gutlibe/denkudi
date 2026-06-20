@@ -3,6 +3,7 @@ import { HugeiconsIcon } from '@hugeicons/react';
 import { Shield01Icon } from '@hugeicons/core-free-icons';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { dashboard } from '@/routes/admin';
 
 type LogEntry = {
     id: number;
@@ -111,3 +112,10 @@ export default function AuditLogsPage({ logs, pagination }: Props) {
         </>
     );
 }
+
+AuditLogsPage.layout = {
+    breadcrumbs: [
+        { title: 'Dashboard', href: dashboard() },
+        { title: 'Audit Logs', href: '/admin/audit-logs' },
+    ],
+};
