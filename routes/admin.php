@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\AuditLogController;
 use App\Http\Controllers\Admin\CandidateController;
 use App\Http\Controllers\Admin\ElectionController;
 use App\Http\Controllers\Admin\PositionController;
@@ -47,6 +48,9 @@ Route::middleware(['auth', 'verified', EnsureUserIsAdmin::class])
         // Chain audit
         Route::get('elections/{election}/audit', [ElectionController::class, 'audit'])
             ->name('elections.audit');
+
+        // Global audit logs
+        Route::get('audit-logs', [AuditLogController::class, 'index'])->name('audit-logs');
 
         // Position candidate management page
         Route::get('elections/{election}/positions/{position}/candidates', [CandidateController::class, 'index'])

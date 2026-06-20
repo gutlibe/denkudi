@@ -3,6 +3,7 @@ import { HugeiconsIcon } from '@hugeicons/react';
 import {
     Analytics01Icon,
     DashboardSquare02Icon,
+    File01Icon,
     PanelLeftOpenIcon,
     Shield01Icon,
 } from '@hugeicons/core-free-icons';
@@ -35,6 +36,11 @@ const mainNavItems: NavItem[] = [
         title: 'Elections',
         href: '/admin/elections',
         icon: () => <HugeiconsIcon icon={Analytics01Icon} size={18} />,
+    },
+    {
+        title: 'Audit Logs',
+        href: '/admin/audit-logs',
+        icon: () => <HugeiconsIcon icon={File01Icon} size={18} />,
     },
 ];
 
