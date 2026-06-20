@@ -1,4 +1,4 @@
-import { useSyncExternalStore } from 'react';
+import { startTransition, useSyncExternalStore, useState, useEffect } from 'react';
 
 export type ResolvedAppearance = 'light' | 'dark';
 export type Appearance = ResolvedAppearance | 'system';
@@ -13,11 +13,7 @@ const listeners = new Set<() => void>();
 let currentAppearance: Appearance = 'system';
 
 const prefersDark = (): boolean => {
-    if (typeof window === 'undefined') {
-        return false;
-    }
-
-    return window.matchMedia('(prefers-color-scheme: dark)').matches;
+    return window.matchMedia?.('(prefers-color-scheme: dark)').matches ?? false;
 };
 
 const setCookie = (name: string, value: string, days = 365): void => {
@@ -88,28 +84,34 @@ export function initializeTheme(): void {
 }
 
 export function useAppearance(): UseAppearanceReturn {
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => {
+        startTransition(() => {
+            setMounted(true);
+        });
+    }, []);
+
     const appearance: Appearance = useSyncExternalStore(
         subscribe,
         () => currentAppearance,
         () => 'system',
     );
 
-    const resolvedAppearance: ResolvedAppearance = isDarkMode(appearance)
-        ? 'dark'
+    const resolvedAppearance: ResolvedAppearance = mounted
+        ? (isDarkMode(appearance) ? 'dark' : 'light')
         : 'light';
 
     const updateAppearance = (mode: Appearance): void => {
         currentAppearance = mode;
 
-        // Store in localStorage for client-side persistence...
         localStorage.setItem('appearance', mode);
 
-        // Store in cookie for SSR...
         setCookie('appearance', mode);
 
         applyTheme(mode);
         notify();
     };
 
-    return { appearance, resolvedAppearance, updateAppearance } as const;
+    return { appearance: mounted ? appearance : 'system', resolvedAppearance, updateAppearance } as const;
 }
