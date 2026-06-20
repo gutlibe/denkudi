@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Exceptions\ElectionPausedException;
+use App\Models\Candidate;
 use App\Models\Election;
+use App\Models\Position;
 use App\Models\Vote;
 use App\Services\VotingService;
 use Illuminate\Http\Request;
@@ -203,6 +205,56 @@ class DashboardController extends Controller
         return Inertia::render('verify', [
             'result' => $result,
             'token' => $token,
+        ]);
+    }
+
+    public function results(Election $election): \Inertia\Response
+    {
+        $positions = $election->positions()
+            ->with(['candidates'])
+            ->orderBy('sort_order')
+            ->get()
+            ->map(function (Position $position) {
+                $candidates = $position->candidates->map(function (Candidate $candidate) {
+                    $count = Vote::where('position_id', $candidate->position_id)
+                        ->where('candidate_id', $candidate->id)
+                        ->where('status', 'valid')
+                        ->count();
+
+                    return [
+                        'id' => $candidate->id,
+                        'name' => $candidate->name,
+                        'department' => $candidate->department,
+                        'photo_url' => $candidate->photo_url ? asset('storage/' . $candidate->photo_url) : null,
+                        'vote_count' => $count,
+                    ];
+                });
+
+                $total = $candidates->sum('vote_count');
+
+                return [
+                    'id' => $position->id,
+                    'title' => $position->title,
+                    'total_votes' => $total,
+                    'candidates' => $candidates->map(fn ($c) => [
+                        'id' => $c['id'],
+                        'name' => $c['name'],
+                        'department' => $c['department'],
+                        'photo_url' => $c['photo_url'],
+                        'vote_count' => $c['vote_count'],
+                        'percentage' => $total > 0 ? round(($c['vote_count'] / $total) * 100, 1) : 0,
+                    ])->sortByDesc('vote_count')->values(),
+                ];
+            });
+
+        return Inertia::render('elections/results', [
+            'election' => [
+                'id' => $election->id,
+                'title' => $election->title,
+                'status' => $election->status->value,
+                'results_released' => $election->results_released,
+            ],
+            'positions' => $positions,
         ]);
     }
 }

@@ -29,6 +29,7 @@ class Election extends Model
         'pause_reason',
         'resumed_at',
         'resumed_by',
+        'results_released',
     ];
 
     protected function casts(): array

@@ -13,6 +13,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->middleware('throttle:10,1')
         ->name('elections.vote.submit');
     Route::get('verify', [DashboardController::class, 'verify'])->name('verify');
+    Route::get('elections/{election}/results', [DashboardController::class, 'results'])->name('elections.results');
 });
 
 require __DIR__.'/admin.php';
