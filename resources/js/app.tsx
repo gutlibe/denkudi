@@ -9,8 +9,22 @@ import SettingsLayout from '@/layouts/settings/layout';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
+const pages = import.meta.glob('./pages/**/*.tsx');
+
 createInertiaApp({
     title: (title) => (title ? `${title} - ${appName}` : appName),
+    resolve: (name) => {
+        const exact = `./pages/${name}.tsx`;
+        const folder = `./pages/${name}/index.tsx`;
+
+        const importFn = pages[exact] || pages[folder];
+
+        if (!importFn) {
+            throw new Error(`Page not found: ${name}`);
+        }
+
+        return importFn() as any;
+    },
     layout: (name) => {
         switch (true) {
             case name === 'welcome':
