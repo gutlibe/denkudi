@@ -100,6 +100,47 @@ class DashboardController extends Controller
         ]);
     }
 
+    /**
+     * Return ballot data as JSON for the inline voting sheet on the dashboard.
+     * Validates the user is a student, election is active, and they haven't voted yet.
+     */
+    public function ballotData(Election $election, Request $request, VotingService $voting): \Illuminate\Http\JsonResponse
+    {
+        $user = $request->user();
+
+        if (! $user->isStudent()) {
+            abort(403, 'Only students may vote in elections.');
+        }
+
+        if (! $election->isActive()) {
+            abort(403, 'This election is not currently active.');
+        }
+
+        if ($voting->hasVoted($election, $user->student_id)) {
+            return response()->json(['alreadyVoted' => true]);
+        }
+
+        $election->load(['positions' => fn ($q) => $q->orderBy('sort_order'), 'positions.candidates']);
+
+        return response()->json([
+            'id' => $election->id,
+            'title' => $election->title,
+            'description' => $election->description,
+            'positions' => $election->positions->map(fn ($p) => [
+                'id' => $p->id,
+                'title' => $p->title,
+                'max_selections' => $p->max_selections,
+                'candidates' => $p->candidates->map(fn ($c) => [
+                    'id' => $c->id,
+                    'name' => $c->name,
+                    'department' => $c->department,
+                    'manifesto' => $c->manifesto,
+                    'photo_url' => $c->photo_url ? asset('storage/'.$c->photo_url) : null,
+                ]),
+            ]),
+        ]);
+    }
+
     public function submitVote(Election $election, Request $request, VotingService $voting): Response
     {
         $user = $request->user();
