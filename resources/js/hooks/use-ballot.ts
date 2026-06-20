@@ -31,64 +31,36 @@ export function useBallot(election: { id: number; title: string; description: st
     const [submitting, setSubmitting] = useState(false);
     const [submitted, setSubmitted] = useState(false);
     const [receipt, setReceipt] = useState<string | null>(null);
+    const [error, setError] = useState<string | null>(null);
 
     const loadBallot = useCallback(async () => {
         setLoading(true);
+        setError(null);
         try {
             const res = await fetch(`/elections/${election.id}/ballot-data`, {
-                headers: { Accept: 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+                headers: {
+                    Accept: 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-XSRF-TOKEN': decodeURIComponent(document.cookie.replace(/(?:(?:^|.*;\s*)XSRF-TOKEN\s*\=\s*([^;]*).*$)|^.*$/, '$1')),
+                },
+                credentials: 'include',
             });
-            if (res.ok) {
-                const data = await res.json();
-                setBallotData(data);
+            if (!res.ok) {
+                if (res.status === 403) throw new Error('You are not eligible to vote in this election.');
+                throw new Error('Failed to load ballot data.');
+            }
+            const data = await res.json();
+            if (data.alreadyVoted) {
+                setError('You have already voted in this election.');
                 setLoading(false);
                 return;
             }
+            setBallotData(data);
         } catch (e) {
-            console.error('Error fetching ballot data:', e);
+            setError(e instanceof Error ? e.message : 'Failed to load ballot data.');
         }
-
-        const mock: Record<number, Position[]> = {
-            1: [
-                {
-                    id: 101, title: 'President', max_selections: 1,
-                    candidates: [
-                        { id: 1001, name: 'Sarah Jenkins', department: 'Political Science', manifesto: 'Empowering student voices and modernizing campus facilities.', photo_url: 'https://ui-avatars.com/api/?name=Sarah+Jenkins&background=7c3aed&color=fff&size=128' },
-                        { id: 1002, name: 'David Chen', department: 'Computer Science', manifesto: 'Transparency, technology, and trust in student government.', photo_url: 'https://ui-avatars.com/api/?name=David+Chen&background=2563eb&color=fff&size=128' },
-                        { id: 1005, name: 'Ama Serwaa', department: 'Law', manifesto: 'Justice and equity for every student on campus.', photo_url: 'https://ui-avatars.com/api/?name=Ama+Serwaa&background=db2777&color=fff&size=128' },
-                    ],
-                },
-                {
-                    id: 102, title: 'Vice President', max_selections: 1,
-                    candidates: [
-                        { id: 1003, name: 'Elena Rostova', department: 'Economics', manifesto: 'Financial responsibility and student advocacy.', photo_url: 'https://ui-avatars.com/api/?name=Elena+Rostova&background=059669&color=fff&size=128' },
-                        { id: 1004, name: 'Marcus Aurelius', department: 'History', manifesto: 'Strengthening community and campus spirit.', photo_url: 'https://ui-avatars.com/api/?name=Marcus+Aurelius&background=dc2626&color=fff&size=128' },
-                    ],
-                },
-                {
-                    id: 103, title: 'General Secretary', max_selections: 1,
-                    candidates: [
-                        { id: 1006, name: 'Kwame Asante', department: 'Communication Studies', manifesto: 'Clear communication between students and administration.', photo_url: 'https://ui-avatars.com/api/?name=Kwame+Asante&background=ea580c&color=fff&size=128' },
-                        { id: 1007, name: 'Naa Koshie', department: 'Business Admin', manifesto: 'Efficient record keeping and transparent minutes.', photo_url: 'https://ui-avatars.com/api/?name=Naa+Koshie&background=0891b2&color=fff&size=128' },
-                    ],
-                },
-            ],
-        };
-
-        setBallotData({
-            id: election.id,
-            title: election.title,
-            description: election.description || 'Cast your ballot below.',
-            positions: mock[election.id] || [{
-                id: 999, title: 'General Representative', max_selections: 1,
-                candidates: [
-                    { id: 9001, name: 'Candidate A', department: 'Liberal Arts', manifesto: 'For a better tomorrow.', photo_url: 'https://ui-avatars.com/api/?name=Candidate+A&background=6366f1&color=fff&size=128' },
-                    { id: 9002, name: 'Candidate B', department: 'Sciences', manifesto: 'Science first.', photo_url: 'https://ui-avatars.com/api/?name=Candidate+B&background=f59e0b&color=fff&size=128' },
-                ],
-            }],
-        });
         setLoading(false);
-    }, [election.id, election.title, election.description]);
+    }, [election.id]);
 
     useEffect(() => {
         if (open) {
@@ -132,17 +104,6 @@ export function useBallot(election: { id: number; title: string; description: st
         const allSelected = positions.every((p) => (selections[p.id]?.length ?? 0) > 0);
         if (!allSelected) { setSubmitting(false); return; }
 
-        const isMock = Object.values(selections).flat().some((id) => id >= 1000);
-        if (isMock) {
-            setTimeout(() => {
-                setSubmitted(true);
-                setReceipt('HTU-' + Math.random().toString(36).substring(2, 9).toUpperCase());
-                onVoted();
-                setSubmitting(false);
-            }, 800);
-            return;
-        }
-
         const ballot = Object.entries(selections).flatMap(([posId, candIds]) =>
             candIds.map((candId) => ({ position_id: parseInt(posId), candidate_id: candId }))
         );
@@ -161,11 +122,11 @@ export function useBallot(election: { id: number; title: string; description: st
     const positionsCompleted = positions.filter((p) => (selections[p.id]?.length ?? 0) > 0).length;
 
     return {
-        ballotData, loading, submitted, receipt,
+        ballotData, loading, submitted, receipt, error, setError,
         currentStep, positions, currentPosition, isLastStep,
         selections, selectedForCurrent, canProceed,
         goNext, goPrev, toggleCandidate, submit,
-        positionsCompleted, loadBallot, submitting, setSubmitting,
+        positionsCompleted, loadBallot, submitting,
     };
 }
 
