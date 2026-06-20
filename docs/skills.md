@@ -5,8 +5,10 @@ How things are done in this project.
 ## Commit Messages
 
 ```
-type(scope): short description
+type: short description
 ```
+
+No scope. Keep it simple.
 
 ### Types
 
@@ -21,27 +23,14 @@ type(scope): short description
 | test     | Adding/updating tests         |
 | perf     | Performance improvement       |
 
-### Scopes (short)
-
-| Scope   | Covers                        |
-| ------- | ----------------------------- |
-| ui      | Pages, components, layouts    |
-| auth    | Login, register, sessions     |
-| db      | Migrations, models, seeding   |
-| api     | Controllers, routes, requests |
-| config  | Env, tailwind, vite, eslint   |
-| deps    | Composer/npm packages         |
-| vote    | Voting logic, ballot flow     |
-| admin   | Admin panel area              |
-
 **Examples:**
 ```
-feat(vote): add ballot submission
-fix(auth): prevent double vote submission
-refactor(db): extract ballot logic to service
-chore(deps): update tailwind to v4.3
-style(ui): fix card spacing
+feat: add ballot submission
+fix: prevent double vote submission
+refactor: extract ballot logic to service
+chore: update tailwind to v4.3
+style: fix card spacing
 ```
 
-> Keep it short. No period. Imperative mood (`add` not `added`). Scope is optional — drop it if the change spans the whole app.
+> Keep it short. No period. Imperative mood (`add` not `added`).
 
