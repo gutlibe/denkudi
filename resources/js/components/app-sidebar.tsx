@@ -5,12 +5,9 @@ import {
     DashboardSquare02Icon,
     PanelLeftOpenIcon,
     Search01Icon,
-    Settings01Icon,
     Shield01Icon,
 } from '@hugeicons/core-free-icons';
-import { Moon, Sun } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
-import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
 import {
@@ -24,26 +21,21 @@ import {
     SidebarTrigger,
     useSidebar,
 } from '@/components/ui/sidebar';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { useAppearance } from '@/hooks/use-appearance';
 import { dashboard, verify as verifyRoute } from '@/routes';
+import { results } from '@/routes/elections';
 import type { NavItem } from '@/types';
 
 export function AppSidebar() {
-    const { props } = usePage<{ auth: { admin?: boolean } }>();
+    const { props } = usePage<{ auth: { admin?: boolean }; pastElections: { id: number; title: string; scope: string; status: string; ends_at: string | null }[] }>();
     const { state, setOpen } = useSidebar();
-    const { resolvedAppearance, updateAppearance } = useAppearance();
 
     const mainNavItems: NavItem[] = [
         {
             title: 'Dashboard',
             href: dashboard(),
             icon: () => <HugeiconsIcon icon={DashboardSquare02Icon} size={18} />,
-        },
-        {
-            title: 'Past Elections',
-            href: dashboard(),
-            icon: () => <HugeiconsIcon icon={Clock01Icon} size={18} />,
         },
         {
             title: 'Verify Vote',
@@ -59,14 +51,6 @@ export function AppSidebar() {
             icon: () => <HugeiconsIcon icon={Shield01Icon} size={18} />,
         });
     }
-
-    const footerNavItems: NavItem[] = [
-        {
-            title: 'Settings',
-            href: '/settings/profile',
-            icon: () => <HugeiconsIcon icon={Settings01Icon} size={18} />,
-        },
-    ];
 
     return (
         <Sidebar collapsible="icon" variant="inset" className="[&_[data-sidebar=sidebar]]:rounded-2xl [&_[data-sidebar=sidebar]]:overflow-hidden">
@@ -109,25 +93,39 @@ export function AppSidebar() {
             </SidebarHeader>
             <SidebarContent>
                 <NavMain items={mainNavItems} />
+                <div className="mt-4 border-t border-sidebar-border/40 pt-3 group-data-[collapsible=icon]:border-transparent group-data-[collapsible=icon]:pt-1">
+                    <div className="px-3 pb-2 group-data-[collapsible=icon]:hidden">
+                        <p className="text-[10px] font-semibold uppercase tracking-widest text-sidebar-foreground/40">Past Elections</p>
+                    </div>
+                    <ScrollArea className="h-40 group-data-[collapsible=icon]:h-auto">
+                        {props.pastElections && props.pastElections.length > 0 ? (
+                            <div className="space-y-0.5 px-1.5">
+                                {props.pastElections.map((e) => (
+                                    <Tooltip key={e.id}>
+                                        <TooltipTrigger asChild>
+                                            <SidebarMenuButton size="sm" asChild className="justify-start h-auto py-2 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-1 group-data-[collapsible=icon]:size-8">
+                                                <Link href={results({ election: e.id })} className="flex-col items-start gap-0.5">
+                                                    <span className="text-xs font-medium leading-tight line-clamp-1 group-data-[collapsible=icon]:hidden">{e.title}</span>
+                                                    <span className="text-[10px] text-muted-foreground group-data-[collapsible=icon]:hidden">
+                                                        {e.ends_at ? new Date(e.ends_at).toLocaleDateString('en-GB', { month: 'short', year: 'numeric' }) : ''}
+                                                    </span>
+                                                    <HugeiconsIcon icon={Clock01Icon} size={14} className="hidden group-data-[collapsible=icon]:block text-muted-foreground" />
+                                                </Link>
+                                            </SidebarMenuButton>
+                                        </TooltipTrigger>
+                                        <TooltipContent side="right" align="center" sideOffset={8}>
+                                            {e.title}
+                                        </TooltipContent>
+                                    </Tooltip>
+                                ))}
+                            </div>
+                        ) : (
+                            <p className="text-[10px] text-muted-foreground px-3 group-data-[collapsible=icon]:hidden">No past elections yet.</p>
+                        )}
+                    </ScrollArea>
+                </div>
             </SidebarContent>
             <SidebarFooter>
-                <NavFooter items={footerNavItems} className="mt-auto" />
-                <SidebarMenu>
-                    <SidebarMenuItem>
-                        <SidebarMenuButton
-                            size="lg"
-                            onClick={() => updateAppearance(resolvedAppearance === 'dark' ? 'light' : 'dark')}
-                            tooltip={{ children: resolvedAppearance === 'dark' ? 'Switch to light mode' : 'Switch to dark mode' }}
-                            className="relative group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0!"
-                        >
-                            <Sun className="size-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-                            <Moon className="absolute size-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-                            <span className="group-data-[collapsible=icon]:hidden">
-                                {resolvedAppearance === 'dark' ? 'Light mode' : 'Dark mode'}
-                            </span>
-                        </SidebarMenuButton>
-                    </SidebarMenuItem>
-                </SidebarMenu>
                 <NavUser />
             </SidebarFooter>
         </Sidebar>
