@@ -5,6 +5,12 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import {
     Dialog,
     DialogContent,
     DialogDescription,
@@ -37,6 +43,13 @@ type Props = {
     elections: Election[];
     filters: { status: string; search: string };
     statuses: Record<string, string>;
+};
+
+const statusTransitions: Record<string, { value: string; label: string }[]> = {
+    draft: [{ value: 'scheduled', label: 'Schedule' }],
+    scheduled: [{ value: 'active', label: 'Activate' }],
+    active: [{ value: 'closed', label: 'Close' }],
+    closed: [],
 };
 
 const statusBadge = (status: string) => {
@@ -153,9 +166,31 @@ export default function ElectionsIndex({ elections, filters, statuses }: Props) 
                                             <td className="px-6 py-3 font-medium">{election.title}</td>
                                             <td className="px-6 py-3">{election.type_label}</td>
                                             <td className="px-6 py-3">
-                                                <Badge className={statusBadge(election.status)} variant="outline">
-                                                    {election.status_label}
-                                                </Badge>
+                                                {statusTransitions[election.status]?.length > 0 ? (
+                                                    <DropdownMenu>
+                                                        <DropdownMenuTrigger asChild>
+                                                            <button className="cursor-pointer">
+                                                                <Badge className={statusBadge(election.status)} variant="outline">
+                                                                    {election.status_label}
+                                                                </Badge>
+                                                            </button>
+                                                        </DropdownMenuTrigger>
+                                                        <DropdownMenuContent align="start" className="w-36">
+                                                            {statusTransitions[election.status].map((t) => (
+                                                                <DropdownMenuItem
+                                                                    key={t.value}
+                                                                    onClick={() => router.patch(`/admin/elections/${election.id}/status`, { status: t.value })}
+                                                                >
+                                                                    {t.label}
+                                                                </DropdownMenuItem>
+                                                            ))}
+                                                        </DropdownMenuContent>
+                                                    </DropdownMenu>
+                                                ) : (
+                                                    <Badge className={statusBadge(election.status)} variant="outline">
+                                                        {election.status_label}
+                                                    </Badge>
+                                                )}
                                             </td>
                                             <td className="px-6 py-3 hidden md:table-cell text-muted-foreground">{election.scope}</td>
                                             <td className="px-6 py-3 text-muted-foreground">

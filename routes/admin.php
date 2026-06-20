@@ -40,6 +40,10 @@ Route::middleware(['auth', 'verified', EnsureUserIsAdmin::class])
         Route::patch('elections/{election}/release-results', [ElectionController::class, 'releaseResults'])
             ->name('elections.release-results');
 
+        // Update election status
+        Route::patch('elections/{election}/status', [ElectionController::class, 'updateStatus'])
+            ->name('elections.status');
+
         // Position candidate management page
         Route::get('elections/{election}/positions/{position}/candidates', [CandidateController::class, 'index'])
             ->name('elections.positions.candidates');

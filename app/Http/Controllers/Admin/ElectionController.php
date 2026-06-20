@@ -213,4 +213,42 @@ class ElectionController extends Controller
                 : 'Results withdrawn. Students can no longer view them.',
         ]);
     }
+
+    public function updateStatus(Request $request, Election $election): RedirectResponse
+    {
+        $validTransitions = [
+            ElectionStatus::Draft->value => [ElectionStatus::Scheduled->value],
+            ElectionStatus::Scheduled->value => [ElectionStatus::Active->value],
+            ElectionStatus::Active->value => [ElectionStatus::Closed->value],
+        ];
+
+        $current = $election->status->value;
+        $newStatus = $request->input('status');
+
+        $allowed = $validTransitions[$current] ?? [];
+
+        if (! in_array($newStatus, $allowed)) {
+            return back()->with('toast', [
+                'type' => 'error',
+                'message' => "Cannot transition from {$current} to {$newStatus}.",
+            ]);
+        }
+
+        $oldStatus = $current;
+        $election->update(['status' => $newStatus]);
+
+        AdminAuditLog::create([
+            'admin_id' => $request->user()->id,
+            'action' => 'election_status_changed',
+            'description' => "Election \"{$election->title}\" moved from {$oldStatus} to {$newStatus}.",
+            'metadata' => ['election_id' => $election->id, 'from' => $oldStatus, 'to' => $newStatus],
+            'ip_address' => $request->ip(),
+            'created_at' => now(),
+        ]);
+
+        return back()->with('toast', [
+            'type' => 'success',
+            'message' => "Election status updated to {$newStatus}.",
+        ]);
+    }
 }
