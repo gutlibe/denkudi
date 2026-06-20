@@ -30,8 +30,8 @@ class ElectionController extends Controller
             $query->where('title', 'like', "%{$search}%");
         }
 
-        $elections = $query->get()
-            ->map(fn (Election $election) => [
+        $elections = $query->paginate(12)
+            ->through(fn (Election $election) => [
                 'id' => $election->id,
                 'title' => $election->title,
                 'type' => $election->type->value,
@@ -47,7 +47,12 @@ class ElectionController extends Controller
             ]);
 
         return Inertia::render('admin/elections/index', [
-            'elections' => $elections,
+            'elections' => Inertia::merge(fn () => $elections->items()),
+            'pagination' => [
+                'current_page' => $elections->currentPage(),
+                'last_page' => $elections->lastPage(),
+                'total' => $elections->total(),
+            ],
             'filters' => [
                 'status' => $request->input('status', ''),
                 'search' => $request->input('search', ''),
