@@ -11,6 +11,7 @@ import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
 import { register } from '@/routes';
 import { store } from '@/routes/login';
+import { loginOptions, login } from '@/routes/passkey';
 import { request } from '@/routes/password';
 
 type Props = {
@@ -23,7 +24,7 @@ export default function Login({ status, canResetPassword }: Props) {
         <>
             <Head title="Log in" />
 
-            <PasskeyVerify />
+            <PasskeyVerify routes={{ options: { url: loginOptions.url(), method: 'get' }, submit: { url: login.url(), method: 'post' } }} />
 
             <Card>
                 <CardHeader className="text-center">
