@@ -73,8 +73,8 @@ jobs:
           CURR="$APP/current"
           PHP="/usr/bin/php8.4"
 
-          echo "Uploading artifact..."
-          cat /tmp/artifact.tar.gz | $SSH "cat > $REMOTE"
+          echo "Uploading artifact via base64..."
+          base64 /tmp/artifact.tar.gz | $SSH "base64 -d > $REMOTE"
 
           echo "Extracting to $RELEASE"
           $SSH "mkdir -p $RELEASE && tar -xzf $REMOTE -C $RELEASE --strip-components=1"
