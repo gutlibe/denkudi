@@ -64,7 +64,6 @@ jobs:
           SSH_USER: ${{ secrets.VPS_USER }}
           SSH_PORT: ${{ secrets.VPS_PORT || '22' }}
         run: |
-          sudo apt-get update -qq && sudo apt-get install -y -qq lftp
           SSH="ssh -p $SSH_PORT -i ~/.ssh/deploy_key -o BatchMode=yes $SSH_USER@$SSH_HOST"
           TS=$(date +%Y%m%d%H%M%S)
           REMOTE="/home/$SSH_USER/apps/denkudi/artifacts/artifact-${TS}.tar.gz"
@@ -74,8 +73,8 @@ jobs:
           CURR="$APP/current"
           PHP="/usr/bin/php8.4"
 
-          echo "Uploading artifact via SFTP..."
-          lftp -e "set sftp:connect-program \"ssh -p $SSH_PORT -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no\"; put /tmp/artifact.tar.gz -o $REMOTE; quit" -u $SSH_USER, sftp://$SSH_HOST
+          echo "Uploading artifact..."
+          cat /tmp/artifact.tar.gz | $SSH "cat > $REMOTE"
 
           echo "Extracting to $RELEASE"
           $SSH "mkdir -p $RELEASE && tar -xzf $REMOTE -C $RELEASE --strip-components=1"
