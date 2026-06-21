@@ -22,6 +22,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
+import { Spinner } from '@/components/ui/spinner';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useState } from 'react';
 
@@ -80,6 +81,7 @@ export default function ElectionsIndex({ elections, filters, statuses, paginatio
     const [deleteId, setDeleteId] = useState<number | null>(null);
     const [releaseId, setReleaseId] = useState<Election | null>(null);
     const [statusChange, setStatusChange] = useState<{ id: number; status: string; label: string } | null>(null);
+    const [deleting, setDeleting] = useState(false);
 
     const applyFilters = (overrides: Record<string, string>) => {
         router.get('/admin/elections', { ...filters, ...overrides }, { preserveState: true, replace: true });
@@ -276,14 +278,25 @@ export default function ElectionsIndex({ elections, filters, statuses, paginatio
                 <DialogContent>
                     <DialogHeader>
                         <DialogTitle>Delete Election</DialogTitle>
-                        <DialogDescription>This will permanently delete the election and all its data.</DialogDescription>
+                        <DialogDescription>
+                            This will permanently delete the election and all associated data — positions, candidates, votes, and audit records.
+                        </DialogDescription>
                     </DialogHeader>
                     <DialogFooter>
-                        <Button variant="outline" onClick={() => setDeleteId(null)}>Cancel</Button>
-                        <Button variant="destructive" onClick={() => {
-                            if (deleteId) router.delete(`/admin/elections/${deleteId}`);
-                            setDeleteId(null);
-                        }}>Delete</Button>
+                        <Button variant="outline" onClick={() => setDeleteId(null)} disabled={deleting}>Cancel</Button>
+                        <Button variant="destructive" disabled={deleting} onClick={() => {
+                            if (deleteId) {
+                                setDeleting(true);
+                                router.delete(`/admin/elections/${deleteId}`, {
+                                    onFinish: () => {
+                                        setDeleting(false);
+                                        setDeleteId(null);
+                                    },
+                                });
+                            }
+                        }}>
+                            {deleting ? <><Spinner className="mr-1.5" /> Deleting…</> : 'Delete'}
+                        </Button>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
@@ -294,8 +307,8 @@ export default function ElectionsIndex({ elections, filters, statuses, paginatio
                         <DialogTitle>{releaseId?.results_released ? 'Withdraw Results' : 'Release Results'}</DialogTitle>
                         <DialogDescription>
                             {releaseId?.results_released
-                                ? 'Students will no longer be able to view the results for this election.'
-                                : 'Students will be able to view the results on their dashboard.'}
+                                ? 'Voters will no longer be able to view the results for this election.'
+                                : 'Voters will be able to view the results for this election.'}
                         </DialogDescription>
                     </DialogHeader>
                     <DialogFooter>

@@ -259,21 +259,27 @@ class ElectionController extends Controller
         ]);
     }
 
-    public function audit(Election $election, VotingService $voting): \Inertia\Response
+    public function audit(Election $election, VotingService $voting, Request $request): \Inertia\Response
     {
         $result = $voting->verifyChain($election);
 
-        $votes = Vote::with(['position', 'candidate'])
+        $query = Vote::with(['position', 'candidate'])
             ->where('election_id', $election->id)
-            ->orderBy('id')
-            ->get()
-            ->map(fn ($v) => [
+            ->orderBy('id');
+
+        if ($request->filled('search')) {
+            $search = $request->input('search');
+            $query->where('receipt_token', 'like', "%{$search}%");
+        }
+
+        $votes = $query->paginate(20)
+            ->through(fn ($v) => [
                 'id' => $v->id,
                 'position' => $v->position?->title ?? '—',
                 'candidate' => $v->candidate?->name ?? '—',
-                'receipt_token' => $v->receipt_token,
-                'previous_hash' => substr($v->previous_hash, 0, 16) . '...',
-                'current_hash' => substr($v->current_hash, 0, 16) . '...',
+                'previous_hash' => '...' . substr($v->previous_hash, -16),
+                'current_hash' => '...' . substr($v->current_hash, -16),
+                'receipt' => $v->receipt_token,
                 'status' => $v->status,
             ]);
 
@@ -284,7 +290,15 @@ class ElectionController extends Controller
                 'status' => $election->status->value,
             ],
             'chain' => $result,
-            'votes' => $votes,
+            'votes' => Inertia::merge(fn () => $votes->items()),
+            'pagination' => [
+                'current_page' => $votes->currentPage(),
+                'last_page' => $votes->lastPage(),
+                'total' => $votes->total(),
+            ],
+            'filters' => [
+                'search' => $request->input('search', ''),
+            ],
         ]);
     }
 }
