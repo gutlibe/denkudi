@@ -104,13 +104,12 @@ jobs:
           $SSH "ln -sfn $RELEASE $CURR"
 
           echo "Restarting PHP-FPM"
-          $SSH "sudo systemctl restart php8.4-fpm 2>/dev/null || systemctl restart php8.4-fpm 2>/dev/null || true"
+          $SSH "sudo systemctl restart php8.4-fpm 2>/dev/null || true"
 
           echo "Restarting queue workers"
           $SSH "
             cd $CURR
             $PHP artisan queue:restart --no-ansi 2>/dev/null || true
-            supervisorctl restart denkudi-queue:* 2>/dev/null || true
           "
 
           echo "Cleaning up old releases (keep last 5)"
