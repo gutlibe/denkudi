@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\AuditLogController;
 use App\Http\Controllers\Admin\CandidateController;
+use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\ElectionController;
 use App\Http\Controllers\Admin\PositionController;
 use App\Http\Middleware\EnsureUserIsAdmin;
@@ -11,7 +12,7 @@ Route::middleware(['auth', 'verified', EnsureUserIsAdmin::class])
     ->prefix('admin')
     ->name('admin.')
     ->group(function () {
-        Route::inertia('dashboard', 'admin/dashboard')->name('dashboard');
+        Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
         Route::resource('elections', ElectionController::class)
             ->except(['show'])

@@ -7,6 +7,7 @@ use App\Enums\ElectionType;
 use App\Http\Controllers\Controller;
 use App\Models\AdminAuditLog;
 use App\Models\Election;
+use App\Models\Vote;
 use App\Services\VotingService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -262,7 +263,8 @@ class ElectionController extends Controller
     {
         $result = $voting->verifyChain($election);
 
-        $votes = \App\Models\Vote::where('election_id', $election->id)
+        $votes = Vote::with(['position', 'candidate'])
+            ->where('election_id', $election->id)
             ->orderBy('id')
             ->get()
             ->map(fn ($v) => [
@@ -275,7 +277,7 @@ class ElectionController extends Controller
                 'status' => $v->status,
             ]);
 
-        return \Inertia::render('admin/elections/audit', [
+        return Inertia::render('admin/elections/audit', [
             'election' => [
                 'id' => $election->id,
                 'title' => $election->title,

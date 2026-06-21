@@ -78,6 +78,8 @@ const typeIcon = (type: string) => {
 export default function ElectionsIndex({ elections, filters, statuses, pagination }: Props) {
     const [search, setSearch] = useState(filters.search);
     const [deleteId, setDeleteId] = useState<number | null>(null);
+    const [releaseId, setReleaseId] = useState<Election | null>(null);
+    const [statusChange, setStatusChange] = useState<{ id: number; status: string; label: string } | null>(null);
 
     const applyFilters = (overrides: Record<string, string>) => {
         router.get('/admin/elections', { ...filters, ...overrides }, { preserveState: true, replace: true });
@@ -152,7 +154,7 @@ export default function ElectionsIndex({ elections, filters, statuses, paginatio
                 ) : (
                     <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                         {elections.map((election) => (
-                            <Card key={election.id} className="flex flex-col group pb-0">
+                            <Card key={election.id} className="flex flex-col group pb-0 gap-0">
                                 <CardHeader className="pb-3">
                                     <div className="flex items-start justify-between gap-2">
                                         <div className="flex-1 min-w-0">
@@ -170,7 +172,7 @@ export default function ElectionsIndex({ elections, filters, statuses, paginatio
                                                         </DropdownMenuTrigger>
                                                         <DropdownMenuContent align="start" className="w-32">
                                                             {statusTransitions[election.status].map((t) => (
-                                                                <DropdownMenuItem key={t.value} onClick={() => router.patch(`/admin/elections/${election.id}/status`, { status: t.value })}>
+                                                                <DropdownMenuItem key={t.value} onClick={() => setStatusChange({ id: election.id, status: t.value, label: t.label })}>
                                                                     {t.label}
                                                                 </DropdownMenuItem>
                                                             ))}
@@ -196,11 +198,11 @@ export default function ElectionsIndex({ elections, filters, statuses, paginatio
                                     )}
                                 </CardContent>
                                 <Separator />
-                                <div className="flex items-center justify-between px-3 py-1.5">
+                                <div className="flex items-center justify-between px-3 py-0.5">
                                     <div className="flex items-center gap-0.5">
                                         <Tooltip>
                                             <TooltipTrigger asChild>
-                                                <Button variant="ghost" size="icon-sm" onClick={() => router.patch(`/admin/elections/${election.id}/release-results`)} className={election.results_released ? 'text-green-500 hover:text-green-600' : 'text-muted-foreground'}>
+                                                <Button variant="ghost" size="icon-sm" onClick={() => setReleaseId(election)} className={election.results_released ? 'text-green-500 hover:text-green-600' : 'text-muted-foreground'}>
                                                     <HugeiconsIcon icon={Analytics01Icon} size={14} />
                                                 </Button>
                                             </TooltipTrigger>
@@ -282,6 +284,48 @@ export default function ElectionsIndex({ elections, filters, statuses, paginatio
                             if (deleteId) router.delete(`/admin/elections/${deleteId}`);
                             setDeleteId(null);
                         }}>Delete</Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            <Dialog open={releaseId !== null} onOpenChange={() => setReleaseId(null)}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>{releaseId?.results_released ? 'Withdraw Results' : 'Release Results'}</DialogTitle>
+                        <DialogDescription>
+                            {releaseId?.results_released
+                                ? 'Students will no longer be able to view the results for this election.'
+                                : 'Students will be able to view the results on their dashboard.'}
+                        </DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => setReleaseId(null)}>Cancel</Button>
+                        <Button onClick={() => {
+                            if (releaseId) router.patch(`/admin/elections/${releaseId.id}/release-results`);
+                            setReleaseId(null);
+                        }}>
+                            {releaseId?.results_released ? 'Withdraw Results' : 'Release Results'}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            <Dialog open={statusChange !== null} onOpenChange={() => setStatusChange(null)}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Change Status</DialogTitle>
+                        <DialogDescription>
+                            {statusChange?.label} this election? This action cannot be undone.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => setStatusChange(null)}>Cancel</Button>
+                        <Button onClick={() => {
+                            if (statusChange) router.patch(`/admin/elections/${statusChange.id}/status`, { status: statusChange.status });
+                            setStatusChange(null);
+                        }}>
+                            {statusChange?.label}
+                        </Button>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
