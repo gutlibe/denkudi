@@ -1,0 +1,116 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    name: Build & Deploy
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          tools: composer:v2
+          coverage: none
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install PHP Dependencies
+        run: composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader --no-ansi
+
+      - name: Build Frontend Assets
+        run: npm ci && npm run build
+
+      - name: Prepare Artifact
+        run: |
+          rm -rf node_modules .git tests .github .env .env.* *.md scripts docs
+          rm -f phpunit.xml phpunit.xml.dist pint.json eslint.config.js tsconfig.json vite.config.ts postcss.config.js tailwind.config.js
+          tar -czf /tmp/artifact.tar.gz .
+          echo "Artifact size: $(du -h /tmp/artifact.tar.gz | cut -f1)"
+
+      - name: Setup SSH
+        env:
+          SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+          SSH_HOST: ${{ secrets.VPS_HOST }}
+          SSH_USER: ${{ secrets.VPS_USER }}
+          SSH_PORT: ${{ secrets.VPS_PORT || '22' }}
+        run: |
+          mkdir -p ~/.ssh
+          echo "$SSH_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -p "$SSH_PORT" -H "$SSH_HOST" >> ~/.ssh/known_hosts 2>/dev/null
+          echo "SSH configured"
+
+      - name: Upload & Deploy
+        env:
+          SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+          SSH_HOST: ${{ secrets.VPS_HOST }}
+          SSH_USER: ${{ secrets.VPS_USER }}
+          SSH_PORT: ${{ secrets.VPS_PORT || '22' }}
+        run: |
+          SSH="ssh -p $SSH_PORT -i ~/.ssh/deploy_key -o BatchMode=yes $SSH_USER@$SSH_HOST"
+          TS=$(date +%Y%m%d%H%M%S)
+          REMOTE="/home/$SSH_USER/apps/denkudi/artifacts/artifact-${TS}.tar.gz"
+          RELEASE="/home/$SSH_USER/apps/denkudi/releases/${TS}"
+          APP="/home/$SSH_USER/apps/denkudi"
+          SHARED="$APP/shared"
+          CURR="$APP/current"
+          PHP="/usr/bin/php8.4"
+
+          echo "Uploading artifact..."
+          cat /tmp/artifact.tar.gz | $SSH "cat > $REMOTE"
+
+          echo "Extracting to $RELEASE"
+          $SSH "mkdir -p $RELEASE && tar -xzf $REMOTE -C $RELEASE --strip-components=1"
+
+          echo "Linking shared resources"
+          $SSH "
+            ln -sfn $SHARED/.env $RELEASE/.env
+            rm -rf $RELEASE/storage && ln -sfn $SHARED/storage $RELEASE/storage
+            rm -rf $RELEASE/bootstrap/cache && ln -sfn $SHARED/bootstrap/cache $RELEASE/bootstrap/cache
+            mkdir -p $SHARED/bootstrap/cache
+            mkdir -p $SHARED/storage/{framework/{views,cache,sessions,testing},logs,app/public}
+          "
+
+          echo "Running deployment commands"
+          $SSH "
+            cd $RELEASE
+            $PHP artisan storage:link --quiet 2>/dev/null || true
+            $PHP artisan config:cache --no-ansi
+            $PHP artisan route:cache --no-ansi
+            $PHP artisan view:cache --no-ansi
+            $PHP artisan event:cache --no-ansi
+            $PHP artisan migrate --force --no-ansi
+          "
+
+          echo "Activating release"
+          $SSH "ln -sfn $RELEASE $CURR"
+
+          echo "Restarting PHP-FPM"
+          $SSH "sudo systemctl restart php8.4-fpm 2>/dev/null || systemctl restart php8.4-fpm 2>/dev/null || true"
+
+          echo "Restarting queue workers"
+          $SSH "
+            cd $CURR
+            $PHP artisan queue:restart --no-ansi 2>/dev/null || true
+            supervisorctl restart denkudi-queue:* 2>/dev/null || true
+          "
+
+          echo "Cleaning up old releases (keep last 5)"
+          $SSH "cd $APP/releases && ls -1t | tail -n +6 | xargs -r rm -rf"
+          $SSH "cd $APP/artifacts && ls -1t | tail -n +11 | xargs -r rm -f"
+
+          echo "Deploy complete: $TS"
