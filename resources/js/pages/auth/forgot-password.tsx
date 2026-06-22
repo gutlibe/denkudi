@@ -3,7 +3,13 @@ import { Form, Head } from '@inertiajs/react';
 import InputError from '@/components/input-error';
 import TextLink from '@/components/text-link';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
+} from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
@@ -55,7 +61,9 @@ export default function ForgotPassword({ status }: { status?: string }) {
                                 </Button>
 
                                 <div className="text-center text-sm text-muted-foreground">
-                                    <TextLink href={login()}>Back to log in</TextLink>
+                                    <TextLink href={login()}>
+                                        Back to log in
+                                    </TextLink>
                                 </div>
                             </>
                         )}

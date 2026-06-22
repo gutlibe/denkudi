@@ -48,7 +48,11 @@ export function UserMenuContent({ user }: Props) {
                 </DropdownMenuItem>
                 <DropdownMenuItem
                     className="cursor-pointer"
-                    onClick={() => updateAppearance(resolvedAppearance === 'dark' ? 'light' : 'dark')}
+                    onClick={() =>
+                        updateAppearance(
+                            resolvedAppearance === 'dark' ? 'light' : 'dark',
+                        )
+                    }
                 >
                     {resolvedAppearance === 'dark' ? (
                         <Sun className="mr-2 size-4" />

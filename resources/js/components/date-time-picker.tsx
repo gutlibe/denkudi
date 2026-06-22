@@ -5,7 +5,11 @@ import * as React from 'react';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { Input } from '@/components/ui/input';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from '@/components/ui/popover';
 
 type Props = {
     id: string;
@@ -25,8 +29,8 @@ export function DateTimePicker({ id, label, value, onChange }: Props) {
 
     const emit = (d: Date | undefined, t: string) => {
         if (!d || !onChange) {
-return;
-}
+            return;
+        }
 
         const [h, m] = t.split(':');
         const dt = new Date(d);
@@ -36,7 +40,11 @@ return;
 
     return (
         <div className="grid gap-1.5">
-            {label && <span className="text-xs font-medium text-muted-foreground">{label}</span>}
+            {label && (
+                <span className="text-xs font-medium text-muted-foreground">
+                    {label}
+                </span>
+            )}
             <div className="flex gap-1.5">
                 <Popover open={open} onOpenChange={setOpen}>
                     <PopoverTrigger asChild>
@@ -48,10 +56,17 @@ return;
                             <span className="truncate">
                                 {date ? format(date, 'MMM d, yyyy') : 'Date'}
                             </span>
-                            <HugeiconsIcon icon={Calendar02Icon} size={14} className="shrink-0 opacity-50" />
+                            <HugeiconsIcon
+                                icon={Calendar02Icon}
+                                size={14}
+                                className="shrink-0 opacity-50"
+                            />
                         </Button>
                     </PopoverTrigger>
-                    <PopoverContent className="w-auto overflow-hidden p-0" align="start">
+                    <PopoverContent
+                        className="w-auto overflow-hidden p-0"
+                        align="start"
+                    >
                         <Calendar
                             mode="single"
                             selected={date}

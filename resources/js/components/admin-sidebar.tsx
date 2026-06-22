@@ -22,7 +22,11 @@ import {
     SidebarTrigger,
     useSidebar,
 } from '@/components/ui/sidebar';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipTrigger,
+} from '@/components/ui/tooltip';
 import { dashboard } from '@/routes/admin';
 import type { NavItem } from '@/types';
 
@@ -59,13 +63,19 @@ export function AdminSidebar() {
                                 tooltip={{ children: 'Expand sidebar' }}
                                 className="group/expand relative overflow-hidden"
                             >
-                                <span className="group-hover/expand:opacity-0 transition-opacity">
+                                <span className="transition-opacity group-hover/expand:opacity-0">
                                     <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-                                        <HugeiconsIcon icon={Shield01Icon} size={18} />
+                                        <HugeiconsIcon
+                                            icon={Shield01Icon}
+                                            size={18}
+                                        />
                                     </div>
                                 </span>
-                                <span className="absolute inset-0 flex items-center justify-center opacity-0 group-hover/expand:opacity-100 transition-opacity">
-                                    <HugeiconsIcon icon={PanelLeftOpenIcon} size={20} />
+                                <span className="absolute inset-0 flex items-center justify-center opacity-0 transition-opacity group-hover/expand:opacity-100">
+                                    <HugeiconsIcon
+                                        icon={PanelLeftOpenIcon}
+                                        size={20}
+                                    />
                                 </span>
                             </SidebarMenuButton>
                         ) : (

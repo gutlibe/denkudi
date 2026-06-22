@@ -3,7 +3,13 @@ import InputError from '@/components/input-error';
 import PasswordInput from '@/components/password-input';
 import TextLink from '@/components/text-link';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
+} from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
@@ -20,7 +26,9 @@ export default function Register({ passwordRules }: Props) {
             <Head title="Register" />
             <Card>
                 <CardHeader className="text-center">
-                    <CardTitle className="text-xl">Create your account</CardTitle>
+                    <CardTitle className="text-xl">
+                        Create your account
+                    </CardTitle>
                     <CardDescription>
                         Enter your details to join the HTU e-voting platform
                     </CardDescription>
@@ -37,7 +45,9 @@ export default function Register({ passwordRules }: Props) {
                                 <div className="grid gap-4">
                                     <div className="grid grid-cols-2 gap-4">
                                         <div className="grid gap-2">
-                                            <Label htmlFor="first_name">First name</Label>
+                                            <Label htmlFor="first_name">
+                                                First name
+                                            </Label>
                                             <Input
                                                 id="first_name"
                                                 type="text"
@@ -48,10 +58,14 @@ export default function Register({ passwordRules }: Props) {
                                                 name="first_name"
                                                 placeholder="John"
                                             />
-                                            <InputError message={errors.first_name} />
+                                            <InputError
+                                                message={errors.first_name}
+                                            />
                                         </div>
                                         <div className="grid gap-2">
-                                            <Label htmlFor="last_name">Last name</Label>
+                                            <Label htmlFor="last_name">
+                                                Last name
+                                            </Label>
                                             <Input
                                                 id="last_name"
                                                 type="text"
@@ -61,12 +75,16 @@ export default function Register({ passwordRules }: Props) {
                                                 name="last_name"
                                                 placeholder="Doe"
                                             />
-                                            <InputError message={errors.last_name} />
+                                            <InputError
+                                                message={errors.last_name}
+                                            />
                                         </div>
                                     </div>
 
                                     <div className="grid gap-2">
-                                        <Label htmlFor="student_id">Student ID</Label>
+                                        <Label htmlFor="student_id">
+                                            Student ID
+                                        </Label>
                                         <Input
                                             id="student_id"
                                             type="text"
@@ -79,13 +97,18 @@ export default function Register({ passwordRules }: Props) {
                                             pattern="\d{10}"
                                         />
                                         <p className="text-xs text-muted-foreground">
-                                            Your 10-digit student ID. You'll log in with it.
+                                            Your 10-digit student ID. You'll log
+                                            in with it.
                                         </p>
-                                        <InputError message={errors.student_id} />
+                                        <InputError
+                                            message={errors.student_id}
+                                        />
                                     </div>
 
                                     <div className="grid gap-2">
-                                        <Label htmlFor="password">Password</Label>
+                                        <Label htmlFor="password">
+                                            Password
+                                        </Label>
                                         <PasswordInput
                                             id="password"
                                             required
@@ -99,7 +122,9 @@ export default function Register({ passwordRules }: Props) {
                                     </div>
 
                                     <div className="grid gap-2">
-                                        <Label htmlFor="password_confirmation">Confirm password</Label>
+                                        <Label htmlFor="password_confirmation">
+                                            Confirm password
+                                        </Label>
                                         <PasswordInput
                                             id="password_confirmation"
                                             required
@@ -109,7 +134,11 @@ export default function Register({ passwordRules }: Props) {
                                             placeholder="Confirm password"
                                             passwordrules={passwordRules}
                                         />
-                                        <InputError message={errors.password_confirmation} />
+                                        <InputError
+                                            message={
+                                                errors.password_confirmation
+                                            }
+                                        />
                                     </div>
 
                                     <Button

@@ -1,4 +1,9 @@
-import { startTransition, useSyncExternalStore, useState, useEffect } from 'react';
+import {
+    startTransition,
+    useSyncExternalStore,
+    useState,
+    useEffect,
+} from 'react';
 
 export type ResolvedAppearance = 'light' | 'dark';
 export type Appearance = ResolvedAppearance | 'system';
@@ -99,7 +104,9 @@ export function useAppearance(): UseAppearanceReturn {
     );
 
     const resolvedAppearance: ResolvedAppearance = mounted
-        ? (isDarkMode(appearance) ? 'dark' : 'light')
+        ? isDarkMode(appearance)
+            ? 'dark'
+            : 'light'
         : 'light';
 
     const updateAppearance = (mode: Appearance): void => {
@@ -113,5 +120,9 @@ export function useAppearance(): UseAppearanceReturn {
         notify();
     };
 
-    return { appearance: mounted ? appearance : 'system', resolvedAppearance, updateAppearance } as const;
+    return {
+        appearance: mounted ? appearance : 'system',
+        resolvedAppearance,
+        updateAppearance,
+    } as const;
 }

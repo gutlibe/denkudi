@@ -4,7 +4,13 @@ import PasskeyVerify from '@/components/passkey-verify';
 import PasswordInput from '@/components/password-input';
 import TextLink from '@/components/text-link';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
+} from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -24,7 +30,12 @@ export default function Login({ status, canResetPassword }: Props) {
         <>
             <Head title="Log in" />
 
-            <PasskeyVerify routes={{ options: { url: loginOptions.url(), method: 'get' }, submit: { url: login.url(), method: 'post' } }} />
+            <PasskeyVerify
+                routes={{
+                    options: { url: loginOptions.url(), method: 'get' },
+                    submit: { url: login.url(), method: 'post' },
+                }}
+            />
 
             <Card>
                 <CardHeader className="text-center">
@@ -43,7 +54,9 @@ export default function Login({ status, canResetPassword }: Props) {
                             <>
                                 <div className="grid gap-4">
                                     <div className="grid gap-2">
-                                        <Label htmlFor="email">Student ID or email</Label>
+                                        <Label htmlFor="email">
+                                            Student ID or email
+                                        </Label>
                                         <Input
                                             id="email"
                                             type="text"
@@ -59,7 +72,9 @@ export default function Login({ status, canResetPassword }: Props) {
 
                                     <div className="grid gap-2">
                                         <div className="flex items-center">
-                                            <Label htmlFor="password">Password</Label>
+                                            <Label htmlFor="password">
+                                                Password
+                                            </Label>
                                             {canResetPassword && (
                                                 <TextLink
                                                     href={request()}
@@ -87,7 +102,9 @@ export default function Login({ status, canResetPassword }: Props) {
                                             name="remember"
                                             tabIndex={3}
                                         />
-                                        <Label htmlFor="remember">Remember me</Label>
+                                        <Label htmlFor="remember">
+                                            Remember me
+                                        </Label>
                                     </div>
 
                                     <Button

@@ -47,7 +47,9 @@ export default function Profile({
                         <>
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="grid gap-2">
-                                    <Label htmlFor="first_name">First name</Label>
+                                    <Label htmlFor="first_name">
+                                        First name
+                                    </Label>
 
                                     <Input
                                         id="first_name"
@@ -118,7 +120,8 @@ export default function Profile({
                                 />
 
                                 <p className="text-xs text-muted-foreground">
-                                    Your email is generated from your student ID.
+                                    Your email is generated from your student
+                                    ID.
                                 </p>
                             </div>
 

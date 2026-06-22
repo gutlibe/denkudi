@@ -5,13 +5,14 @@ import { LiquidBackground } from '@/components/liquid-background';
 import { MobileFloatingHeader } from '@/components/mobile-floating-header';
 import type { AppLayoutProps } from '@/types';
 
-export default function AppSidebarLayout({
-    children,
-}: AppLayoutProps) {
+export default function AppSidebarLayout({ children }: AppLayoutProps) {
     return (
         <AppShell variant="sidebar">
             <AppSidebar />
-            <AppContent variant="sidebar" className="max-lg:max-h-svh max-lg:overflow-y-auto [&::-webkit-scrollbar]:hidden [scrollbar-width:none]">
+            <AppContent
+                variant="sidebar"
+                className="[scrollbar-width:none] max-lg:max-h-svh max-lg:overflow-y-auto [&::-webkit-scrollbar]:hidden"
+            >
                 <LiquidBackground />
                 <div className="relative z-10 flex flex-1 flex-col">
                     <MobileFloatingHeader />

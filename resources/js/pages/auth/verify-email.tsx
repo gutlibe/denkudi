@@ -1,7 +1,13 @@
 import { Form, Head } from '@inertiajs/react';
 import TextLink from '@/components/text-link';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
+} from '@/components/ui/card';
 import { Spinner } from '@/components/ui/spinner';
 import { logout } from '@/routes';
 import { send } from '@/routes/verification';
@@ -28,15 +34,18 @@ export default function VerifyEmail({ status }: { status?: string }) {
                     <Form {...send.form()} className="flex flex-col gap-6">
                         {({ processing }) => (
                             <>
-                                <Button type="submit" className="w-full" disabled={processing} variant="secondary">
+                                <Button
+                                    type="submit"
+                                    className="w-full"
+                                    disabled={processing}
+                                    variant="secondary"
+                                >
                                     {processing && <Spinner />}
                                     Resend verification email
                                 </Button>
 
                                 <div className="text-center text-sm">
-                                    <TextLink href={logout()}>
-                                        Log out
-                                    </TextLink>
+                                    <TextLink href={logout()}>Log out</TextLink>
                                 </div>
                             </>
                         )}

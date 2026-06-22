@@ -2,7 +2,13 @@ import { Form, Head } from '@inertiajs/react';
 import InputError from '@/components/input-error';
 import PasswordInput from '@/components/password-input';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
+} from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
@@ -48,7 +54,9 @@ export default function ResetPassword({ token, email, passwordRules }: Props) {
                                 </div>
 
                                 <div className="grid gap-2">
-                                    <Label htmlFor="password">New password</Label>
+                                    <Label htmlFor="password">
+                                        New password
+                                    </Label>
                                     <PasswordInput
                                         id="password"
                                         name="password"
@@ -61,7 +69,9 @@ export default function ResetPassword({ token, email, passwordRules }: Props) {
                                 </div>
 
                                 <div className="grid gap-2">
-                                    <Label htmlFor="password_confirmation">Confirm password</Label>
+                                    <Label htmlFor="password_confirmation">
+                                        Confirm password
+                                    </Label>
                                     <PasswordInput
                                         id="password_confirmation"
                                         name="password_confirmation"
@@ -69,7 +79,9 @@ export default function ResetPassword({ token, email, passwordRules }: Props) {
                                         placeholder="Confirm password"
                                         passwordrules={passwordRules}
                                     />
-                                    <InputError message={errors.password_confirmation} />
+                                    <InputError
+                                        message={errors.password_confirmation}
+                                    />
                                 </div>
 
                                 <Button

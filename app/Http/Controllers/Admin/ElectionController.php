@@ -390,9 +390,6 @@ class ElectionController extends Controller
         ]);
     }
 
-    /**
-     * @return Response|JsonResponse
-     */
     public function results(Election $election, VotingService $voting): Response|JsonResponse
     {
         $data = [

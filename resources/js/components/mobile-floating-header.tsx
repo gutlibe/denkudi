@@ -17,8 +17,8 @@ export function MobileFloatingHeader() {
     const { resolvedAppearance, updateAppearance } = useAppearance();
 
     if (!auth.user) {
-return null;
-}
+        return null;
+    }
 
     const name = `${auth.user.first_name} ${auth.user.last_name}`;
 
@@ -41,21 +41,29 @@ return null;
                         className="relative flex size-9 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted/50 hover:text-foreground dark:text-white/60 dark:hover:bg-white/10 dark:hover:text-white"
                         aria-label={`Switch to ${resolvedAppearance === 'dark' ? 'light' : 'dark'} mode`}
                     >
-                        <Sun className="size-[18px] shrink-0 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-                        <Moon className="absolute left-1/2 top-1/2 size-[18px] -translate-x-1/2 -translate-y-1/2 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+                        <Sun className="size-[18px] shrink-0 scale-100 rotate-0 transition-all dark:scale-0 dark:-rotate-90" />
+                        <Moon className="absolute top-1/2 left-1/2 size-[18px] -translate-x-1/2 -translate-y-1/2 scale-0 rotate-90 transition-all dark:scale-100 dark:rotate-0" />
                     </button>
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                            <button className="size-9 cursor-pointer rounded-full ring-offset-background transition-opacity hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
-                                <Avatar className="size-9 after:hidden bg-gradient-to-br from-primary/20 to-violet-500/20 dark:from-primary/30 dark:to-violet-500/30">
-                                    <AvatarImage src={auth.user.avatar} alt={name} />
-                                    <AvatarFallback className="bg-transparent text-primary dark:text-white text-xs font-semibold">
+                            <button className="size-9 cursor-pointer rounded-full ring-offset-background transition-opacity hover:opacity-80 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none">
+                                <Avatar className="size-9 bg-gradient-to-br from-primary/20 to-violet-500/20 after:hidden dark:from-primary/30 dark:to-violet-500/30">
+                                    <AvatarImage
+                                        src={auth.user.avatar}
+                                        alt={name}
+                                    />
+                                    <AvatarFallback className="bg-transparent text-xs font-semibold text-primary dark:text-white">
                                         {getInitials(name)}
                                     </AvatarFallback>
                                 </Avatar>
                             </button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent side="bottom" align="end" sideOffset={12} className="w-56 rounded-xl">
+                        <DropdownMenuContent
+                            side="bottom"
+                            align="end"
+                            sideOffset={12}
+                            className="w-56 rounded-xl"
+                        >
                             <UserMenuContent user={auth.user} />
                         </DropdownMenuContent>
                     </DropdownMenu>

@@ -3,7 +3,13 @@ import { REGEXP_ONLY_DIGITS } from 'input-otp';
 import { useMemo, useState } from 'react';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
+} from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import {
     InputOTP,
@@ -55,8 +61,12 @@ export default function TwoFactorChallenge() {
 
             <Card>
                 <CardHeader className="text-center">
-                    <CardTitle className="text-xl">{authConfigContent.title}</CardTitle>
-                    <CardDescription>{authConfigContent.description}</CardDescription>
+                    <CardTitle className="text-xl">
+                        {authConfigContent.title}
+                    </CardTitle>
+                    <CardDescription>
+                        {authConfigContent.description}
+                    </CardDescription>
                 </CardHeader>
                 <CardContent>
                     <Form
@@ -76,7 +86,9 @@ export default function TwoFactorChallenge() {
                                             autoFocus
                                             required
                                         />
-                                        <InputError message={errors.recovery_code} />
+                                        <InputError
+                                            message={errors.recovery_code}
+                                        />
                                     </>
                                 ) : (
                                     <div className="flex flex-col items-center justify-center space-y-3 text-center">
@@ -93,7 +105,10 @@ export default function TwoFactorChallenge() {
                                                 {Array.from(
                                                     { length: OTP_MAX_LENGTH },
                                                     (_, index) => (
-                                                        <InputOTPSlot key={index} index={index} />
+                                                        <InputOTPSlot
+                                                            key={index}
+                                                            index={index}
+                                                        />
                                                     ),
                                                 )}
                                             </InputOTPGroup>
@@ -102,7 +117,11 @@ export default function TwoFactorChallenge() {
                                     </div>
                                 )}
 
-                                <Button type="submit" className="w-full" disabled={processing}>
+                                <Button
+                                    type="submit"
+                                    className="w-full"
+                                    disabled={processing}
+                                >
                                     Continue
                                 </Button>
 
@@ -110,7 +129,9 @@ export default function TwoFactorChallenge() {
                                     <button
                                         type="button"
                                         className="cursor-pointer text-foreground underline decoration-neutral-300 underline-offset-4 transition-colors duration-300 ease-out hover:decoration-current! dark:decoration-neutral-500"
-                                        onClick={() => toggleRecoveryMode(clearErrors)}
+                                        onClick={() =>
+                                            toggleRecoveryMode(clearErrors)
+                                        }
                                     >
                                         {authConfigContent.toggleText}
                                     </button>

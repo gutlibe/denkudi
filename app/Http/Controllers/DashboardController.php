@@ -9,6 +9,7 @@ use App\Models\Position;
 use App\Models\Vote;
 use App\Services\VotingService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -149,7 +150,7 @@ class DashboardController extends Controller
         ]);
     }
 
-    public function submitVote(Election $election, Request $request, VotingService $voting): Response|\Illuminate\Http\RedirectResponse
+    public function submitVote(Election $election, Request $request, VotingService $voting): Response|RedirectResponse
     {
         $user = $request->user();
 

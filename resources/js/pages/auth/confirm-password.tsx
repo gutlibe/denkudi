@@ -7,7 +7,13 @@ import InputError from '@/components/input-error';
 import PasskeyVerify from '@/components/passkey-verify';
 import PasswordInput from '@/components/password-input';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
+} from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
 import { store } from '@/routes/password/confirm';
@@ -21,7 +27,8 @@ export default function ConfirmPassword() {
                 <CardHeader className="text-center">
                     <CardTitle className="text-xl">Confirm password</CardTitle>
                     <CardDescription>
-                        This is a secure area. Please confirm your password before continuing.
+                        This is a secure area. Please confirm your password
+                        before continuing.
                     </CardDescription>
                 </CardHeader>
                 <CardContent className="flex flex-col gap-6">

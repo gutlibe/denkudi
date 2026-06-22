@@ -36,8 +36,9 @@ class VotingService
      * access, preventing two concurrent voters from linking to the same
      * predecessor.
      *
-     * @param  array<int, array{position_id: int|string, candidate_id: int|string}> $ballot
+     * @param  array<int, array{position_id: int|string, candidate_id: int|string}>  $ballot
      * @return array{receipt: string, count: int}
+     *
      * @throws ElectionPausedException
      * @throws \RuntimeException
      */

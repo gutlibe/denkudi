@@ -23,7 +23,11 @@ type BallotData = {
     positions: Position[];
 };
 
-export function useBallot(election: { id: number; title: string; description: string | null }, open: boolean, onVoted: () => void) {
+export function useBallot(
+    election: { id: number; title: string; description: string | null },
+    open: boolean,
+    onVoted: () => void,
+) {
     const [ballotData, setBallotData] = useState<BallotData | null>(null);
     const [loading, setLoading] = useState(false);
     const [currentStep, setCurrentStep] = useState(0);
@@ -42,15 +46,22 @@ export function useBallot(election: { id: number; title: string; description: st
                 headers: {
                     Accept: 'application/json',
                     'X-Requested-With': 'XMLHttpRequest',
-                    'X-XSRF-TOKEN': decodeURIComponent(document.cookie.replace(/(?:(?:^|.*;\s*)XSRF-TOKEN\s*=\s*([^;]*).*$)|^.*$/, '$1')),
+                    'X-XSRF-TOKEN': decodeURIComponent(
+                        document.cookie.replace(
+                            /(?:(?:^|.*;\s*)XSRF-TOKEN\s*=\s*([^;]*).*$)|^.*$/,
+                            '$1',
+                        ),
+                    ),
                 },
                 credentials: 'include',
             });
 
             if (!res.ok) {
                 if (res.status === 403) {
-throw new Error('You are not eligible to vote in this election.');
-}
+                    throw new Error(
+                        'You are not eligible to vote in this election.',
+                    );
+                }
 
                 throw new Error('Failed to load ballot data.');
             }
@@ -66,7 +77,9 @@ throw new Error('You are not eligible to vote in this election.');
 
             setBallotData(data);
         } catch (e) {
-            setError(e instanceof Error ? e.message : 'Failed to load ballot data.');
+            setError(
+                e instanceof Error ? e.message : 'Failed to load ballot data.',
+            );
         }
 
         setLoading(false);
@@ -95,7 +108,10 @@ throw new Error('You are not eligible to vote in this election.');
             const max = currentPosition?.max_selections ?? 1;
 
             if (existing.includes(candidateId)) {
-                return { ...prev, [positionId]: existing.filter((id) => id !== candidateId) };
+                return {
+                    ...prev,
+                    [positionId]: existing.filter((id) => id !== candidateId),
+                };
             }
 
             if (max === 1) {
@@ -103,8 +119,8 @@ throw new Error('You are not eligible to vote in this election.');
             }
 
             if (existing.length >= max) {
-return prev;
-}
+                return prev;
+            }
 
             return { ...prev, [positionId]: [...existing, candidateId] };
         });
@@ -114,47 +130,75 @@ return prev;
     const canProceed = selectedForCurrent.length > 0;
 
     const goNext = () => {
- if (!isLastStep) {
-setCurrentStep((s) => s + 1);
-} 
-};
+        if (!isLastStep) {
+            setCurrentStep((s) => s + 1);
+        }
+    };
     const goPrev = () => {
- setCurrentStep((s) => Math.max(0, s - 1)); 
-};
+        setCurrentStep((s) => Math.max(0, s - 1));
+    };
 
     const submit = () => {
         setSubmitting(true);
-        const allSelected = positions.every((p) => (selections[p.id]?.length ?? 0) > 0);
-
-        if (!allSelected) {
- setSubmitting(false);
-
- return; 
-}
-
-        const ballot = Object.entries(selections).flatMap(([posId, candIds]) =>
-            candIds.map((candId) => ({ position_id: parseInt(posId), candidate_id: candId }))
+        const allSelected = positions.every(
+            (p) => (selections[p.id]?.length ?? 0) > 0,
         );
 
-        router.post(`/elections/${election.id}/vote`, { ballot }, {
-            preserveState: true,
-            onSuccess: (page) => {
-                setSubmitted(true);
-                setReceipt((page.props as { receipt?: string }).receipt ?? null);
-                onVoted();
+        if (!allSelected) {
+            setSubmitting(false);
+
+            return;
+        }
+
+        const ballot = Object.entries(selections).flatMap(([posId, candIds]) =>
+            candIds.map((candId) => ({
+                position_id: parseInt(posId),
+                candidate_id: candId,
+            })),
+        );
+
+        router.post(
+            `/elections/${election.id}/vote`,
+            { ballot },
+            {
+                preserveState: true,
+                onSuccess: (page) => {
+                    setSubmitted(true);
+                    setReceipt(
+                        (page.props as { receipt?: string }).receipt ?? null,
+                    );
+                    onVoted();
+                },
+                onFinish: () => setSubmitting(false),
             },
-            onFinish: () => setSubmitting(false),
-        });
+        );
     };
 
-    const positionsCompleted = positions.filter((p) => (selections[p.id]?.length ?? 0) > 0).length;
+    const positionsCompleted = positions.filter(
+        (p) => (selections[p.id]?.length ?? 0) > 0,
+    ).length;
 
     return {
-        ballotData, loading, submitted, receipt, error, setError,
-        currentStep, positions, currentPosition, isLastStep,
-        selections, selectedForCurrent, canProceed,
-        goNext, goPrev, toggleCandidate, submit,
-        positionsCompleted, loadBallot, submitting,
+        ballotData,
+        loading,
+        submitted,
+        receipt,
+        error,
+        setError,
+        currentStep,
+        positions,
+        currentPosition,
+        isLastStep,
+        selections,
+        selectedForCurrent,
+        canProceed,
+        goNext,
+        goPrev,
+        toggleCandidate,
+        submit,
+        positionsCompleted,
+        loadBallot,
+        submitting,
     };
 }
 
