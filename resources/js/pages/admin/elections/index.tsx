@@ -1,4 +1,12 @@
-import { PlusSignIcon, PencilEdit02Icon, Delete01Icon, Analytics01Icon, Search01Icon, Settings01Icon, Shield01Icon } from '@hugeicons/core-free-icons';
+import {
+    PlusSignIcon,
+    PencilEdit02Icon,
+    Delete01Icon,
+    Analytics01Icon,
+    Search01Icon,
+    Settings01Icon,
+    Shield01Icon,
+} from '@hugeicons/core-free-icons';
 import { HugeiconsIcon } from '@hugeicons/react';
 import { Head, Link, router } from '@inertiajs/react';
 import { useState } from 'react';
@@ -20,10 +28,20 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { Spinner } from '@/components/ui/spinner';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipTrigger,
+} from '@/components/ui/tooltip';
 
 type Election = {
     id: number;
@@ -51,15 +69,18 @@ const statusTransitions: Record<string, { value: string; label: string }[]> = {
     draft: [{ value: 'scheduled', label: 'Schedule' }],
     scheduled: [{ value: 'active', label: 'Activate' }],
     active: [{ value: 'closed', label: 'Close' }],
+    paused_for_review: [{ value: 'active', label: 'Resume' }],
     closed: [],
 };
 
 const statusBadge = (status: string) => {
     const map: Record<string, string> = {
         draft: 'bg-muted text-muted-foreground',
-        scheduled: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+        scheduled:
+            'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
         active: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
-        paused_for_review: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
+        paused_for_review:
+            'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
         closed: 'bg-neutral-100 text-neutral-700 dark:bg-neutral-800 dark:text-neutral-400',
     };
 
@@ -77,15 +98,28 @@ const typeIcon = (type: string) => {
     return map[type] ?? 'bg-muted text-muted-foreground';
 };
 
-export default function ElectionsIndex({ elections, filters, statuses, pagination }: Props) {
+export default function ElectionsIndex({
+    elections,
+    filters,
+    statuses,
+    pagination,
+}: Props) {
     const [search, setSearch] = useState(filters.search);
     const [deleteId, setDeleteId] = useState<number | null>(null);
     const [releaseId, setReleaseId] = useState<Election | null>(null);
-    const [statusChange, setStatusChange] = useState<{ id: number; status: string; label: string } | null>(null);
+    const [statusChange, setStatusChange] = useState<{
+        id: number;
+        status: string;
+        label: string;
+    } | null>(null);
     const [deleting, setDeleting] = useState(false);
 
     const applyFilters = (overrides: Record<string, string>) => {
-        router.get('/admin/elections', { ...filters, ...overrides }, { preserveState: true, replace: true });
+        router.get(
+            '/admin/elections',
+            { ...filters, ...overrides },
+            { preserveState: true, replace: true },
+        );
     };
 
     return (
@@ -94,12 +128,20 @@ export default function ElectionsIndex({ elections, filters, statuses, paginatio
             <div className="space-y-6">
                 <div className="flex items-center justify-between gap-4">
                     <div>
-                        <h2 className="text-xl font-bold tracking-tight">Elections</h2>
-                        <p className="text-sm text-muted-foreground">Create and manage elections.</p>
+                        <h2 className="text-xl font-bold tracking-tight">
+                            Elections
+                        </h2>
+                        <p className="text-sm text-muted-foreground">
+                            Create and manage elections.
+                        </p>
                     </div>
                     <Button asChild size="sm">
                         <Link href="/admin/elections/create">
-                            <HugeiconsIcon icon={PlusSignIcon} size={14} className="mr-1.5" />
+                            <HugeiconsIcon
+                                icon={PlusSignIcon}
+                                size={14}
+                                className="mr-1.5"
+                            />
                             New
                         </Link>
                     </Button>
@@ -107,26 +149,36 @@ export default function ElectionsIndex({ elections, filters, statuses, paginatio
 
                 <div className="flex items-center gap-3">
                     <div className="relative flex-1">
-                        <HugeiconsIcon icon={Search01Icon} size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                        <HugeiconsIcon
+                            icon={Search01Icon}
+                            size={14}
+                            className="absolute top-1/2 left-2.5 -translate-y-1/2 text-muted-foreground"
+                        />
                         <Input
                             placeholder="Search elections..."
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
-                            onKeyDown={(e) => e.key === 'Enter' && applyFilters({ search })}
-                            className="pl-8 h-9 text-sm"
+                            onKeyDown={(e) =>
+                                e.key === 'Enter' && applyFilters({ search })
+                            }
+                            className="h-9 pl-8 text-sm"
                         />
                     </div>
                     <Select
                         value={filters.status}
-                        onValueChange={(v) => applyFilters({ status: v === 'all' ? '' : v })}
+                        onValueChange={(v) =>
+                            applyFilters({ status: v === 'all' ? '' : v })
+                        }
                     >
-                        <SelectTrigger className="w-36 h-9 text-sm">
+                        <SelectTrigger className="h-9 w-36 text-sm">
                             <SelectValue placeholder="All statuses" />
                         </SelectTrigger>
                         <SelectContent>
                             <SelectItem value="all">All</SelectItem>
                             {Object.entries(statuses).map(([value, label]) => (
-                                <SelectItem key={value} value={value}>{label}</SelectItem>
+                                <SelectItem key={value} value={value}>
+                                    {label}
+                                </SelectItem>
                             ))}
                         </SelectContent>
                     </Select>
@@ -134,20 +186,31 @@ export default function ElectionsIndex({ elections, filters, statuses, paginatio
 
                 {elections.length === 0 ? (
                     <Card>
-                        <CardContent className="flex flex-col items-center justify-center py-16 text-center gap-3">
+                        <CardContent className="flex flex-col items-center justify-center gap-3 py-16 text-center">
                             <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-muted text-muted-foreground">
-                                <HugeiconsIcon icon={Analytics01Icon} size={22} />
+                                <HugeiconsIcon
+                                    icon={Analytics01Icon}
+                                    size={22}
+                                />
                             </div>
                             <div>
-                                <p className="text-sm font-semibold">No elections found</p>
-                                <p className="text-xs text-muted-foreground mt-1">
-                                    {filters.status || filters.search ? 'No elections match your filters.' : 'Create your first election to get started.'}
+                                <p className="text-sm font-semibold">
+                                    No elections found
+                                </p>
+                                <p className="mt-1 text-xs text-muted-foreground">
+                                    {filters.status || filters.search
+                                        ? 'No elections match your filters.'
+                                        : 'Create your first election to get started.'}
                                 </p>
                             </div>
                             {!filters.status && !filters.search && (
                                 <Button asChild variant="outline" size="sm">
                                     <Link href="/admin/elections/create">
-                                        <HugeiconsIcon icon={PlusSignIcon} size={14} className="mr-1.5" />
+                                        <HugeiconsIcon
+                                            icon={PlusSignIcon}
+                                            size={14}
+                                            className="mr-1.5"
+                                        />
                                         Create Election
                                     </Link>
                                 </Button>
@@ -157,46 +220,118 @@ export default function ElectionsIndex({ elections, filters, statuses, paginatio
                 ) : (
                     <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                         {elections.map((election) => (
-                            <Card key={election.id} className="flex flex-col group pb-0 gap-0">
+                            <Card
+                                key={election.id}
+                                className="group flex flex-col gap-0 pb-0"
+                            >
                                 <CardHeader className="pb-3">
                                     <div className="flex items-start justify-between gap-2">
-                                        <div className="flex-1 min-w-0">
-                                            <CardTitle className="text-sm leading-snug line-clamp-2">{election.title}</CardTitle>
-                                            <div className="flex items-center gap-2 mt-2">
-                                                <span className={`inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[10px] font-medium ${typeIcon(election.type)}`}>
+                                        <div className="min-w-0 flex-1">
+                                            <CardTitle className="line-clamp-2 text-sm leading-snug">
+                                                {election.title}
+                                            </CardTitle>
+                                            <div className="mt-2 flex items-center gap-2">
+                                                <span
+                                                    className={`inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[10px] font-medium ${typeIcon(election.type)}`}
+                                                >
                                                     {election.type_label}
                                                 </span>
-                                                {statusTransitions[election.status]?.length > 0 ? (
+                                                {statusTransitions[
+                                                    election.status
+                                                ]?.length > 0 ? (
                                                     <DropdownMenu>
-                                                        <DropdownMenuTrigger asChild>
+                                                        <DropdownMenuTrigger
+                                                            asChild
+                                                        >
                                                             <button className="cursor-pointer">
-                                                                <Badge className={statusBadge(election.status)} variant="outline">{election.status_label}</Badge>
+                                                                <Badge
+                                                                    className={statusBadge(
+                                                                        election.status,
+                                                                    )}
+                                                                    variant="outline"
+                                                                >
+                                                                    {
+                                                                        election.status_label
+                                                                    }
+                                                                </Badge>
                                                             </button>
                                                         </DropdownMenuTrigger>
-                                                        <DropdownMenuContent align="start" className="w-32">
-                                                            {statusTransitions[election.status].map((t) => (
-                                                                <DropdownMenuItem key={t.value} onClick={() => setStatusChange({ id: election.id, status: t.value, label: t.label })}>
+                                                        <DropdownMenuContent
+                                                            align="start"
+                                                            className="w-32"
+                                                        >
+                                                            {statusTransitions[
+                                                                election.status
+                                                            ].map((t) => (
+                                                                <DropdownMenuItem
+                                                                    key={
+                                                                        t.value
+                                                                    }
+                                                                    onClick={() =>
+                                                                        setStatusChange(
+                                                                            {
+                                                                                id: election.id,
+                                                                                status: t.value,
+                                                                                label: t.label,
+                                                                            },
+                                                                        )
+                                                                    }
+                                                                >
                                                                     {t.label}
                                                                 </DropdownMenuItem>
                                                             ))}
                                                         </DropdownMenuContent>
                                                     </DropdownMenu>
                                                 ) : (
-                                                    <Badge className={statusBadge(election.status)} variant="outline">{election.status_label}</Badge>
+                                                    <Badge
+                                                        className={statusBadge(
+                                                            election.status,
+                                                        )}
+                                                        variant="outline"
+                                                    >
+                                                        {election.status_label}
+                                                    </Badge>
                                                 )}
                                             </div>
                                         </div>
                                     </div>
                                 </CardHeader>
-                                <CardContent className="flex-1 pb-3 space-y-1.5">
+                                <CardContent className="flex-1 space-y-1.5 pb-3">
                                     <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                                        <span className="font-medium text-foreground/70">{election.scope}</span>
+                                        <span className="font-medium text-foreground/70">
+                                            {election.scope}
+                                        </span>
                                         <span>&middot;</span>
-                                        <span>{new Date(election.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
+                                        <span>
+                                            {new Date(
+                                                election.created_at,
+                                            ).toLocaleDateString('en-GB', {
+                                                day: 'numeric',
+                                                month: 'short',
+                                                year: 'numeric',
+                                            })}
+                                        </span>
                                     </div>
                                     {election.starts_at && (
                                         <p className="text-xs text-muted-foreground">
-                                            {new Date(election.starts_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })} — {election.ends_at ? new Date(election.ends_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : '...' }
+                                            {new Date(
+                                                election.starts_at,
+                                            ).toLocaleDateString('en-GB', {
+                                                day: 'numeric',
+                                                month: 'short',
+                                            })}{' '}
+                                            —{' '}
+                                            {election.ends_at
+                                                ? new Date(
+                                                      election.ends_at,
+                                                  ).toLocaleDateString(
+                                                      'en-GB',
+                                                      {
+                                                          day: 'numeric',
+                                                          month: 'short',
+                                                      },
+                                                  )
+                                                : '...'}
                                         </p>
                                     )}
                                 </CardContent>
@@ -205,53 +340,148 @@ export default function ElectionsIndex({ elections, filters, statuses, paginatio
                                     <div className="flex items-center gap-0.5">
                                         <Tooltip>
                                             <TooltipTrigger asChild>
-                                                <Button variant="ghost" size="icon-sm" onClick={() => setReleaseId(election)} className={election.results_released ? 'text-green-500 hover:text-green-600' : 'text-muted-foreground'}>
-                                                    <HugeiconsIcon icon={Analytics01Icon} size={14} />
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon-sm"
+                                                    onClick={() =>
+                                                        setReleaseId(election)
+                                                    }
+                                                    className={
+                                                        election.results_released
+                                                            ? 'text-green-500 hover:text-green-600'
+                                                            : 'text-muted-foreground'
+                                                    }
+                                                >
+                                                    <HugeiconsIcon
+                                                        icon={Analytics01Icon}
+                                                        size={14}
+                                                    />
                                                 </Button>
                                             </TooltipTrigger>
-                                            <TooltipContent>{election.results_released ? 'Withdraw Results' : 'Release Results'}</TooltipContent>
+                                            <TooltipContent>
+                                                {election.results_released
+                                                    ? 'Withdraw Results'
+                                                    : 'Release Results'}
+                                            </TooltipContent>
                                         </Tooltip>
                                         <Tooltip>
                                             <TooltipTrigger asChild>
-                                                <Button asChild variant="ghost" size="icon-sm">
-                                                    <Link href={`/admin/elections/${election.id}/audit`}>
-                                                        <HugeiconsIcon icon={Shield01Icon} size={14} />
+                                                <Button
+                                                    asChild
+                                                    variant="ghost"
+                                                    size="icon-sm"
+                                                >
+                                                    <Link
+                                                        href={`/admin/elections/${election.id}/audit`}
+                                                    >
+                                                        <HugeiconsIcon
+                                                            icon={Shield01Icon}
+                                                            size={14}
+                                                        />
                                                     </Link>
                                                 </Button>
                                             </TooltipTrigger>
-                                            <TooltipContent>Audit Chain</TooltipContent>
+                                            <TooltipContent>
+                                                Audit Chain
+                                            </TooltipContent>
                                         </Tooltip>
+                                        {election.status ===
+                                            'paused_for_review' && (
+                                            <Tooltip>
+                                                <TooltipTrigger asChild>
+                                                    <Button
+                                                        asChild
+                                                        variant="ghost"
+                                                        size="icon-sm"
+                                                        className="text-yellow-500 hover:text-yellow-600"
+                                                    >
+                                                        <Link
+                                                            href={`/admin/elections/${election.id}/quarantined`}
+                                                        >
+                                                            <HugeiconsIcon
+                                                                icon={
+                                                                    Shield01Icon
+                                                                }
+                                                                size={14}
+                                                            />
+                                                        </Link>
+                                                    </Button>
+                                                </TooltipTrigger>
+                                                <TooltipContent>
+                                                    Quarantined Votes
+                                                </TooltipContent>
+                                            </Tooltip>
+                                        )}
                                         <Tooltip>
                                             <TooltipTrigger asChild>
-                                                <Button asChild variant="ghost" size="icon-sm">
-                                                    <Link href={`/admin/elections/${election.id}/results`}>
-                                                        <HugeiconsIcon icon={Analytics01Icon} size={14} />
+                                                <Button
+                                                    asChild
+                                                    variant="ghost"
+                                                    size="icon-sm"
+                                                >
+                                                    <Link
+                                                        href={`/admin/elections/${election.id}/results`}
+                                                    >
+                                                        <HugeiconsIcon
+                                                            icon={
+                                                                Analytics01Icon
+                                                            }
+                                                            size={14}
+                                                        />
                                                     </Link>
                                                 </Button>
                                             </TooltipTrigger>
-                                            <TooltipContent>Results</TooltipContent>
+                                            <TooltipContent>
+                                                Results
+                                            </TooltipContent>
                                         </Tooltip>
                                     </div>
                                     <div className="flex items-center gap-0.5">
                                         <Tooltip>
                                             <TooltipTrigger asChild>
-                                                <Button asChild variant="ghost" size="icon-sm">
-                                                    <Link href={`/admin/elections/${election.id}/manage`}>
-                                                        <HugeiconsIcon icon={Settings01Icon} size={14} />
+                                                <Button
+                                                    asChild
+                                                    variant="ghost"
+                                                    size="icon-sm"
+                                                >
+                                                    <Link
+                                                        href={`/admin/elections/${election.id}/manage`}
+                                                    >
+                                                        <HugeiconsIcon
+                                                            icon={
+                                                                Settings01Icon
+                                                            }
+                                                            size={14}
+                                                        />
                                                     </Link>
                                                 </Button>
                                             </TooltipTrigger>
-                                            <TooltipContent>Manage</TooltipContent>
+                                            <TooltipContent>
+                                                Manage
+                                            </TooltipContent>
                                         </Tooltip>
                                         <Tooltip>
                                             <TooltipTrigger asChild>
-                                                <Button asChild variant="ghost" size="icon-sm">
-                                                    <Link href={`/admin/elections/${election.id}/edit`}>
-                                                        <HugeiconsIcon icon={PencilEdit02Icon} size={14} />
+                                                <Button
+                                                    asChild
+                                                    variant="ghost"
+                                                    size="icon-sm"
+                                                >
+                                                    <Link
+                                                        href={`/admin/elections/${election.id}/edit`}
+                                                    >
+                                                        <HugeiconsIcon
+                                                            icon={
+                                                                PencilEdit02Icon
+                                                            }
+                                                            size={14}
+                                                        />
                                                     </Link>
                                                 </Button>
                                             </TooltipTrigger>
-                                            <TooltipContent>Edit</TooltipContent>
+                                            <TooltipContent>
+                                                Edit
+                                            </TooltipContent>
                                         </Tooltip>
                                         <Tooltip>
                                             <TooltipTrigger asChild>
@@ -259,12 +489,19 @@ export default function ElectionsIndex({ elections, filters, statuses, paginatio
                                                     variant="ghost"
                                                     size="icon-sm"
                                                     className="text-muted-foreground hover:text-destructive"
-                                                    onClick={() => setDeleteId(election.id)}
+                                                    onClick={() =>
+                                                        setDeleteId(election.id)
+                                                    }
                                                 >
-                                                    <HugeiconsIcon icon={Delete01Icon} size={14} />
+                                                    <HugeiconsIcon
+                                                        icon={Delete01Icon}
+                                                        size={14}
+                                                    />
                                                 </Button>
                                             </TooltipTrigger>
-                                            <TooltipContent>Delete</TooltipContent>
+                                            <TooltipContent>
+                                                Delete
+                                            </TooltipContent>
                                         </Tooltip>
                                     </div>
                                 </div>
@@ -277,7 +514,19 @@ export default function ElectionsIndex({ elections, filters, statuses, paginatio
                     <div className="flex justify-center">
                         <Button
                             variant="outline"
-                            onClick={() => router.get('/admin/elections', { ...filters, page: pagination.current_page + 1 }, { preserveState: true, preserveScroll: false })}
+                            onClick={() =>
+                                router.get(
+                                    '/admin/elections',
+                                    {
+                                        ...filters,
+                                        page: pagination.current_page + 1,
+                                    },
+                                    {
+                                        preserveState: true,
+                                        preserveScroll: false,
+                                    },
+                                )
+                            }
                         >
                             Load More
                         </Button>
@@ -285,37 +534,68 @@ export default function ElectionsIndex({ elections, filters, statuses, paginatio
                 )}
             </div>
 
-            <Dialog open={deleteId !== null} onOpenChange={() => setDeleteId(null)}>
+            <Dialog
+                open={deleteId !== null}
+                onOpenChange={() => setDeleteId(null)}
+            >
                 <DialogContent>
                     <DialogHeader>
                         <DialogTitle>Delete Election</DialogTitle>
                         <DialogDescription>
-                            This will permanently delete the election and all associated data — positions, candidates, votes, and audit records.
+                            This will permanently delete the election and all
+                            associated data — positions, candidates, votes, and
+                            audit records.
                         </DialogDescription>
                     </DialogHeader>
                     <DialogFooter>
-                        <Button variant="outline" onClick={() => setDeleteId(null)} disabled={deleting}>Cancel</Button>
-                        <Button variant="destructive" disabled={deleting} onClick={() => {
-                            if (deleteId) {
-                                setDeleting(true);
-                                router.delete(`/admin/elections/${deleteId}`, {
-                                    onFinish: () => {
-                                        setDeleting(false);
-                                        setDeleteId(null);
-                                    },
-                                });
-                            }
-                        }}>
-                            {deleting ? <><Spinner className="mr-1.5" /> Deleting…</> : 'Delete'}
+                        <Button
+                            variant="outline"
+                            onClick={() => setDeleteId(null)}
+                            disabled={deleting}
+                        >
+                            Cancel
+                        </Button>
+                        <Button
+                            variant="destructive"
+                            disabled={deleting}
+                            onClick={() => {
+                                if (deleteId) {
+                                    setDeleting(true);
+                                    router.delete(
+                                        `/admin/elections/${deleteId}`,
+                                        {
+                                            onFinish: () => {
+                                                setDeleting(false);
+                                                setDeleteId(null);
+                                            },
+                                        },
+                                    );
+                                }
+                            }}
+                        >
+                            {deleting ? (
+                                <>
+                                    <Spinner className="mr-1.5" /> Deleting…
+                                </>
+                            ) : (
+                                'Delete'
+                            )}
                         </Button>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
 
-            <Dialog open={releaseId !== null} onOpenChange={() => setReleaseId(null)}>
+            <Dialog
+                open={releaseId !== null}
+                onOpenChange={() => setReleaseId(null)}
+            >
                 <DialogContent>
                     <DialogHeader>
-                        <DialogTitle>{releaseId?.results_released ? 'Withdraw Results' : 'Release Results'}</DialogTitle>
+                        <DialogTitle>
+                            {releaseId?.results_released
+                                ? 'Withdraw Results'
+                                : 'Release Results'}
+                        </DialogTitle>
                         <DialogDescription>
                             {releaseId?.results_released
                                 ? 'Voters will no longer be able to view the results for this election.'
@@ -323,37 +603,62 @@ export default function ElectionsIndex({ elections, filters, statuses, paginatio
                         </DialogDescription>
                     </DialogHeader>
                     <DialogFooter>
-                        <Button variant="outline" onClick={() => setReleaseId(null)}>Cancel</Button>
-                        <Button onClick={() => {
-                            if (releaseId) {
-router.patch(`/admin/elections/${releaseId.id}/release-results`);
-}
+                        <Button
+                            variant="outline"
+                            onClick={() => setReleaseId(null)}
+                        >
+                            Cancel
+                        </Button>
+                        <Button
+                            onClick={() => {
+                                if (releaseId) {
+                                    router.patch(
+                                        `/admin/elections/${releaseId.id}/release-results`,
+                                    );
+                                }
 
-                            setReleaseId(null);
-                        }}>
-                            {releaseId?.results_released ? 'Withdraw Results' : 'Release Results'}
+                                setReleaseId(null);
+                            }}
+                        >
+                            {releaseId?.results_released
+                                ? 'Withdraw Results'
+                                : 'Release Results'}
                         </Button>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
 
-            <Dialog open={statusChange !== null} onOpenChange={() => setStatusChange(null)}>
+            <Dialog
+                open={statusChange !== null}
+                onOpenChange={() => setStatusChange(null)}
+            >
                 <DialogContent>
                     <DialogHeader>
                         <DialogTitle>Change Status</DialogTitle>
                         <DialogDescription>
-                            {statusChange?.label} this election? This action cannot be undone.
+                            {statusChange?.label} this election? This action
+                            cannot be undone.
                         </DialogDescription>
                     </DialogHeader>
                     <DialogFooter>
-                        <Button variant="outline" onClick={() => setStatusChange(null)}>Cancel</Button>
-                        <Button onClick={() => {
-                            if (statusChange) {
-router.patch(`/admin/elections/${statusChange.id}/status`, { status: statusChange.status });
-}
+                        <Button
+                            variant="outline"
+                            onClick={() => setStatusChange(null)}
+                        >
+                            Cancel
+                        </Button>
+                        <Button
+                            onClick={() => {
+                                if (statusChange) {
+                                    router.patch(
+                                        `/admin/elections/${statusChange.id}/status`,
+                                        { status: statusChange.status },
+                                    );
+                                }
 
-                            setStatusChange(null);
-                        }}>
+                                setStatusChange(null);
+                            }}
+                        >
                             {statusChange?.label}
                         </Button>
                     </DialogFooter>
