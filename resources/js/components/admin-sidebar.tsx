@@ -38,11 +38,6 @@ const mainNavItems: NavItem[] = [
         icon: () => <HugeiconsIcon icon={Analytics01Icon} size={18} />,
     },
     {
-        title: 'Elections',
-        href: '/admin/elections',
-        icon: () => <HugeiconsIcon icon={Analytics01Icon} size={18} />,
-    },
-    {
         title: 'Users',
         href: '/admin/users',
         icon: () => <HugeiconsIcon icon={UserGroup02Icon} size={18} />,
