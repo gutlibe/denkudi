@@ -19,6 +19,9 @@ enum ElectionType: string
         };
     }
 
+    /**
+     * @return array<string, string>
+     */
     public static function options(): array
     {
         return array_reduce(self::cases(), fn ($carry, $type) => [
