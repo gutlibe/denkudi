@@ -1,9 +1,9 @@
 import {
     Analytics01Icon,
     DashboardSquare02Icon,
-    File01Icon,
     PanelLeftOpenIcon,
     Shield01Icon,
+    UserGroup02Icon,
 } from '@hugeicons/core-free-icons';
 import { HugeiconsIcon } from '@hugeicons/react';
 import { Link } from '@inertiajs/react';
@@ -38,9 +38,14 @@ const mainNavItems: NavItem[] = [
         icon: () => <HugeiconsIcon icon={Analytics01Icon} size={18} />,
     },
     {
-        title: 'Audit Logs',
-        href: '/admin/audit-logs',
-        icon: () => <HugeiconsIcon icon={File01Icon} size={18} />,
+        title: 'Elections',
+        href: '/admin/elections',
+        icon: () => <HugeiconsIcon icon={Analytics01Icon} size={18} />,
+    },
+    {
+        title: 'Users',
+        href: '/admin/users',
+        icon: () => <HugeiconsIcon icon={UserGroup02Icon} size={18} />,
     },
 ];
 
