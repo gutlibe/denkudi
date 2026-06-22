@@ -1,13 +1,14 @@
-import { Head, Link, router, useForm, setLayoutProps } from '@inertiajs/react';
-import { HugeiconsIcon } from '@hugeicons/react';
 import {
     PlusSignIcon,
     PencilEdit02Icon,
     Delete01Icon,
     Settings01Icon,
 } from '@hugeicons/core-free-icons';
+import { HugeiconsIcon } from '@hugeicons/react';
+import { Head, Link, router, useForm, setLayoutProps } from '@inertiajs/react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardTitle } from '@/components/ui/card';
 import {
     Dialog,
     DialogContent,
@@ -20,7 +21,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { useState } from 'react';
 
 type PositionItem = {
     id: number;
@@ -199,7 +199,10 @@ export default function ElectionManage({ election }: Props) {
                     <DialogFooter>
                         <Button variant="outline" onClick={() => setDeletePosId(null)}>Cancel</Button>
                         <Button variant="destructive" onClick={() => {
-                            if (deletePosId) router.delete(`/admin/elections/${election.id}/positions/${deletePosId}`);
+                            if (deletePosId) {
+router.delete(`/admin/elections/${election.id}/positions/${deletePosId}`);
+}
+
                             setDeletePosId(null);
                         }}>Delete</Button>
                     </DialogFooter>

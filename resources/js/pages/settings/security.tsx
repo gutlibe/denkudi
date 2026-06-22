@@ -1,15 +1,14 @@
 import { Form, Head } from '@inertiajs/react';
 import { useRef } from 'react';
 import SecurityController from '@/actions/App/Http/Controllers/Settings/SecurityController';
-import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import type { Props as ManagePasskeysProps } from '@/components/manage-passkeys';
 import ManagePasskeys from '@/components/manage-passkeys';
 import type { Props as ManageTwoFactorProps } from '@/components/manage-two-factor';
 import ManageTwoFactor from '@/components/manage-two-factor';
 import PasswordInput from '@/components/password-input';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { edit } from '@/routes/security';
 
@@ -39,8 +38,13 @@ export default function Security(props: Props) {
                             resetOnError={['password', 'password_confirmation', 'current_password']}
                             resetOnSuccess
                             onError={(errors) => {
-                                if (errors.password) passwordInput.current?.focus();
-                                if (errors.current_password) currentPasswordInput.current?.focus();
+                                if (errors.password) {
+passwordInput.current?.focus();
+}
+
+                                if (errors.current_password) {
+currentPasswordInput.current?.focus();
+}
                             }}
                             className="space-y-4"
                         >

@@ -1,8 +1,9 @@
-import { HugeiconsIcon } from '@hugeicons/react';
 import { ArrowRight02Icon, CheckmarkCircle01Icon, ArrowLeft02Icon, UserIcon, Search01Icon } from '@hugeicons/core-free-icons';
-import { Button } from '@/components/ui/button';
+import { HugeiconsIcon } from '@hugeicons/react';
 import { Link } from '@inertiajs/react';
-import { useBallot, type Candidate } from '@/hooks/use-ballot';
+import { Button } from '@/components/ui/button';
+import { useBallot  } from '@/hooks/use-ballot';
+import type {Candidate} from '@/hooks/use-ballot';
 import { verify as verifyRoute } from '@/routes';
 
 type Props = {
@@ -42,7 +43,9 @@ export function VoteFlowMobile({ election, open, onClose, onVoted }: Props) {
         positionsCompleted, loadBallot, submitting,
     } = useBallot(election, open, onVoted);
 
-    if (!open) return null;
+    if (!open) {
+return null;
+}
 
     return (
         <div className="fixed inset-0 z-50 flex flex-col bg-gradient-to-b from-background to-card animate-in fade-in duration-200">
@@ -108,6 +111,7 @@ export function VoteFlowMobile({ election, open, onClose, onVoted }: Props) {
                         <div className="flex gap-3 overflow-x-auto snap-x snap-mandatory px-8 scrollbar-none">
                             {currentPosition.candidates.map((candidate) => {
                                 const isSelected = selectedForCurrent.includes(candidate.id);
+
                                 return (
                                     <button key={candidate.id} onClick={() => toggleCandidate(currentPosition.id, candidate.id)} className="snap-center shrink-0 flex flex-col items-center gap-2 w-20">
                                         <CandidatePhoto candidate={candidate} isSelected={isSelected} />
@@ -135,6 +139,7 @@ export function VoteFlowMobile({ election, open, onClose, onVoted }: Props) {
                         <div className="flex-1 overflow-y-auto px-4 py-3 space-y-2 scrollbar-none">
                             {currentPosition.candidates.map((candidate) => {
                                 const isSelected = selectedForCurrent.includes(candidate.id);
+
                                 return (
                                     <button key={candidate.id} type="button" onClick={() => toggleCandidate(currentPosition.id, candidate.id)} className={`w-full flex items-center gap-3 rounded-2xl border p-3.5 text-left transition-all duration-150 ${isSelected ? 'border-primary bg-primary/5 ring-1 ring-primary/30 shadow-sm shadow-primary/5' : 'border-border/50 hover:border-border hover:bg-muted/30'}`}>
                                         <CandidatePhoto candidate={candidate} isSelected={isSelected} />

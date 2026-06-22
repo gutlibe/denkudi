@@ -1,5 +1,3 @@
-import { Head, Link, usePage } from '@inertiajs/react';
-import { HugeiconsIcon } from '@hugeicons/react';
 import {
     AiMagicIcon,
     AiSecurity01Icon,
@@ -10,6 +8,8 @@ import {
     GraduationCapIcon,
     Group01Icon,
 } from '@hugeicons/core-free-icons';
+import { HugeiconsIcon } from '@hugeicons/react';
+import { Head, Link, usePage } from '@inertiajs/react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';

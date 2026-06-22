@@ -1,7 +1,7 @@
-import * as React from 'react';
-import { format } from 'date-fns';
-import { HugeiconsIcon } from '@hugeicons/react';
 import { Calendar02Icon } from '@hugeicons/core-free-icons';
+import { HugeiconsIcon } from '@hugeicons/react';
+import { format } from 'date-fns';
+import * as React from 'react';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { Input } from '@/components/ui/input';
@@ -24,7 +24,10 @@ export function DateTimePicker({ id, label, value, onChange }: Props) {
     );
 
     const emit = (d: Date | undefined, t: string) => {
-        if (!d || !onChange) return;
+        if (!d || !onChange) {
+return;
+}
+
         const [h, m] = t.split(':');
         const dt = new Date(d);
         dt.setHours(parseInt(h), parseInt(m));

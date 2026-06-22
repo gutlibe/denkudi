@@ -1,5 +1,3 @@
-import { Head, Link, router, useForm, setLayoutProps } from '@inertiajs/react';
-import { HugeiconsIcon } from '@hugeicons/react';
 import {
     PlusSignIcon,
     PencilEdit02Icon,
@@ -8,16 +6,17 @@ import {
     AiImageIcon,
     Doc01Icon,
 } from '@hugeicons/core-free-icons';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { HugeiconsIcon } from '@hugeicons/react';
+import { Head, Link, router, useForm, setLayoutProps } from '@inertiajs/react';
+import { useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Textarea } from '@/components/ui/textarea';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { useRef, useState } from 'react';
 
 type Candidate = { id: number; name: string; department: string | null; manifesto: string | null; photo_url: string | null };
 type Props = { election: { id: number; title: string }; position: { id: number; title: string; max_selections: number; candidates: Candidate[] } };
@@ -27,7 +26,7 @@ export default function CandidatesIndex({ election, position }: Props) {
 
     const [dialog, setDialog] = useState<{ open: boolean; edit: Candidate | null }>({ open: false, edit: null });
     const [deleteId, setDeleteId] = useState<number | null>(null);
-    const [saving, setSaving] = useState(false);
+    const [saving] = useState(false);
     const [viewManifesto, setViewManifesto] = useState<{ name: string; text: string } | null>(null);
     const fileRef = useRef<HTMLInputElement>(null);
 
@@ -58,16 +57,23 @@ export default function CandidatesIndex({ election, position }: Props) {
                 department: form.data.department,
                 manifesto: form.data.manifesto,
             };
-            if (form.data.photo) data.photo = form.data.photo;
+
+            if (form.data.photo) {
+data.photo = form.data.photo;
+}
 
             router.post(`${base}/${dialog.edit.id}`, data as unknown as Record<string, string | File>, {
                 forceFormData: true,
-                onSuccess: () => { console.log('Edit success'); setDialog({ open: false, edit: null }); window.location.reload(); },
+                onSuccess: () => {
+ console.log('Edit success'); setDialog({ open: false, edit: null }); window.location.reload(); 
+},
                 onError: (e) => console.log('Edit error', e),
             });
         } else {
             form.post(base, {
-                onSuccess: () => { console.log('Add success'); setDialog({ open: false, edit: null }); window.location.reload(); },
+                onSuccess: () => {
+ console.log('Add success'); setDialog({ open: false, edit: null }); window.location.reload(); 
+},
                 onError: (e) => console.log('Add error', e),
             });
         }
@@ -149,7 +155,13 @@ export default function CandidatesIndex({ election, position }: Props) {
                                     {form.data.photo ? <img src={URL.createObjectURL(form.data.photo)} className="h-12 w-12 object-cover" /> : dialog.edit?.photo_url ? <img src={dialog.edit.photo_url} className="h-12 w-12 object-cover" /> : <HugeiconsIcon icon={AiImageIcon} size={20} className="text-muted-foreground" />}
                                 </div>
                                 <Button type="button" variant="outline" size="sm" onClick={() => fileRef.current?.click()}>Upload</Button>
-                                <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) form.setData('photo', f); }} />
+                                <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={(e) => {
+ const f = e.target.files?.[0];
+
+ if (f) {
+form.setData('photo', f);
+} 
+}} />
                             </div>
                         </div>
                         <DialogFooter>
@@ -162,7 +174,13 @@ export default function CandidatesIndex({ election, position }: Props) {
             <Dialog open={deleteId !== null} onOpenChange={() => setDeleteId(null)}>
                 <DialogContent>
                     <DialogHeader><DialogTitle>Remove Candidate</DialogTitle><DialogDescription>This will permanently remove the candidate.</DialogDescription></DialogHeader>
-                    <DialogFooter><Button variant="outline" onClick={() => setDeleteId(null)}>Cancel</Button><Button variant="destructive" onClick={() => { if (deleteId) router.delete(`/admin/elections/${election.id}/candidates/${deleteId}`); setDeleteId(null); }}>Remove</Button></DialogFooter>
+                    <DialogFooter><Button variant="outline" onClick={() => setDeleteId(null)}>Cancel</Button><Button variant="destructive" onClick={() => {
+ if (deleteId) {
+router.delete(`/admin/elections/${election.id}/candidates/${deleteId}`);
+}
+
+ setDeleteId(null); 
+}}>Remove</Button></DialogFooter>
                 </DialogContent>
             </Dialog>
 

@@ -1,5 +1,3 @@
-import { Head, Link } from '@inertiajs/react';
-import { HugeiconsIcon, IconSvgElement } from '@hugeicons/react';
 import {
     ArrowRight02Icon,
     CheckmarkCircle01Icon,
@@ -10,14 +8,17 @@ import {
     AiMagicIcon,
     AiSecurity01Icon,
 } from '@hugeicons/core-free-icons';
+import type { IconSvgElement } from '@hugeicons/react';
+import { HugeiconsIcon } from '@hugeicons/react';
+import { Head, Link } from '@inertiajs/react';
+import { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { VoteFlowMobile } from '@/components/vote-flow-mobile';
 import { VoteFlowDesktop } from '@/components/vote-flow-desktop';
+import { VoteFlowMobile } from '@/components/vote-flow-mobile';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { useState } from 'react';
 import { dashboard } from '@/routes';
 import { results } from '@/routes/elections';
 
@@ -50,11 +51,21 @@ const formatDate = (d: string | null) =>
     d ? new Date(d).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '—';
 
 const formatRelative = (d: string | null) => {
-    if (!d) return '—';
+    if (!d) {
+return '—';
+}
+
     const diff = new Date(d).getTime() - Date.now();
     const days = Math.ceil(diff / 86400000);
-    if (days < 0) return 'Ended';
-    if (days === 0) return 'Ends today';
+
+    if (days < 0) {
+return 'Ended';
+}
+
+    if (days === 0) {
+return 'Ends today';
+}
+
     return `${days}d left`;
 };
 
@@ -239,6 +250,7 @@ function UpcomingElectionCard({ election }: { election: Election }) {
 /* ─── Past Election Card ─── */
 function PastElectionCard({ election, idx }: { election: Election; idx: number }) {
     const pct = 55 + ((idx * 13 + 7) % 40);
+
     return (
         <Card className="group transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 opacity-80 hover:opacity-100">
             <CardContent className="p-4">

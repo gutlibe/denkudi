@@ -1,11 +1,11 @@
-import { Head, Link, router } from '@inertiajs/react';
-import { HugeiconsIcon } from '@hugeicons/react';
 import { ArrowLeft02Icon, CheckmarkCircle01Icon, Cancel01Icon, Search01Icon, Shield01Icon } from '@hugeicons/core-free-icons';
+import { HugeiconsIcon } from '@hugeicons/react';
+import { Head, Link, router } from '@inertiajs/react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { dashboard } from '@/routes/admin';
-import { useState } from 'react';
 
 type Props = {
     election: { id: number; title: string; status: string };
@@ -37,6 +37,7 @@ type Props = {
 
 export default function AuditPage({ election, chain, votes, pagination, filters }: Props) {
     const [search, setSearch] = useState(filters.search);
+
     return (
         <>
             <Head title={`Chain Audit — ${election.title}`} />

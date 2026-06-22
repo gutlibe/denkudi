@@ -1,9 +1,9 @@
-import { Head, router } from '@inertiajs/react';
-import { HugeiconsIcon } from '@hugeicons/react';
 import { CheckmarkCircle01Icon, UserIcon } from '@hugeicons/core-free-icons';
+import { HugeiconsIcon } from '@hugeicons/react';
+import { Head, router } from '@inertiajs/react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { useState } from 'react';
 
 type Candidate = {
     id: number;

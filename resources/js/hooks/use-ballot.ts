@@ -36,34 +36,45 @@ export function useBallot(election: { id: number; title: string; description: st
     const loadBallot = useCallback(async () => {
         setLoading(true);
         setError(null);
+
         try {
             const res = await fetch(`/elections/${election.id}/ballot-data`, {
                 headers: {
                     Accept: 'application/json',
                     'X-Requested-With': 'XMLHttpRequest',
-                    'X-XSRF-TOKEN': decodeURIComponent(document.cookie.replace(/(?:(?:^|.*;\s*)XSRF-TOKEN\s*\=\s*([^;]*).*$)|^.*$/, '$1')),
+                    'X-XSRF-TOKEN': decodeURIComponent(document.cookie.replace(/(?:(?:^|.*;\s*)XSRF-TOKEN\s*=\s*([^;]*).*$)|^.*$/, '$1')),
                 },
                 credentials: 'include',
             });
+
             if (!res.ok) {
-                if (res.status === 403) throw new Error('You are not eligible to vote in this election.');
+                if (res.status === 403) {
+throw new Error('You are not eligible to vote in this election.');
+}
+
                 throw new Error('Failed to load ballot data.');
             }
+
             const data = await res.json();
+
             if (data.alreadyVoted) {
                 setError('You have already voted in this election.');
                 setLoading(false);
+
                 return;
             }
+
             setBallotData(data);
         } catch (e) {
             setError(e instanceof Error ? e.message : 'Failed to load ballot data.');
         }
+
         setLoading(false);
     }, [election.id]);
 
     useEffect(() => {
         if (open) {
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             setCurrentStep(0);
             setSelections({});
             setSubmitted(false);
@@ -82,13 +93,19 @@ export function useBallot(election: { id: number; title: string; description: st
         setSelections((prev) => {
             const existing = prev[positionId] ?? [];
             const max = currentPosition?.max_selections ?? 1;
+
             if (existing.includes(candidateId)) {
                 return { ...prev, [positionId]: existing.filter((id) => id !== candidateId) };
             }
+
             if (max === 1) {
                 return { ...prev, [positionId]: [candidateId] };
             }
-            if (existing.length >= max) return prev;
+
+            if (existing.length >= max) {
+return prev;
+}
+
             return { ...prev, [positionId]: [...existing, candidateId] };
         });
     };
@@ -96,13 +113,24 @@ export function useBallot(election: { id: number; title: string; description: st
     const selectedForCurrent = selections[currentPosition?.id ?? 0] ?? [];
     const canProceed = selectedForCurrent.length > 0;
 
-    const goNext = () => { if (!isLastStep) setCurrentStep((s) => s + 1); };
-    const goPrev = () => { setCurrentStep((s) => Math.max(0, s - 1)); };
+    const goNext = () => {
+ if (!isLastStep) {
+setCurrentStep((s) => s + 1);
+} 
+};
+    const goPrev = () => {
+ setCurrentStep((s) => Math.max(0, s - 1)); 
+};
 
     const submit = () => {
         setSubmitting(true);
         const allSelected = positions.every((p) => (selections[p.id]?.length ?? 0) > 0);
-        if (!allSelected) { setSubmitting(false); return; }
+
+        if (!allSelected) {
+ setSubmitting(false);
+
+ return; 
+}
 
         const ballot = Object.entries(selections).flatMap(([posId, candIds]) =>
             candIds.map((candId) => ({ position_id: parseInt(posId), candidate_id: candId }))

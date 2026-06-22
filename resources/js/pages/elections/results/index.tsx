@@ -1,10 +1,9 @@
-import { Head, Link } from '@inertiajs/react';
-import { HugeiconsIcon } from '@hugeicons/react';
 import { ArrowLeft02Icon, Analytics01Icon, UserIcon } from '@hugeicons/core-free-icons';
+import { HugeiconsIcon } from '@hugeicons/react';
+import { Head, Link } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { dashboard } from '@/routes';
-import { results } from '@/routes/elections';
 
 type Candidate = {
     id: number;

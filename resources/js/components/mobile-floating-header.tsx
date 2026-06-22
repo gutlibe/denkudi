@@ -1,11 +1,11 @@
 import { usePage } from '@inertiajs/react';
 import { Moon, Sun } from 'lucide-react';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { UserMenuContent } from '@/components/user-menu-content';
 import { useAppearance } from '@/hooks/use-appearance';
@@ -16,7 +16,9 @@ export function MobileFloatingHeader() {
     const getInitials = useInitials();
     const { resolvedAppearance, updateAppearance } = useAppearance();
 
-    if (!auth.user) return null;
+    if (!auth.user) {
+return null;
+}
 
     const name = `${auth.user.first_name} ${auth.user.last_name}`;
 

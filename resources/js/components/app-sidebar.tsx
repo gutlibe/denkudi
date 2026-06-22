@@ -1,5 +1,3 @@
-import { Link, usePage } from '@inertiajs/react';
-import { HugeiconsIcon } from '@hugeicons/react';
 import {
     Clock01Icon,
     DashboardSquare02Icon,
@@ -7,9 +5,12 @@ import {
     Search01Icon,
     Shield01Icon,
 } from '@hugeicons/core-free-icons';
+import { HugeiconsIcon } from '@hugeicons/react';
+import { Link, usePage } from '@inertiajs/react';
 import AppLogo from '@/components/app-logo';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import {
     Sidebar,
     SidebarContent,
@@ -21,7 +22,6 @@ import {
     SidebarTrigger,
     useSidebar,
 } from '@/components/ui/sidebar';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { dashboard, verify as verifyRoute } from '@/routes';
 import { results } from '@/routes/elections';

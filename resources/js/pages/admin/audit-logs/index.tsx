@@ -1,8 +1,6 @@
-import { Head, Link, router } from '@inertiajs/react';
-import { HugeiconsIcon } from '@hugeicons/react';
-import { Shield01Icon } from '@hugeicons/core-free-icons';
+import { Head, router } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { dashboard } from '@/routes/admin';
 
 type LogEntry = {
@@ -36,6 +34,7 @@ const actionLabel = (action: string) => {
         results_withdrawn: 'Results Withdrawn',
         election_resumed: 'Resumed',
     };
+
     return labels[action] ?? action.replace(/_/g, ' ');
 };
 

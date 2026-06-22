@@ -1,6 +1,6 @@
-import { Head, Link } from '@inertiajs/react';
+import { Analytics01Icon, Group01Icon, PlusSignIcon, CheckmarkCircle01Icon, Shield01Icon, Clock01Icon, File01Icon } from '@hugeicons/core-free-icons';
 import { HugeiconsIcon } from '@hugeicons/react';
-import { Analytics01Icon, Group01Icon, DashboardSquare02Icon, PlusSignIcon, CheckmarkCircle01Icon, Shield01Icon, Clock01Icon, File01Icon } from '@hugeicons/core-free-icons';
+import { Head, Link } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { dashboard } from '@/routes/admin';
@@ -34,6 +34,7 @@ const actionLabel = (action: string) => {
         results_withdrawn: 'Withdrawn',
         election_resumed: 'Resumed',
     };
+
     return m[action] ?? action.replace(/_/g, ' ');
 };
 

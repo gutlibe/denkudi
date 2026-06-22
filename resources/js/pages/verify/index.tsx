@@ -1,11 +1,11 @@
-import { Head, Link } from '@inertiajs/react';
+import { CheckmarkCircle01Icon, Search01Icon, Cancel01Icon } from '@hugeicons/core-free-icons';
 import { HugeiconsIcon } from '@hugeicons/react';
-import { CheckmarkCircle01Icon, Search01Icon, Shield01Icon, Cancel01Icon } from '@hugeicons/core-free-icons';
+import { Head, Link } from '@inertiajs/react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { dashboard, verify as verifyRoute } from '@/routes';
-import { useState } from 'react';
 
 type Props = {
     result: {
@@ -44,6 +44,7 @@ export default function VerifyPage({ result, token: initialToken }: Props) {
                         <form
                             onSubmit={(e) => {
                                 e.preventDefault();
+
                                 if (token.trim()) {
                                     window.location.href = verifyRoute.url({ query: { token: token.trim() } });
                                 }

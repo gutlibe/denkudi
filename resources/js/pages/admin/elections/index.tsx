@@ -1,15 +1,10 @@
-import { Head, Link, router } from '@inertiajs/react';
-import { HugeiconsIcon } from '@hugeicons/react';
 import { PlusSignIcon, PencilEdit02Icon, Delete01Icon, Analytics01Icon, Search01Icon, Settings01Icon, Shield01Icon } from '@hugeicons/core-free-icons';
+import { HugeiconsIcon } from '@hugeicons/react';
+import { Head, Link, router } from '@inertiajs/react';
+import { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
     Dialog,
     DialogContent,
@@ -18,13 +13,17 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { Spinner } from '@/components/ui/spinner';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { useState } from 'react';
 
 type Election = {
     id: number;
@@ -63,6 +62,7 @@ const statusBadge = (status: string) => {
         paused_for_review: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
         closed: 'bg-neutral-100 text-neutral-700 dark:bg-neutral-800 dark:text-neutral-400',
     };
+
     return map[status] ?? '';
 };
 
@@ -73,6 +73,7 @@ const typeIcon = (type: string) => {
         department: 'bg-amber-500/10 text-amber-400',
         hall: 'bg-emerald-500/10 text-emerald-400',
     };
+
     return map[type] ?? 'bg-muted text-muted-foreground';
 };
 
@@ -314,7 +315,10 @@ export default function ElectionsIndex({ elections, filters, statuses, paginatio
                     <DialogFooter>
                         <Button variant="outline" onClick={() => setReleaseId(null)}>Cancel</Button>
                         <Button onClick={() => {
-                            if (releaseId) router.patch(`/admin/elections/${releaseId.id}/release-results`);
+                            if (releaseId) {
+router.patch(`/admin/elections/${releaseId.id}/release-results`);
+}
+
                             setReleaseId(null);
                         }}>
                             {releaseId?.results_released ? 'Withdraw Results' : 'Release Results'}
@@ -334,7 +338,10 @@ export default function ElectionsIndex({ elections, filters, statuses, paginatio
                     <DialogFooter>
                         <Button variant="outline" onClick={() => setStatusChange(null)}>Cancel</Button>
                         <Button onClick={() => {
-                            if (statusChange) router.patch(`/admin/elections/${statusChange.id}/status`, { status: statusChange.status });
+                            if (statusChange) {
+router.patch(`/admin/elections/${statusChange.id}/status`, { status: statusChange.status });
+}
+
                             setStatusChange(null);
                         }}>
                             {statusChange?.label}

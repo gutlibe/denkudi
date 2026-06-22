@@ -1,5 +1,3 @@
-import { Link } from '@inertiajs/react';
-import { HugeiconsIcon } from '@hugeicons/react';
 import {
     Analytics01Icon,
     DashboardSquare02Icon,
@@ -7,6 +5,8 @@ import {
     PanelLeftOpenIcon,
     Shield01Icon,
 } from '@hugeicons/core-free-icons';
+import { HugeiconsIcon } from '@hugeicons/react';
+import { Link } from '@inertiajs/react';
 import AppLogo from '@/components/app-logo';
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
