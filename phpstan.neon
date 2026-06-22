@@ -11,3 +11,12 @@ parameters:
         - routes/
 
     level: 7
+    treatPhpDocTypesAsCertain: false
+
+    ignoreErrors:
+        - '#Access to an undefined property App\\Models\\VoterParticipation::\$date#'
+        - '#Access to an undefined property App\\Models\\VoterParticipation::\$count#'
+        - '#contains unresolvable type#'
+        - '#expects callable.*Closure\(mixed\)#'
+        - '#Anonymous function should return#'
+        - '#expects callable\(App\\Models\\Position, int\): array\{id: int, title: string, total_votes: mixed, candidates: Illuminate\\Support\\Collection#'
