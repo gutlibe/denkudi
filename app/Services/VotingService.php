@@ -84,6 +84,14 @@ class VotingService
             $selectionsByPosition[$pid][] = $selection;
         }
 
+        // Reject any ballot entry whose position_id does not belong to this
+        // election — prevents silent acceptance of stale/foreign positions.
+        foreach ($selectionsByPosition as $pid => $selections) {
+            if (! isset($positions[$pid])) {
+                throw new \RuntimeException('Ballot contains a position that does not belong to this election.');
+            }
+        }
+
         foreach ($positions as $pos) {
             $selected = $selectionsByPosition[$pos->id] ?? [];
 
@@ -192,9 +200,12 @@ class VotingService
      *
      * Failing rows are quarantined immediately (no transaction wrapper —
      * the single UPDATE is atomic on its own, and the caller ensures this
-     * runs outside any rollback-prone scope). If the total number of
-     * quarantined votes (existing + newly detected) reaches the threshold
-     * the election is paused.
+     * runs outside any rollback-prone scope). The election's
+     * `quarantine_count` column is atomically incremented on each
+     * quarantine and re-read from the database every loop iteration, so
+     * the threshold is enforced system-wide even under concurrent calls.
+     * When the counter reaches the threshold the election is paused and
+     * the counter is reset to zero on the next `resumeElection()`.
      *
      * Called OUTSIDE the ballot transaction so quarantine and pause
      * writes are independent — a later ballot rollback cannot undo them.
@@ -203,13 +214,20 @@ class VotingService
      */
     private function getLatestValidVote(Election $election): ?Vote
     {
-        $existingQuarantined = Vote::where('election_id', $election->id)
-            ->where('status', 'quarantined')
-            ->count();
+        while (true) {
+            // Read the live, atomic quarantine counter each iteration so
+            // that concurrent calls observe each other's increments and
+            // the threshold is enforced system-wide, not per-call.
+            $currentQuarantineCount = (int) ($election->fresh()?->quarantine_count ?? 0);
 
-        $totalTampered = $existingQuarantined;
+            if ($currentQuarantineCount >= self::QUARANTINE_HALT_THRESHOLD) {
+                $this->pauseElection($election, $currentQuarantineCount);
 
-        while ($totalTampered < self::QUARANTINE_HALT_THRESHOLD) {
+                throw new ElectionPausedException(
+                    'Voting is temporarily unavailable for this election. Please try again later.'
+                );
+            }
+
             $lastVote = Vote::where('election_id', $election->id)
                 ->where('status', 'valid')
                 ->orderBy('id', 'desc')
@@ -235,8 +253,7 @@ class VotingService
                     ->first();
 
                 if ($predecessor && $lastVote->previous_hash !== $predecessor->current_hash) {
-                    $this->quarantineRow($lastVote, $election, $totalTampered + 1);
-                    $totalTampered++;
+                    $this->quarantineRow($lastVote, $election, $currentQuarantineCount + 1);
 
                     continue;
                 }
@@ -244,15 +261,8 @@ class VotingService
                 return $lastVote;
             }
 
-            $this->quarantineRow($lastVote, $election, $totalTampered + 1);
-            $totalTampered++;
+            $this->quarantineRow($lastVote, $election, $currentQuarantineCount + 1);
         }
-
-        $this->pauseElection($election, $totalTampered);
-
-        throw new ElectionPausedException(
-            'Voting has been paused pending administrator review of a detected integrity issue.'
-        );
     }
 
     /**
@@ -267,13 +277,16 @@ class VotingService
     private function quarantineRow(Vote $vote, Election $election, int $count): void
     {
         if (DB::transactionLevel() > 0) {
-            Log::warning('quarantineRow called inside an active transaction — durability may be compromised.', [
-                'vote_id' => $vote->id,
-                'election_id' => $election->id,
-            ]);
+            throw new \RuntimeException(
+                'quarantineRow called inside an active transaction — durability would be compromised.'
+            );
         }
 
         $vote->update(['status' => 'quarantined']);
+
+        // Atomic increment — safe under concurrent calls; the live value is
+        // re-read by getLatestValidVote each iteration via $election->fresh().
+        $election->increment('quarantine_count');
 
         Log::critical('Vote tampering detected and quarantined.', [
             'vote_id' => $vote->id,
@@ -291,9 +304,9 @@ class VotingService
     private function pauseElection(Election $election, int $count): void
     {
         if (DB::transactionLevel() > 0) {
-            Log::warning('pauseElection called inside an active transaction — durability may be compromised.', [
-                'election_id' => $election->id,
-            ]);
+            throw new \RuntimeException(
+                'pauseElection called inside an active transaction — durability would be compromised.'
+            );
         }
 
         $election->update([
@@ -310,12 +323,17 @@ class VotingService
 
     /**
      * Resume a paused election after administrator review.
+     *
+     * Resets the quarantine counter so that getLatestValidVote does not
+     * immediately re-pause on the next ballot (which would read the stale
+     * count of previously-reviewed quarantined votes).
      */
     public function resumeElection(Election $election, int $adminId): void
     {
         DB::transaction(function () use ($election, $adminId) {
             $election->update([
                 'status' => 'active',
+                'quarantine_count' => 0,
                 'resumed_at' => now(),
                 'resumed_by' => $adminId,
             ]);
