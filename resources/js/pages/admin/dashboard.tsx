@@ -1,8 +1,12 @@
-import { Analytics01Icon, Group01Icon, PlusSignIcon, CheckmarkCircle01Icon, Shield01Icon, Clock01Icon, File01Icon } from '@hugeicons/core-free-icons';
 import { HugeiconsIcon } from '@hugeicons/react';
+import { Analytics01Icon, Group01Icon, Shield01Icon, Clock01Icon, ArrowRight02Icon, CheckmarkCircle01Icon } from '@hugeicons/core-free-icons';
 import { Head, Link } from '@inertiajs/react';
+import { useState } from 'react';
+import { Area, AreaChart, CartesianGrid, XAxis } from 'recharts';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from '@/components/ui/chart';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { dashboard } from '@/routes/admin';
 
 type LogEntry = {
@@ -22,6 +26,7 @@ type Props = {
         paused_elections: number;
     };
     recent_logs: LogEntry[];
+    activity: { date: string; votes: number }[];
 };
 
 const actionLabel = (action: string) => {
@@ -34,11 +39,20 @@ const actionLabel = (action: string) => {
         results_withdrawn: 'Withdrawn',
         election_resumed: 'Resumed',
     };
-
     return m[action] ?? action.replace(/_/g, ' ');
 };
 
-export default function AdminDashboard({ stats, recent_logs }: Props) {
+export default function AdminDashboard({ stats, recent_logs, activity }: Props) {
+    const [period, setPeriod] = useState('30d');
+
+    const filteredActivity = (() => {
+        if (activity.length === 0) return [];
+        const ref = new Date(activity[activity.length - 1].date);
+        const days = period === '7d' ? 7 : period === '30d' ? 30 : period === '90d' ? 90 : 365;
+        const start = new Date(ref);
+        start.setDate(start.getDate() - days);
+        return activity.filter((a) => new Date(a.date) >= start);
+    })();
     return (
         <>
             <Head title="Admin Dashboard" />
@@ -106,44 +120,74 @@ export default function AdminDashboard({ stats, recent_logs }: Props) {
                     </Card>
                 </div>
 
-                <div className="grid gap-6 lg:grid-cols-2">
-                    <Card>
-                        <CardHeader className="pb-3">
-                            <CardTitle className="text-sm font-medium flex items-center gap-2">
-                                <HugeiconsIcon icon={PlusSignIcon} size={14} />
-                                Quick Actions
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent className="flex flex-wrap gap-2">
-                            <Button asChild size="sm" variant="outline">
-                                <Link href="/admin/elections/create">
-                                    <HugeiconsIcon icon={PlusSignIcon} size={13} className="mr-1.5" />
-                                    New Election
-                                </Link>
-                            </Button>
-                            <Button asChild size="sm" variant="outline">
-                                <Link href="/admin/elections">
-                                    <HugeiconsIcon icon={Analytics01Icon} size={13} className="mr-1.5" />
-                                    Manage Elections
-                                </Link>
-                            </Button>
-                            <Button asChild size="sm" variant="outline">
-                                <Link href="/admin/audit-logs">
-                                    <HugeiconsIcon icon={File01Icon} size={13} className="mr-1.5" />
-                                    Audit Logs
-                                </Link>
-                            </Button>
+                <div className="grid gap-6 lg:grid-cols-3">
+                    <Card className="lg:col-span-2">
+                        <div className="flex items-center justify-between px-(--card-spacing) pt-6 pb-4">
+                            <div>
+                                <h3 className="font-heading text-base font-medium">Voting Activity</h3>
+                                <p className="text-sm text-muted-foreground">Votes cast over the selected period</p>
+                            </div>
+                            <Select value={period} onValueChange={setPeriod}>
+                                <SelectTrigger className="w-[150px]">
+                                    <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="7d">Last 7 days</SelectItem>
+                                    <SelectItem value="30d">Last 30 days</SelectItem>
+                                    <SelectItem value="90d">Last 90 days</SelectItem>
+                                    <SelectItem value="all">All time</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        <CardContent className="pt-0">
+                            {activity.length === 0 ? (
+                                <div className="flex items-center justify-center h-[250px] text-sm text-muted-foreground">No voting activity yet.</div>
+                            ) : (
+                                <ChartContainer
+                                    config={{ votes: { label: 'Votes', color: 'var(--chart-1)' } } satisfies ChartConfig}
+                                    className="aspect-auto h-[250px] w-full"
+                                >
+                                    <AreaChart data={filteredActivity}>
+                                        <defs>
+                                            <linearGradient id="fillVotes" x1="0" y1="0" x2="0" y2="1">
+                                                <stop offset="5%" stopColor="var(--color-votes)" stopOpacity={0.8} />
+                                                <stop offset="95%" stopColor="var(--color-votes)" stopOpacity={0.1} />
+                                            </linearGradient>
+                                        </defs>
+                                        <CartesianGrid vertical={false} strokeDasharray="4" />
+                                        <XAxis
+                                            dataKey="date"
+                                            tickLine={false}
+                                            axisLine={false}
+                                            tickMargin={8}
+                                            minTickGap={32}
+                                            tick={{ fontSize: 12, fill: 'var(--muted-foreground)' }}
+                                            tickFormatter={(v) => {
+                                                const d = new Date(v);
+                                                return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                                            }}
+                                        />
+                                        <ChartTooltip
+                                            cursor={false}
+                                            content={
+                                                <ChartTooltipContent
+                                                    labelFormatter={(v) => new Date(v).toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}
+                                                    indicator="dot"
+                                                />
+                                            }
+                                        />
+                                        <Area dataKey="votes" type="natural" fill="url(#fillVotes)" stroke="var(--color-votes)" />
+                                    </AreaChart>
+                                </ChartContainer>
+                            )}
                         </CardContent>
                     </Card>
 
                     <Card>
                         <CardHeader className="pb-3">
-                            <CardTitle className="text-sm font-medium flex items-center gap-2">
-                                <HugeiconsIcon icon={Clock01Icon} size={14} />
-                                Recent Activity
-                            </CardTitle>
+                            <CardTitle className="text-sm font-medium">Recent Activity</CardTitle>
                         </CardHeader>
-                        <CardContent className="space-y-0">
+                        <CardContent>
                             {recent_logs.length === 0 ? (
                                 <p className="text-sm text-muted-foreground text-center py-6">No recent activity.</p>
                             ) : (
