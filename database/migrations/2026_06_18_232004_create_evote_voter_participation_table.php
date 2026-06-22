@@ -13,8 +13,6 @@ return new class extends Migration
             $table->foreignId('election_id')->constrained('evote_elections')->cascadeOnDelete();
             $table->string('hashed_student_id', 64);
             $table->timestamp('voted_at');
-
-            $table->unique(['election_id', 'hashed_student_id']);
         });
     }
 
@@ -23,4 +21,3 @@ return new class extends Migration
         Schema::dropIfExists('evote_voter_participation');
     }
 };
-
