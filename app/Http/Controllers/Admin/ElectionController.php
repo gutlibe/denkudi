@@ -301,4 +301,74 @@ class ElectionController extends Controller
             ],
         ]);
     }
+
+    public function results(Election $election, VotingService $voting): Response
+    {
+        $data = [
+            'election' => [
+                'id' => $election->id,
+                'title' => $election->title,
+                'status' => $election->status->value,
+            ],
+            'positions' => $this->getResultsData($election),
+            'chain' => $voting->verifyChain($election),
+            'turnout' => $voting->turnout($election),
+        ];
+
+        if (request()->expectsJson()) {
+            return response()->json($data);
+        }
+
+        return Inertia::render('admin/elections/results', $data);
+    }
+
+    public function resultsFullscreen(Election $election, VotingService $voting): Response
+    {
+        return Inertia::render('admin/elections/results-fullscreen', [
+            'election' => [
+                'id' => $election->id,
+                'title' => $election->title,
+                'status' => $election->status->value,
+            ],
+            'positions' => $this->getResultsData($election),
+            'chain' => $voting->verifyChain($election),
+            'turnout' => $voting->turnout($election),
+        ]);
+    }
+
+    private function getResultsData(Election $election): array
+    {
+        $election->load(['positions' => fn ($q) => $q->orderBy('sort_order'), 'positions.candidates']);
+
+        return $election->positions->map(function ($position) {
+            $totalForPosition = Vote::where('election_id', $position->election_id)
+                ->where('position_id', $position->id)
+                ->where('status', 'valid')
+                ->count();
+
+            $candidates = $position->candidates->map(function ($candidate) use ($position, $totalForPosition) {
+                $count = Vote::where('position_id', $candidate->position_id)
+                    ->where('candidate_id', $candidate->id)
+                    ->where('status', 'valid')
+                    ->count();
+
+                return [
+                    'id' => $candidate->id,
+                    'name' => $candidate->name,
+                    'department' => $candidate->department,
+                    'photo_url' => $candidate->photo_url ? asset('storage/' . $candidate->photo_url) : null,
+                    'vote_count' => $count,
+                    'percentage' => $totalForPosition > 0 ? round(($count / $totalForPosition) * 100, 1) : 0,
+                ];
+            });
+
+            return [
+                'id' => $position->id,
+                'title' => $position->title,
+                'total_votes' => $totalForPosition,
+                'candidates' => $candidates->sortByDesc('vote_count')->values()->toArray(),
+            ];
+        })->filter(fn ($p) => $p['total_votes'] > 0)->values()->toArray();
+    }
+
 }

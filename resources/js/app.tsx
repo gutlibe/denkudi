@@ -31,6 +31,8 @@ createInertiaApp({
                 return null;
             case name.startsWith('auth/'):
                 return AuthLayout;
+            case name.endsWith('-fullscreen'):
+                return null;
             case name.startsWith('admin/'):
                 return AdminLayout;
             case name.startsWith('settings/'):

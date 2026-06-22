@@ -221,6 +221,16 @@ export default function ElectionsIndex({ elections, filters, statuses, paginatio
                                             </TooltipTrigger>
                                             <TooltipContent>Audit Chain</TooltipContent>
                                         </Tooltip>
+                                        <Tooltip>
+                                            <TooltipTrigger asChild>
+                                                <Button asChild variant="ghost" size="icon-sm">
+                                                    <Link href={`/admin/elections/${election.id}/results`}>
+                                                        <HugeiconsIcon icon={Analytics01Icon} size={14} />
+                                                    </Link>
+                                                </Button>
+                                            </TooltipTrigger>
+                                            <TooltipContent>Results</TooltipContent>
+                                        </Tooltip>
                                     </div>
                                     <div className="flex items-center gap-0.5">
                                         <Tooltip>

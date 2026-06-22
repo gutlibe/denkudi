@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\CandidateController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\ElectionController;
 use App\Http\Controllers\Admin\PositionController;
+use App\Http\Controllers\Admin\UserController;
 use App\Http\Middleware\EnsureUserIsAdmin;
 use Illuminate\Support\Facades\Route;
 
@@ -38,6 +39,10 @@ Route::middleware(['auth', 'verified', EnsureUserIsAdmin::class])
         Route::get('elections/{election}/manage', [ElectionController::class, 'manage'])
             ->name('elections.manage');
 
+        // Election results
+        Route::get('elections/{election}/results', [ElectionController::class, 'results'])
+            ->name('elections.results');
+
         // Toggle results release
         Route::patch('elections/{election}/release-results', [ElectionController::class, 'releaseResults'])
             ->name('elections.release-results');
@@ -50,8 +55,15 @@ Route::middleware(['auth', 'verified', EnsureUserIsAdmin::class])
         Route::get('elections/{election}/audit', [ElectionController::class, 'audit'])
             ->name('elections.audit');
 
+        // Election results (full-screen mode for projection)
+        Route::get('elections/{election}/results/fullscreen', [ElectionController::class, 'resultsFullscreen'])
+            ->name('elections.results.fullscreen');
+
         // Global audit logs
         Route::get('audit-logs', [AuditLogController::class, 'index'])->name('audit-logs');
+
+        Route::get('users', [UserController::class, 'index'])->name('users.index');
+        Route::patch('users/{user}/role', [UserController::class, 'updateRole'])->name('users.role');
 
         // Position candidate management page
         Route::get('elections/{election}/positions/{position}/candidates', [CandidateController::class, 'index'])
