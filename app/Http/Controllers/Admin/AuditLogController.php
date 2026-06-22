@@ -17,7 +17,7 @@ class AuditLogController extends Controller
             ->paginate(50)
             ->through(fn ($log) => [
                 'id' => $log->id,
-                'admin' => $log->admin?->first_name . ' ' . $log->admin?->last_name,
+                'admin' => $log->admin?->first_name.' '.$log->admin?->last_name,
                 'action' => $log->action,
                 'description' => $log->description,
                 'metadata' => $log->metadata,

@@ -18,17 +18,17 @@ class DashboardController extends Controller
     {
         // Vote activity for last 30 days
         $activity = VoterParticipation::select(
-                DB::raw('DATE(voted_at) as date'),
-                DB::raw('COUNT(*) as count')
-            )
+            DB::raw('DATE(voted_at) as date'),
+            DB::raw('COUNT(*) as count')
+        )
             ->where('voted_at', '>=', now()->subDays(30))
             ->groupBy('date')
             ->orderBy('date')
             ->get()
             ->map(fn ($r) => [
-                'date' => $r->date,
-                'votes' => (int) $r->count,
-            ]);
+            'date' => $r->date,
+            'votes' => (int) $r->count,
+        ]);
 
         return Inertia::render('admin/dashboard', [
             'stats' => [
@@ -45,7 +45,7 @@ class DashboardController extends Controller
                 ->get()
                 ->map(fn ($log) => [
                     'id' => $log->id,
-                    'admin' => $log->admin?->first_name . ' ' . $log->admin?->last_name,
+                    'admin' => $log->admin?->first_name.' '.$log->admin?->last_name,
                     'action' => $log->action,
                     'description' => $log->description,
                     'created_at' => $log->created_at->toISOString(),
