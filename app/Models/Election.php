@@ -4,11 +4,37 @@ namespace App\Models;
 
 use App\Enums\ElectionStatus;
 use App\Enums\ElectionType;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Carbon;
 
+/**
+ * @property int $id
+ * @property string $title
+ * @property string $slug
+ * @property ElectionType $type
+ * @property string $scope
+ * @property string|null $description
+ * @property ElectionStatus $status
+ * @property Carbon|null $starts_at
+ * @property Carbon|null $ends_at
+ * @property int|null $created_by
+ * @property Carbon|null $paused_at
+ * @property string|null $pause_reason
+ * @property int $quarantine_count
+ * @property Carbon|null $resumed_at
+ * @property int|null $resumed_by
+ * @property bool $results_released
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ * @property Carbon|null $deleted_at
+ * @property-read User|null $createdBy
+ * @property-read Collection<int, Position> $positions
+ * @property-read Collection<int, Candidate> $candidates
+ */
 class Election extends Model
 {
     use SoftDeletes;
@@ -46,16 +72,25 @@ class Election extends Model
         ];
     }
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function createdBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
     }
 
+    /**
+     * @return HasMany<Position, $this>
+     */
     public function positions(): HasMany
     {
         return $this->hasMany(Position::class);
     }
 
+    /**
+     * @return HasMany<Candidate, $this>
+     */
     public function candidates(): HasMany
     {
         return $this->hasMany(Candidate::class);
