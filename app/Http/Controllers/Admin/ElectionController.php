@@ -142,10 +142,10 @@ class ElectionController extends Controller
 
     public function update(Request $request, Election $election): RedirectResponse
     {
-        if ($election->isActive()) {
+        if ($election->isActive() || $election->isClosed()) {
             return back()->with('toast', [
                 'type' => 'error',
-                'message' => 'Cannot edit an election while voting is active.',
+                'message' => 'Cannot edit an election while voting is active or after it has been closed.',
             ]);
         }
 
@@ -200,13 +200,20 @@ class ElectionController extends Controller
 
     public function releaseResults(Request $request, Election $election): RedirectResponse
     {
+        if (! $election->isClosed()) {
+            return back()->with('toast', [
+                'type' => 'error',
+                'message' => 'Results can only be released for closed elections.',
+            ]);
+        }
+
         $election->update(['results_released' => ! $election->results_released]);
 
         $action = $election->results_released ? 'released' : 'withdrawn';
 
         AdminAuditLog::create([
             'admin_id' => $request->user()->id,
-            'action' => 'results_' . $action,
+            'action' => 'results_'.$action,
             'description' => "Results {$action} for election \"{$election->title}\".",
             'metadata' => ['election_id' => $election->id],
             'ip_address' => $request->ip(),
@@ -221,12 +228,13 @@ class ElectionController extends Controller
         ]);
     }
 
-    public function updateStatus(Request $request, Election $election): RedirectResponse
+    public function updateStatus(Request $request, Election $election, VotingService $voting): RedirectResponse
     {
         $validTransitions = [
             ElectionStatus::Draft->value => [ElectionStatus::Scheduled->value],
             ElectionStatus::Scheduled->value => [ElectionStatus::Active->value],
             ElectionStatus::Active->value => [ElectionStatus::Closed->value],
+            ElectionStatus::PausedForReview->value => [ElectionStatus::Active->value],
         ];
 
         $current = $election->status->value;
@@ -238,6 +246,18 @@ class ElectionController extends Controller
             return back()->with('toast', [
                 'type' => 'error',
                 'message' => "Cannot transition from {$current} to {$newStatus}.",
+            ]);
+        }
+
+        // Resuming a paused election requires resetting the quarantine
+        // counter and recording a dedicated audit entry — delegate to
+        // VotingService::resumeElection() rather than a plain status flip.
+        if ($current === ElectionStatus::PausedForReview->value && $newStatus === ElectionStatus::Active->value) {
+            $voting->resumeElection($election, $request->user()->id);
+
+            return back()->with('toast', [
+                'type' => 'success',
+                'message' => 'Election resumed after integrity review.',
             ]);
         }
 
@@ -259,7 +279,7 @@ class ElectionController extends Controller
         ]);
     }
 
-    public function audit(Election $election, VotingService $voting, Request $request): \Inertia\Response
+    public function audit(Election $election, VotingService $voting, Request $request): Response
     {
         $result = $voting->verifyChain($election);
 
@@ -277,8 +297,8 @@ class ElectionController extends Controller
                 'id' => $v->id,
                 'position' => $v->position?->title ?? '—',
                 'candidate' => $v->candidate?->name ?? '—',
-                'previous_hash' => '...' . substr($v->previous_hash, -16),
-                'current_hash' => '...' . substr($v->current_hash, -16),
+                'previous_hash' => '...'.substr($v->previous_hash, -16),
+                'current_hash' => '...'.substr($v->current_hash, -16),
                 'receipt' => $v->receipt_token,
                 'status' => $v->status,
             ]);
@@ -299,6 +319,73 @@ class ElectionController extends Controller
             'filters' => [
                 'search' => $request->input('search', ''),
             ],
+        ]);
+    }
+
+    public function quarantined(Election $election, Request $request): Response
+    {
+        $query = Vote::with(['position', 'candidate'])
+            ->where('election_id', $election->id)
+            ->where('status', 'quarantined')
+            ->orderBy('id', 'desc');
+
+        $votes = $query->paginate(20)
+            ->through(fn ($v) => [
+                'id' => $v->id,
+                'position' => $v->position?->title ?? '—',
+                'candidate' => $v->candidate?->name ?? '—',
+                'receipt' => $v->receipt_token,
+                'previous_hash' => '...'.substr($v->previous_hash, -16),
+                'current_hash' => '...'.substr($v->current_hash, -16),
+            ]);
+
+        return Inertia::render('admin/elections/quarantined', [
+            'election' => [
+                'id' => $election->id,
+                'title' => $election->title,
+                'status' => $election->status->value,
+                'quarantine_count' => $election->quarantine_count,
+            ],
+            'votes' => Inertia::merge(fn () => $votes->items()),
+            'pagination' => [
+                'current_page' => $votes->currentPage(),
+                'last_page' => $votes->lastPage(),
+                'total' => $votes->total(),
+            ],
+        ]);
+    }
+
+    public function dismissQuarantine(Request $request, Election $election, Vote $vote): RedirectResponse
+    {
+        if ($vote->election_id !== $election->id) {
+            return back()->with('toast', [
+                'type' => 'error',
+                'message' => 'This vote does not belong to the specified election.',
+            ]);
+        }
+
+        if ($vote->status !== 'quarantined') {
+            return back()->with('toast', [
+                'type' => 'error',
+                'message' => 'Only quarantined votes can be dismissed.',
+            ]);
+        }
+
+        $vote->update(['status' => 'valid']);
+        $election->decrement('quarantine_count');
+
+        AdminAuditLog::create([
+            'admin_id' => $request->user()->id,
+            'action' => 'quarantine_dismissed',
+            'description' => "Quarantined vote #{$vote->id} dismissed (restored to valid) for election \"{$election->title}\".",
+            'metadata' => ['election_id' => $election->id, 'vote_id' => $vote->id],
+            'ip_address' => $request->ip(),
+            'created_at' => now(),
+        ]);
+
+        return back()->with('toast', [
+            'type' => 'success',
+            'message' => 'Vote restored to valid status.',
         ]);
     }
 
@@ -346,7 +433,7 @@ class ElectionController extends Controller
                 ->where('status', 'valid')
                 ->count();
 
-            $candidates = $position->candidates->map(function ($candidate) use ($position, $totalForPosition) {
+            $candidates = $position->candidates->map(function ($candidate) use ($totalForPosition) {
                 $count = Vote::where('position_id', $candidate->position_id)
                     ->where('candidate_id', $candidate->id)
                     ->where('status', 'valid')
@@ -356,7 +443,7 @@ class ElectionController extends Controller
                     'id' => $candidate->id,
                     'name' => $candidate->name,
                     'department' => $candidate->department,
-                    'photo_url' => $candidate->photo_url ? asset('storage/' . $candidate->photo_url) : null,
+                    'photo_url' => $candidate->photo_url ? asset('storage/'.$candidate->photo_url) : null,
                     'vote_count' => $count,
                     'percentage' => $totalForPosition > 0 ? round(($count / $totalForPosition) * 100, 1) : 0,
                 ];
@@ -370,5 +457,4 @@ class ElectionController extends Controller
             ];
         })->filter(fn ($p) => $p['total_votes'] > 0)->values()->toArray();
     }
-
 }

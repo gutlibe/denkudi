@@ -55,6 +55,12 @@ Route::middleware(['auth', 'verified', EnsureUserIsAdmin::class])
         Route::get('elections/{election}/audit', [ElectionController::class, 'audit'])
             ->name('elections.audit');
 
+        // Quarantined vote management
+        Route::get('elections/{election}/quarantined', [ElectionController::class, 'quarantined'])
+            ->name('elections.quarantined');
+        Route::patch('elections/{election}/votes/{vote}/dismiss', [ElectionController::class, 'dismissQuarantine'])
+            ->name('elections.votes.dismiss');
+
         // Election results (full-screen mode for projection)
         Route::get('elections/{election}/results/fullscreen', [ElectionController::class, 'resultsFullscreen'])
             ->name('elections.results.fullscreen');

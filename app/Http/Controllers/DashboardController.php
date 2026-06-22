@@ -8,6 +8,7 @@ use App\Models\Election;
 use App\Models\Position;
 use App\Models\Vote;
 use App\Services\VotingService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -79,6 +80,10 @@ class DashboardController extends Controller
             ]);
         }
 
+        if (! $election->isActive()) {
+            abort(403, 'This election is not currently active.');
+        }
+
         $election->load(['positions' => fn ($q) => $q->orderBy('sort_order'), 'positions.candidates']);
 
         return Inertia::render('elections/ballot', [
@@ -107,7 +112,7 @@ class DashboardController extends Controller
      * Return ballot data as JSON for the inline voting sheet on the dashboard.
      * Validates the user is a student, election is active, and they haven't voted yet.
      */
-    public function ballotData(Election $election, Request $request, VotingService $voting): \Illuminate\Http\JsonResponse
+    public function ballotData(Election $election, Request $request, VotingService $voting): JsonResponse
     {
         $user = $request->user();
 
@@ -176,28 +181,29 @@ class DashboardController extends Controller
         }
     }
 
-    public function verify(Request $request): \Inertia\Response
+    public function verify(Request $request, VotingService $voting): Response
     {
         $token = $request->query('token');
         $result = null;
 
         if ($token) {
-            $votes = Vote::where('receipt_token', $token)->get();
+            $details = $voting->verifyReceipt($token);
 
-            if ($votes->isEmpty()) {
+            if ($details === null) {
                 $result = ['found' => false];
             } else {
-                $election = $votes->first()->election;
-                $positions = $votes->groupBy('position_id')->count();
-                $statuses = $votes->pluck('status')->unique()->toArray();
-                $isValid = !in_array('tampered', $statuses) && !in_array('invalid', $statuses);
+                $election = Vote::where('receipt_token', $token)->first()?->election;
+                $statuses = array_column($details, 'status');
+                $hasQuarantined = in_array('quarantined', $statuses, true);
+                $overallStatus = $hasQuarantined ? 'quarantined' : 'valid';
 
                 $result = [
                     'found' => true,
                     'election' => $election?->title ?? 'Unknown election',
-                    'positions' => $positions,
-                    'total_votes' => $votes->count(),
-                    'status' => $isValid ? 'valid' : 'tampered',
+                    'positions' => count(array_unique(array_column($details, 'position'))),
+                    'total_votes' => count($details),
+                    'status' => $overallStatus,
+                    'details' => $details,
                 ];
             }
         }
@@ -208,44 +214,48 @@ class DashboardController extends Controller
         ]);
     }
 
-    public function results(Election $election): \Inertia\Response
+    public function results(Election $election): Response
     {
-        $positions = $election->positions()
-            ->with(['candidates'])
-            ->orderBy('sort_order')
-            ->get()
-            ->map(function (Position $position) {
-                $candidates = $position->candidates->map(function (Candidate $candidate) {
-                    $count = Vote::where('position_id', $candidate->position_id)
-                        ->where('candidate_id', $candidate->id)
-                        ->where('status', 'valid')
-                        ->count();
+        $positions = [];
+
+        if ($election->results_released) {
+            $positions = $election->positions()
+                ->with(['candidates'])
+                ->orderBy('sort_order')
+                ->get()
+                ->map(function (Position $position) {
+                    $candidates = $position->candidates->map(function (Candidate $candidate) {
+                        $count = Vote::where('position_id', $candidate->position_id)
+                            ->where('candidate_id', $candidate->id)
+                            ->where('status', 'valid')
+                            ->count();
+
+                        return [
+                            'id' => $candidate->id,
+                            'name' => $candidate->name,
+                            'department' => $candidate->department,
+                            'photo_url' => $candidate->photo_url ? asset('storage/'.$candidate->photo_url) : null,
+                            'vote_count' => $count,
+                        ];
+                    });
+
+                    $total = $candidates->sum('vote_count');
 
                     return [
-                        'id' => $candidate->id,
-                        'name' => $candidate->name,
-                        'department' => $candidate->department,
-                        'photo_url' => $candidate->photo_url ? asset('storage/' . $candidate->photo_url) : null,
-                        'vote_count' => $count,
+                        'id' => $position->id,
+                        'title' => $position->title,
+                        'total_votes' => $total,
+                        'candidates' => $candidates->map(fn ($c) => [
+                            'id' => $c['id'],
+                            'name' => $c['name'],
+                            'department' => $c['department'],
+                            'photo_url' => $c['photo_url'],
+                            'vote_count' => $c['vote_count'],
+                            'percentage' => $total > 0 ? round(($c['vote_count'] / $total) * 100, 1) : 0,
+                        ])->sortByDesc('vote_count')->values(),
                     ];
                 });
-
-                $total = $candidates->sum('vote_count');
-
-                return [
-                    'id' => $position->id,
-                    'title' => $position->title,
-                    'total_votes' => $total,
-                    'candidates' => $candidates->map(fn ($c) => [
-                        'id' => $c['id'],
-                        'name' => $c['name'],
-                        'department' => $c['department'],
-                        'photo_url' => $c['photo_url'],
-                        'vote_count' => $c['vote_count'],
-                        'percentage' => $total > 0 ? round(($c['vote_count'] / $total) * 100, 1) : 0,
-                    ])->sortByDesc('vote_count')->values(),
-                ];
-            });
+        }
 
         return Inertia::render('elections/results', [
             'election' => [
