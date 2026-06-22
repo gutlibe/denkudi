@@ -27,6 +27,7 @@ class Election extends Model
         'created_by',
         'paused_at',
         'pause_reason',
+        'quarantine_count',
         'resumed_at',
         'resumed_by',
         'results_released',
@@ -41,6 +42,7 @@ class Election extends Model
             'ends_at' => 'datetime',
             'paused_at' => 'datetime',
             'resumed_at' => 'datetime',
+            'quarantine_count' => 'integer',
         ];
     }
 
