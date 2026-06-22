@@ -149,7 +149,7 @@ class DashboardController extends Controller
         ]);
     }
 
-    public function submitVote(Election $election, Request $request, VotingService $voting): Response
+    public function submitVote(Election $election, Request $request, VotingService $voting): Response|\Illuminate\Http\RedirectResponse
     {
         $user = $request->user();
 
@@ -199,7 +199,7 @@ class DashboardController extends Controller
 
                 $result = [
                     'found' => true,
-                    'election' => $election?->title ?? 'Unknown election',
+                    'election' => $election->title ?? 'Unknown election',
                     'positions' => count(array_unique(array_column($details, 'position'))),
                     'total_votes' => count($details),
                     'status' => $overallStatus,

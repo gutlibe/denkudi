@@ -9,6 +9,7 @@ use App\Models\AdminAuditLog;
 use App\Models\Election;
 use App\Models\Vote;
 use App\Services\VotingService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -295,8 +296,8 @@ class ElectionController extends Controller
         $votes = $query->paginate(20)
             ->through(fn ($v) => [
                 'id' => $v->id,
-                'position' => $v->position?->title ?? '—',
-                'candidate' => $v->candidate?->name ?? '—',
+                'position' => $v->position?->title ?: '—',
+                'candidate' => $v->candidate?->name ?: '—',
                 'previous_hash' => '...'.substr($v->previous_hash, -16),
                 'current_hash' => '...'.substr($v->current_hash, -16),
                 'receipt' => $v->receipt_token,
@@ -332,8 +333,8 @@ class ElectionController extends Controller
         $votes = $query->paginate(20)
             ->through(fn ($v) => [
                 'id' => $v->id,
-                'position' => $v->position?->title ?? '—',
-                'candidate' => $v->candidate?->name ?? '—',
+                'position' => $v->position?->title ?: '—',
+                'candidate' => $v->candidate?->name ?: '—',
                 'receipt' => $v->receipt_token,
                 'previous_hash' => '...'.substr($v->previous_hash, -16),
                 'current_hash' => '...'.substr($v->current_hash, -16),
@@ -389,7 +390,10 @@ class ElectionController extends Controller
         ]);
     }
 
-    public function results(Election $election, VotingService $voting): Response
+    /**
+     * @return Response|JsonResponse
+     */
+    public function results(Election $election, VotingService $voting): Response|JsonResponse
     {
         $data = [
             'election' => [
@@ -423,6 +427,9 @@ class ElectionController extends Controller
         ]);
     }
 
+    /**
+     * @return array<int, array{id: int, title: string, total_votes: int, candidates: array<int, array<string, mixed>>}>
+     */
     private function getResultsData(Election $election): array
     {
         $election->load(['positions' => fn ($q) => $q->orderBy('sort_order'), 'positions.candidates']);
