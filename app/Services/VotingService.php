@@ -36,6 +36,8 @@ class VotingService
      * access, preventing two concurrent voters from linking to the same
      * predecessor.
      *
+     * @param  array<int, array{position_id: int|string, candidate_id: int|string}> $ballot
+     * @return array{receipt: string, count: int}
      * @throws ElectionPausedException
      * @throws \RuntimeException
      */
@@ -218,7 +220,7 @@ class VotingService
             // Read the live, atomic quarantine counter each iteration so
             // that concurrent calls observe each other's increments and
             // the threshold is enforced system-wide, not per-call.
-            $currentQuarantineCount = (int) ($election->fresh()?->quarantine_count ?? 0);
+            $currentQuarantineCount = (int) ($election->fresh()->quarantine_count ?? 0);
 
             if ($currentQuarantineCount >= self::QUARANTINE_HALT_THRESHOLD) {
                 $this->pauseElection($election, $currentQuarantineCount);
@@ -355,6 +357,8 @@ class VotingService
 
     /**
      * Look up a receipt token and return the associated ballot.
+     *
+     * @return array<int, array{position: string, candidate: string, status: string}>|null
      */
     public function verifyReceipt(string $receiptToken): ?array
     {
@@ -379,7 +383,7 @@ class VotingService
      * vote. Each vote is counted at most once as "broken" regardless of
      * how many individual checks it fails.
      *
-     * @return array{valid: bool, total: int, broken: int, quarantined: int, details: array}
+     * @return array{valid: bool, total: int, broken: int, quarantined: int, details: array<int, array{vote_id: int, failures: array<int, string>}>}
      */
     public function verifyChain(Election $election): array
     {
