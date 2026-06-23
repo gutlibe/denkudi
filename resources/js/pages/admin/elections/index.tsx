@@ -67,9 +67,8 @@ type Props = {
 
 const statusTransitions: Record<string, { value: string; label: string }[]> = {
     draft: [{ value: 'scheduled', label: 'Schedule' }],
-    scheduled: [{ value: 'active', label: 'Activate' }],
-    active: [{ value: 'closed', label: 'Close' }],
-    paused_for_review: [{ value: 'active', label: 'Resume' }],
+    scheduled: [{ value: 'active', label: 'Activate' }, { value: 'draft', label: 'Revert to Draft' }],
+    active: [{ value: 'closed', label: 'Close' }, { value: 'draft', label: 'Revert to Draft' }],
     closed: [],
 };
 

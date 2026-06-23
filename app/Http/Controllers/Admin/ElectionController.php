@@ -233,9 +233,8 @@ class ElectionController extends Controller
     {
         $validTransitions = [
             ElectionStatus::Draft->value => [ElectionStatus::Scheduled->value],
-            ElectionStatus::Scheduled->value => [ElectionStatus::Active->value],
-            ElectionStatus::Active->value => [ElectionStatus::Closed->value],
-            ElectionStatus::PausedForReview->value => [ElectionStatus::Active->value],
+            ElectionStatus::Scheduled->value => [ElectionStatus::Active->value, ElectionStatus::Draft->value],
+            ElectionStatus::Active->value => [ElectionStatus::Closed->value, ElectionStatus::Draft->value],
         ];
 
         $current = $election->status->value;
