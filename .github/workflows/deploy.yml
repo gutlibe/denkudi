@@ -85,7 +85,7 @@ jobs:
             rm -rf $RELEASE/storage && ln -sfn $SHARED/storage $RELEASE/storage
             rm -rf $RELEASE/bootstrap/cache && ln -sfn $SHARED/bootstrap/cache $RELEASE/bootstrap/cache
             mkdir -p $SHARED/bootstrap/cache
-            mkdir -p $SHARED/storage/{framework/{views,cache,sessions,testing},logs,app/public}
+            mkdir -p $SHARED/storage/{framework/{views,cache,sessions,testing},logs,app/public/candidates}
           "
 
           echo "Running deployment commands"
