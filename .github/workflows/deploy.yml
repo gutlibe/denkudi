@@ -91,7 +91,7 @@ jobs:
           echo "Running deployment commands"
           $SSH "
             cd $RELEASE
-            $PHP artisan storage:link --quiet 2>/dev/null || true
+            ln -sfn ../storage/app/public public/storage
             $PHP artisan config:cache --no-ansi
             $PHP artisan route:cache --no-ansi
             $PHP artisan view:cache --no-ansi
