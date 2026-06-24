@@ -70,10 +70,6 @@ class DashboardController extends Controller
     {
         $user = $request->user();
 
-        if (! $user->isStudent()) {
-            abort(403, 'Only students may vote in elections.');
-        }
-
         if ($voting->hasVoted($election, $user->student_id)) {
             return Inertia::render('elections/ballot', [
                 'election' => ['id' => $election->id, 'title' => $election->title],
@@ -117,10 +113,6 @@ class DashboardController extends Controller
     {
         $user = $request->user();
 
-        if (! $user->isStudent()) {
-            abort(403, 'Only students may vote in elections.');
-        }
-
         if (! $election->isActive()) {
             abort(403, 'This election is not currently active.');
         }
@@ -153,10 +145,6 @@ class DashboardController extends Controller
     public function submitVote(Election $election, Request $request, VotingService $voting): Response|RedirectResponse
     {
         $user = $request->user();
-
-        if (! $user->isStudent()) {
-            abort(403, 'Only students may vote in elections.');
-        }
 
         $ballot = $request->input('ballot', []);
 
