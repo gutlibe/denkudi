@@ -178,9 +178,9 @@ class DashboardController extends Controller
         $result = null;
 
         if ($token) {
-            $exists = Vote::where('receipt_token', $token)->exists();
+            $vote = Vote::where('receipt_token', $token)->first();
 
-            if (! $exists) {
+            if (! $vote) {
                 $result = ['found' => false];
             } else {
                 $valid = Vote::where('receipt_token', $token)
@@ -190,6 +190,7 @@ class DashboardController extends Controller
                 $result = [
                     'found' => true,
                     'valid' => $valid,
+                    'election' => $vote->election?->title ?? 'Unknown election',
                 ];
             }
         }

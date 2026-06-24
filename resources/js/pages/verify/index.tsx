@@ -16,6 +16,7 @@ type Props = {
     result: {
         found: boolean;
         valid?: boolean;
+        election?: string;
     } | null;
     token: string | null;
 };
@@ -109,6 +110,12 @@ export default function VerifyPage({ result, token: initialToken }: Props) {
                         <CardContent>
                             {result.found ? (
                                 <div className="space-y-3">
+                                    {result.election && (
+                                        <div className="rounded-lg bg-muted/50 px-3 py-2.5">
+                                            <p className="text-[10px] tracking-wide text-muted-foreground uppercase">Election</p>
+                                            <p className="mt-0.5 text-sm font-medium">{result.election}</p>
+                                        </div>
+                                    )}
                                     {result.valid ? (
                                         <p className="text-xs text-muted-foreground">
                                             This receipt corresponds to a valid ballot. Vote integrity verified.
