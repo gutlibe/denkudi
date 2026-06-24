@@ -15,6 +15,9 @@ Route::middleware(['auth', 'verified', EnsureUserIsAdmin::class])
     ->group(function () {
         Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
+        // Redirect /admin to /admin/dashboard
+        Route::redirect('/', '/admin/dashboard')->name('index');
+
         Route::resource('elections', ElectionController::class)
             ->except(['show'])
             ->parameter('elections', 'election');

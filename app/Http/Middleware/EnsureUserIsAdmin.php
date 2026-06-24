@@ -12,7 +12,7 @@ class EnsureUserIsAdmin
     public function handle(Request $request, Closure $next): Response
     {
         if (! $request->user() || $request->user()->role !== Role::Admin) {
-            abort(403);
+            return redirect('/dashboard');
         }
 
         return $next($request);
