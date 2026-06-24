@@ -3,7 +3,6 @@ import {
     DashboardSquare02Icon,
     PanelLeftOpenIcon,
     Search01Icon,
-    Shield01Icon,
 } from '@hugeicons/core-free-icons';
 import { HugeiconsIcon } from '@hugeicons/react';
 import { Link, usePage } from '@inertiajs/react';
@@ -58,14 +57,6 @@ export function AppSidebar() {
             icon: () => <HugeiconsIcon icon={Search01Icon} size={18} />,
         },
     ];
-
-    if (props.auth.admin) {
-        mainNavItems.push({
-            title: 'Admin',
-            href: '/admin/dashboard',
-            icon: () => <HugeiconsIcon icon={Shield01Icon} size={18} />,
-        });
-    }
 
     return (
         <Sidebar
