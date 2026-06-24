@@ -178,22 +178,18 @@ class DashboardController extends Controller
         $result = null;
 
         if ($token) {
-            $votes = Vote::where('receipt_token', $token)->get();
+            $exists = Vote::where('receipt_token', $token)->exists();
 
-            if ($votes->isEmpty()) {
+            if (! $exists) {
                 $result = ['found' => false];
             } else {
-                $election = $votes->first()->election;
-                $positions = $votes->groupBy('position_id')->count();
-                $statuses = $votes->pluck('status')->unique()->toArray();
-                $isValid = ! in_array('tampered', $statuses) && ! in_array('invalid', $statuses);
+                $valid = Vote::where('receipt_token', $token)
+                    ->where('status', 'valid')
+                    ->exists();
 
                 $result = [
                     'found' => true,
-                    'election' => $election?->title ?? 'Unknown election',
-                    'positions' => $positions,
-                    'total_votes' => $votes->count(),
-                    'status' => $isValid ? 'valid' : 'tampered',
+                    'valid' => $valid,
                 ];
             }
         }
