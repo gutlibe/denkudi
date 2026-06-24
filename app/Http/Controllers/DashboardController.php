@@ -172,29 +172,28 @@ class DashboardController extends Controller
         }
     }
 
-    public function verify(Request $request, VotingService $voting): Response
+    public function verify(Request $request): Response
     {
         $token = $request->query('token');
         $result = null;
 
         if ($token) {
-            $details = $voting->verifyReceipt($token);
+            $votes = Vote::where('receipt_token', $token)->get();
 
-            if ($details === null) {
+            if ($votes->isEmpty()) {
                 $result = ['found' => false];
             } else {
-                $election = Vote::where('receipt_token', $token)->first()?->election;
-                $statuses = array_column($details, 'status');
-                $hasQuarantined = in_array('quarantined', $statuses, true);
-                $overallStatus = $hasQuarantined ? 'quarantined' : 'valid';
+                $election = $votes->first()->election;
+                $positions = $votes->groupBy('position_id')->count();
+                $statuses = $votes->pluck('status')->unique()->toArray();
+                $isValid = ! in_array('tampered', $statuses) && ! in_array('invalid', $statuses);
 
                 $result = [
                     'found' => true,
-                    'election' => $election->title ?? 'Unknown election',
-                    'positions' => count(array_unique(array_column($details, 'position'))),
-                    'total_votes' => count($details),
-                    'status' => $overallStatus,
-                    'details' => $details,
+                    'election' => $election?->title ?? 'Unknown election',
+                    'positions' => $positions,
+                    'total_votes' => $votes->count(),
+                    'status' => $isValid ? 'valid' : 'tampered',
                 ];
             }
         }

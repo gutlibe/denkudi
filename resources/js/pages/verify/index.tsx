@@ -12,8 +12,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { dashboard, verify as verifyRoute } from '@/routes';
 
-type VoteDetail = { position: string; candidate: string; status: string };
-
 type Props = {
     result: {
         found: boolean;
@@ -21,7 +19,6 @@ type Props = {
         positions?: number;
         total_votes?: number;
         status?: string;
-        details?: VoteDetail[];
     } | null;
     token: string | null;
 };
@@ -171,41 +168,6 @@ export default function VerifyPage({ result, token: initialToken }: Props) {
                                             </p>
                                         </div>
                                     </div>
-                                    {result.details &&
-                                        result.details.length > 0 && (
-                                            <div className="space-y-1.5 rounded-lg border p-3">
-                                                <p className="text-[10px] tracking-wide text-muted-foreground uppercase">
-                                                    Ballot Details
-                                                </p>
-                                                {result.details.map((d, i) => (
-                                                    <div
-                                                        key={i}
-                                                        className="flex items-center justify-between text-xs"
-                                                    >
-                                                        <span className="text-muted-foreground">
-                                                            {d.position}
-                                                        </span>
-                                                        <span className="font-medium">
-                                                            {d.candidate}
-                                                        </span>
-                                                        <span
-                                                            className={`inline-flex items-center gap-1 ${d.status === 'valid' ? 'text-green-500' : 'text-yellow-500'}`}
-                                                        >
-                                                            <HugeiconsIcon
-                                                                icon={
-                                                                    d.status ===
-                                                                    'valid'
-                                                                        ? CheckmarkCircle01Icon
-                                                                        : AlertDiamondIcon
-                                                                }
-                                                                size={10}
-                                                            />
-                                                            {d.status}
-                                                        </span>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        )}
                                     {result.status === 'valid' ? (
                                         <p className="text-xs text-muted-foreground">
                                             Your vote has been recorded
