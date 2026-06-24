@@ -8,6 +8,7 @@ import {
 import { HugeiconsIcon } from '@hugeicons/react';
 import { Link } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
 import { useBallot } from '@/hooks/use-ballot';
 import type { Candidate } from '@/hooks/use-ballot';
 import { verify as verifyRoute } from '@/routes';
@@ -135,14 +136,44 @@ export function VoteFlowMobile({ election, open, onClose, onVoted }: Props) {
                     </Button>
                 </div>
             ) : loading ? (
-                <div className="animate-pulse space-y-6 p-6">
-                    <div className="h-56 rounded-2xl bg-muted" />
-                    <div className="space-y-3">
-                        <div className="h-5 w-1/3 rounded bg-muted" />
-                        <div className="h-4 w-2/3 rounded bg-muted" />
-                        {[1, 2, 3].map((i) => (
-                            <div key={i} className="h-20 rounded-xl bg-muted" />
-                        ))}
+                <div className="flex flex-col">
+                    <div className="relative shrink-0 bg-gradient-to-b from-muted/20 to-transparent pt-12 pb-6">
+                        <div className="flex gap-3 overflow-x-auto px-8 scrollbar-none">
+                            {[1, 2, 3].map((i) => (
+                                <div key={i} className="flex shrink-0 flex-col items-center gap-2 w-20">
+                                    <Skeleton className="h-18 w-18 rounded-2xl" />
+                                    <Skeleton className="h-3 w-14" />
+                                </div>
+                            ))}
+                        </div>
+                        <div className="mt-4 flex items-center justify-center gap-1.5">
+                            {[1, 2, 3].map((i) => (
+                                <div key={i} className="h-1.5 w-1.5 rounded-full bg-muted" />
+                            ))}
+                        </div>
+                    </div>
+                    <div className="relative -mt-4 flex flex-1 flex-col rounded-t-3xl bg-muted/60 dark:bg-card border-t border-x border-border/30 shadow-lg shadow-black/5 dark:border-border/10 overflow-hidden">
+                        <div className="space-y-3 px-6 pt-6">
+                            <Skeleton className="h-6 w-40" />
+                            <Skeleton className="h-4 w-56" />
+                        </div>
+                        <div className="flex-1 space-y-2 px-4 py-3">
+                            {[1, 2, 3].map((i) => (
+                                <div key={i} className="flex items-center gap-3 rounded-2xl border border-border/50 p-3.5">
+                                    <Skeleton className="h-18 w-18 shrink-0 rounded-2xl" />
+                                    <div className="flex-1 space-y-2">
+                                        <Skeleton className="h-4 w-32" />
+                                        <Skeleton className="h-3 w-24" />
+                                        <Skeleton className="h-3 w-48" />
+                                    </div>
+                                    <Skeleton className="h-5 w-5 rounded-full" />
+                                </div>
+                            ))}
+                        </div>
+                        <div className="shrink-0 space-y-3 border-t border-border/40 px-6 py-4">
+                            <Skeleton className="h-3 w-48" />
+                            <Skeleton className="h-11 w-full rounded-xl" />
+                        </div>
                     </div>
                 </div>
             ) : !ballotData ? (
