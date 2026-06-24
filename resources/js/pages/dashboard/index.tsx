@@ -381,136 +381,6 @@ function SectionHeader({
     );
 }
 
-/* ─── Placeholder Data ─── */
-const PLACEHOLDER_ACTIVE: Election[] = [
-    {
-        id: 1,
-        title: 'Student Union President 2025',
-        type_label: 'General',
-        status_label: 'Active',
-        status: 'active',
-        scope: 'University-Wide',
-        description: null,
-        starts_at: '2025-06-15T00:00:00Z',
-        ends_at: new Date(Date.now() + 2 * 86400000).toISOString(),
-        is_active: true,
-        has_voted: false,
-        position_count: 3,
-        candidate_count: 12,
-    },
-    {
-        id: 2,
-        title: 'Faculty of Engineering Elections',
-        type_label: 'Faculty',
-        status_label: 'Active',
-        status: 'active',
-        scope: 'Faculty',
-        description: null,
-        starts_at: '2025-06-17T00:00:00Z',
-        ends_at: new Date(Date.now() + 4 * 86400000).toISOString(),
-        is_active: true,
-        has_voted: true,
-        position_count: 5,
-        candidate_count: 18,
-    },
-];
-
-const PLACEHOLDER_UPCOMING: Election[] = [
-    {
-        id: 3,
-        title: 'Departmental Rep Elections – CS',
-        type_label: 'Department',
-        status_label: 'Scheduled',
-        status: 'scheduled',
-        scope: 'Department',
-        description: null,
-        starts_at: new Date(Date.now() + 7 * 86400000).toISOString(),
-        ends_at: new Date(Date.now() + 10 * 86400000).toISOString(),
-        is_active: false,
-        has_voted: false,
-        position_count: 2,
-        candidate_count: 6,
-    },
-    {
-        id: 4,
-        title: 'Hall of Residence Committee',
-        type_label: 'Hall',
-        status_label: 'Scheduled',
-        status: 'scheduled',
-        scope: 'Hall',
-        description: null,
-        starts_at: new Date(Date.now() + 14 * 86400000).toISOString(),
-        ends_at: new Date(Date.now() + 17 * 86400000).toISOString(),
-        is_active: false,
-        has_voted: false,
-        position_count: 4,
-        candidate_count: 9,
-    },
-    {
-        id: 5,
-        title: 'SRC General Elections Q3',
-        type_label: 'General',
-        status_label: 'Scheduled',
-        status: 'scheduled',
-        scope: 'University-Wide',
-        description: null,
-        starts_at: new Date(Date.now() + 21 * 86400000).toISOString(),
-        ends_at: new Date(Date.now() + 24 * 86400000).toISOString(),
-        is_active: false,
-        has_voted: false,
-        position_count: 7,
-        candidate_count: 24,
-    },
-];
-
-const PLACEHOLDER_PAST: Election[] = [
-    {
-        id: 6,
-        title: 'Student Union President 2024',
-        type_label: 'General',
-        status_label: 'Closed',
-        status: 'closed',
-        scope: 'University-Wide',
-        description: null,
-        starts_at: '2024-06-01T00:00:00Z',
-        ends_at: '2024-06-05T00:00:00Z',
-        is_active: false,
-        has_voted: true,
-        position_count: 3,
-        candidate_count: 10,
-    },
-    {
-        id: 7,
-        title: 'Faculty of Science Elections 2024',
-        type_label: 'Faculty',
-        status_label: 'Closed',
-        status: 'closed',
-        scope: 'Faculty',
-        description: null,
-        starts_at: '2024-05-10T00:00:00Z',
-        ends_at: '2024-05-14T00:00:00Z',
-        is_active: false,
-        has_voted: false,
-        position_count: 4,
-        candidate_count: 13,
-    },
-    {
-        id: 8,
-        title: 'SRC Mid-Year By-Elections',
-        type_label: 'General',
-        status_label: 'Closed',
-        status: 'closed',
-        scope: 'University-Wide',
-        description: null,
-        starts_at: '2024-03-20T00:00:00Z',
-        ends_at: '2024-03-23T00:00:00Z',
-        is_active: false,
-        has_voted: true,
-        position_count: 2,
-        candidate_count: 7,
-    },
-];
-
 /* ─── Page ─── */
 export default function DashboardPage({
     activeElections,
@@ -520,21 +390,12 @@ export default function DashboardPage({
 }: Props) {
     const [votedIds, setVotedIds] = useState<Set<number>>(new Set());
 
-    const rawActive = activeElections.length
-        ? activeElections
-        : PLACEHOLDER_ACTIVE;
-    const upcoming = upcomingElections.length
-        ? upcomingElections
-        : PLACEHOLDER_UPCOMING;
-    const past = pastElections.length ? pastElections : PLACEHOLDER_PAST;
-
-    // Merge optimistic voted state
-    const active = rawActive.map((e) =>
+    const active = activeElections.map((e) =>
         votedIds.has(e.id) ? { ...e, has_voted: true } : e,
     );
 
-    const totalVoted = [...active, ...past].filter((e) => e.has_voted).length;
-    const totalElections = active.length + upcoming.length + past.length;
+    const totalVoted = [...active, ...pastElections].filter((e) => e.has_voted).length;
+    const totalElections = active.length + upcomingElections.length + pastElections.length;
 
     const markVoted = (id: number) => setVotedIds((s) => new Set(s).add(id));
 
@@ -583,7 +444,7 @@ export default function DashboardPage({
                     />
                     <StatCard
                         label="Upcoming"
-                        value={upcoming.length}
+                        value={upcomingElections.length}
                         icon={Calendar01Icon}
                         accentBg="bg-blue-500/15"
                         accentText="text-blue-400"
@@ -637,11 +498,11 @@ export default function DashboardPage({
                     <SectionHeader
                         icon={Calendar01Icon}
                         label="Upcoming Elections"
-                        count={upcoming.length}
+                        count={upcomingElections.length}
                         accentBg="bg-blue-500/15"
                         accentText="text-blue-400"
                     />
-                    {upcoming.length === 0 ? (
+                    {upcomingElections.length === 0 ? (
                         <Card>
                             <CardContent className="flex flex-col items-center justify-center gap-3 py-10 text-center">
                                 <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-muted text-muted-foreground">
@@ -657,7 +518,7 @@ export default function DashboardPage({
                         </Card>
                     ) : (
                         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                            {upcoming.map((e) => (
+                            {upcomingElections.map((e) => (
                                 <UpcomingElectionCard key={e.id} election={e} />
                             ))}
                         </div>
@@ -670,11 +531,11 @@ export default function DashboardPage({
                     <SectionHeader
                         icon={Analytics01Icon}
                         label="Past Elections"
-                        count={past.length}
+                        count={pastElections.length}
                         accentBg="bg-muted"
                         accentText="text-muted-foreground"
                     />
-                    {past.length === 0 ? (
+                    {pastElections.length === 0 ? (
                         <Card>
                             <CardContent className="flex flex-col items-center justify-center gap-3 py-10 text-center">
                                 <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-muted text-muted-foreground">
@@ -690,7 +551,7 @@ export default function DashboardPage({
                         </Card>
                     ) : (
                         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                            {past.map((e, i) => (
+                            {pastElections.map((e, i) => (
                                 <PastElectionCard
                                     key={e.id}
                                     election={e}
