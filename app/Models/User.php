@@ -38,6 +38,16 @@ class User extends Authenticatable implements PasskeyUser
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable, PasskeyAuthenticatable, TwoFactorAuthenticatable;
 
+    protected $fillable = [
+        'first_name',
+        'last_name',
+        'student_id',
+        'email',
+        'password',
+        'role',
+        'email_verified_at',
+    ];
+
     /**
      * Get the attributes that should be cast.
      *
