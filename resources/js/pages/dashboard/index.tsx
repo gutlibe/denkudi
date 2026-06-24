@@ -256,8 +256,8 @@ function ActiveElectionCard({
                             </Link>
                         </Button>
                     )}
-                </CardContent>
-            </Card>
+            </CardContent>
+        </Card>
 
             <VoteComponent
                 election={election}
@@ -315,7 +315,8 @@ function PastElectionCard({
         : 0;
 
     return (
-        <Card className="group opacity-80 transition-all duration-200 hover:-translate-y-0.5 hover:opacity-100 hover:shadow-md">
+        <Link href={results({ election: election.id })} className="group block opacity-80 transition-all duration-200 hover:-translate-y-0.5 hover:opacity-100">
+        <Card className="hover:shadow-md">
             <CardContent className="p-4">
                 <div className="flex items-center gap-4">
                     <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-muted text-muted-foreground">
@@ -349,6 +350,7 @@ function PastElectionCard({
                 </div>
             </CardContent>
         </Card>
+        </Link>
     );
 }
 
