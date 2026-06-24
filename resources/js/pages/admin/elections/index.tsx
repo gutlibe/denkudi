@@ -75,6 +75,7 @@ const statusTransitions: Record<string, { value: string; label: string }[]> = {
         { value: 'closed', label: 'Close' },
         { value: 'draft', label: 'Revert to Draft' },
     ],
+    paused_for_review: [{ value: 'active', label: 'Resume Voting' }],
     closed: [],
 };
 
