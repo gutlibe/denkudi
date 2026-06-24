@@ -37,6 +37,8 @@ type Election = {
     has_voted: boolean;
     position_count: number;
     candidate_count: number;
+    voter_count: number;
+    total_voters: number;
 };
 
 type Props = {
@@ -124,16 +126,16 @@ function LiveBadge() {
 /* ─── Active Election Card ─── */
 function ActiveElectionCard({
     election,
-    idx,
     onVoted,
 }: {
     election: Election;
-    idx: number;
     onVoted: (id: number) => void;
 }) {
     const [sheetOpen, setSheetOpen] = useState(false);
     const isMobile = useIsMobile();
-    const pct = 20 + ((idx * 37 + 15) % 60);
+    const pct = election.total_voters > 0
+        ? Math.round((election.voter_count / election.total_voters) * 100)
+        : 0;
 
     const VoteComponent = isMobile ? VoteFlowMobile : VoteFlowDesktop;
 
@@ -305,12 +307,12 @@ function UpcomingElectionCard({ election }: { election: Election }) {
 /* ─── Past Election Card ─── */
 function PastElectionCard({
     election,
-    idx,
 }: {
     election: Election;
-    idx: number;
 }) {
-    const pct = 55 + ((idx * 13 + 7) % 40);
+    const pct = election.total_voters > 0
+        ? Math.round((election.voter_count / election.total_voters) * 100)
+        : 0;
 
     return (
         <Card className="group opacity-80 transition-all duration-200 hover:-translate-y-0.5 hover:opacity-100 hover:shadow-md">
@@ -480,11 +482,10 @@ export default function DashboardPage({
                         </Card>
                     ) : (
                         <div className="grid gap-4 sm:grid-cols-2">
-                            {active.map((e, i) => (
+                            {active.map((e) => (
                                 <ActiveElectionCard
                                     key={e.id}
                                     election={e}
-                                    idx={i}
                                     onVoted={markVoted}
                                 />
                             ))}
@@ -551,11 +552,10 @@ export default function DashboardPage({
                         </Card>
                     ) : (
                         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                            {pastElections.map((e, i) => (
+                            {pastElections.map((e) => (
                                 <PastElectionCard
                                     key={e.id}
                                     election={e}
-                                    idx={i}
                                 />
                             ))}
                         </div>

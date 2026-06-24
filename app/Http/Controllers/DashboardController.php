@@ -38,6 +38,8 @@ class DashboardController extends Controller
                 'has_voted' => $voting->hasVoted($election, $user->student_id),
                 'position_count' => $election->positions->count(),
                 'candidate_count' => $election->positions->sum(fn ($p) => $p->candidates->count()),
+                'voter_count' => $voting->turnout($election),
+                'total_voters' => \App\Models\User::count(),
             ]);
 
         $now = now();
