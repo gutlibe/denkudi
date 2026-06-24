@@ -1,183 +1,116 @@
-# Architecture — HTU E-Voting
+# Voting Architecture
 
-## Roles
+## Flow
 
-| Role    | Permissions                          |
-| ------- | ------------------------------------ |
-| Admin   | Create/manage elections, candidates  |
-| Student | Vote in active elections             |
+```mermaid
+sequenceDiagram
+    actor V as Voter
+    participant UI as React/Inertia
+    participant API as Laravel
+    participant DB as MariaDB
+    participant Chain as Hash Chain
 
-## Core Models
+    V->>UI: Click "Cast Your Vote"
+    UI->>API: GET /elections/{id}/ballot-data
+    API->>DB: Load positions + candidates
+    DB-->>API: Ballot data
+    API-->>UI: JSON response
 
-| Model      | Key Fields                                          |
-| ---------- | ---------------------------------------------------- |
-| User       | first_name, last_name, student_id, email, password, role |
-| Election   | title, description, starts_at, ends_at, is_active    |
-| Position   | election_id, title (e.g. "President", "VP")          |
-| Candidate  | election_id, position_id, name, bio, photo           |
-| Vote       | election_id, position_id, candidate_id, user_id      |
+    loop Each Position
+        UI->>V: Show candidates (slider + list)
+        V->>UI: Select candidate(s)
+        UI->>UI: Track selections locally
+    end
 
-## Voter Flow (Start → End)
+    V->>API: POST /elections/{id}/vote (all selections)
 
-```
-1. Landing Page (/)
-   - Hero section explaining the e-voting platform
-   - CTA: Login or Register
-   - Shows current/upcoming election dates (if any)
+    API->>API: Validate eligibility + ballot structure
+    API->>Chain: getLatestValidVote() — scan for tampered rows
 
-2. Register (/register)
-   - Form: first_name, last_name, student_id, password
-   - Email auto-generated: {student_id}@htu.edu.gh
-   - Validates: student_id is 10 digits, unique in DB
-   - Role defaults to "student"
-   → Redirects to Dashboard
+    API->>DB: BEGIN TRANSACTION
+    API->>DB: Lock election row (prevent concurrent chain forks)
+    API->>DB: Read last valid vote → previous_hash
 
-3. Login (/login)
-   - Email (auto-generated: student_id@htu.edu.gh) + password
-   - Sessions persisted via Laravel cookies
-   → Redirects to Dashboard
+    loop Each selection
+        API->>DB: INSERT evote_votes
+        Note over API,DB: receipt_token, position_id,<br/>candidate_id, previous_hash,<br/>current_hash = HMAC(receipt +<br/>candidate + prev_hash, APP_KEY),<br/>status = 'valid'
+    end
 
-4. Dashboard (/dashboard)
-   - Lists all active elections (starts_at <= now <= ends_at)
-   - Shows: election title, description, voting period
-   - Status badge: "Open" or "Closed"
-   - Click to enter an election
-   - If already voted: shows "View Results" instead
+    API->>DB: INSERT evote_voter_participation
+    Note over API,DB: hashed_student_id = HMAC(student_id, APP_KEY)<br/>No user_id stored in votes table
+    API->>DB: COMMIT
 
-5. Voting Form (/elections/{id})
-   - Displays positions one at a time (or all on single page)
-   - Per position: list of candidates with name, photo, bio
-   - Select one candidate per position (radio button)
-   - Progress indicator (step 1 of N positions)
-   - "Next" to proceed, "Back" to revisit
-
-6. Review (/elections/{id} — same page, review step)
-   - Summary of all selections before final submit
-   - Shows position → selected candidate
-   - Warning: "You cannot change your vote after submission"
-   - "Submit Ballot" button
-
-7. Submission
-   - Inserts all votes in a transaction
-   - Shows confirmation: "Your vote has been recorded"
-   - "View Results" button appears
-
-8. Results (/elections/{id}/results)
-   - Only visible if user has voted OR election is closed
-   - Per position: bar/pie chart of vote counts
-   - Shows winner per position
-   - Vote is anonymous — user sees totals only
-
-9. Post-Vote Dashboard
-   - Election appears in "Past Elections" section
-   - No re-entry to voting form
-   - Can always revisit results
+    API-->>UI: receipt_token (HTU-XXXX-XXXX-XXXX)
+    UI-->>V: Show receipt + "Verify Your Vote" button
 ```
 
-## Admin Flow (Summary)
+## Anonymity
 
-```
-Login → Dashboard (election stats) → Create Election →
-Add Positions → Add Candidates → Activate Election →
-Monitor turnout → Close Election → View Results
-```
-
-## Routing (Inertia pages)
-
-```
-/                          Landing page
-/login                     Auth (Fortify)
-/register                  Auth (Fortify)
-/dashboard                 Student: active elections
-/elections/{id}            Voting form
-/elections/{id}/results    Results (after voting or if closed)
-/admin/dashboard           Admin overview
-/admin/elections           CRUD elections
-/admin/elections/{id}      Manage positions & candidates
-/admin/elections/{id}/results  Live results
-```
-
-## Project Structure
-
-### Backend (Laravel)
-
-```
-app/
-├── Models/           Election, Candidate, Position, Vote, User
-├── Http/
-│   └── Controllers/  ElectionController, VoteController, AdminController
-├── Enums/            Role.php
-└── Policies/         ElectionPolicy, VotePolicy
+```mermaid
+erDiagram
+    evote_votes {
+        int id PK
+        int election_id
+        int position_id
+        int candidate_id
+        string receipt_token
+        string previous_hash
+        string current_hash
+        string status
+    }
+    evote_voter_participation {
+        int id PK
+        int election_id
+        string hashed_student_id
+        datetime voted_at
+    }
+    users {
+        int id PK
+        string student_id
+    }
+    evote_votes ||--o{ evote_voter_participation : "NO DIRECT LINK"
+    evote_voter_participation ||--o{ users : "hashed_student_id ≈ HMAC(student_id)"
+    note for evote_votes "No user_id column — votes are anonymous"
+    note for evote_voter_participation "Only stores hashed student ID — not reversible without APP_KEY"
 ```
 
-### Frontend (resources/js)
+## Hash Chain Integrity
 
-```
-├── Pages/
-│   ├── Auth/
-│   │   ├── login/
-│   │   │   └── index.tsx
-│   │   └── register/
-│   │       └── index.tsx
-│   │
-│   ├── App/                           ← Student / voter
-│   │   ├── dashboard/
-│   │   │   └── index.tsx
-│   │   └── Elections/
-│   │       ├── elections-list/
-│   │       │   └── index.tsx
-│   │       ├── voting-form/
-│   │       │   └── index.tsx
-│   │       └── results/
-│   │           └── index.tsx
-│   │
-│   └── Admin/                         ← Admin management
-│       ├── dashboard/
-│       │   └── index.tsx
-│       └── Elections/
-│           ├── elections-list/
-│           │   └── index.tsx
-│           ├── create-election/
-│           │   └── index.tsx
-│           ├── edit-election/
-│           │   └── index.tsx
-│           ├── manage-election/
-│           │   └── index.tsx
-│           └── results/
-│               └── index.tsx
-│
-├── Layouts/
-│   ├── app-layout.tsx
-│   ├── admin-layout.tsx
-│   └── guest-layout.tsx
-│
-├── Components/
-│   ├── Ui/               ← shadcn/ui primitives
-│   └── Shared/
-│       ├── election-card.tsx
-│       ├── candidate-card.tsx
-│       └── vote-chart.tsx
-│
-├── Hooks/
-│   ├── use-election.ts
-│   └── use-vote.ts
-│
-├── Types/
-│   └── index.ts
-│
-└── Lib/
-    └── utils.ts
+```mermaid
+flowchart LR
+    subgraph Genesis
+        G[Genesis Block]
+    end
+
+    subgraph Vote1
+        V1[Vote #1<br/>President]
+        H1[curr_hash = HMAC<br/>(receipt + candidate<br/>+ prev_hash, APP_KEY)]
+    end
+
+    subgraph Vote2
+        V2[Vote #2<br/>Vice President]
+        H2[curr_hash = HMAC<br/>(receipt + candidate<br/>+ prev_hash, APP_KEY)]
+    end
+
+    subgraph Vote3
+        V3[Vote #3<br/>Secretary]
+        H3[curr_hash = HMAC<br/>(receipt + candidate<br/>+ prev_hash, APP_KEY)]
+    end
+
+    G -->|"prev_hash"| H1
+    H1 -->|"prev_hash = H1"| H2
+    H2 -->|"prev_hash = H2"| H3
+
+    note for V2 "Tamper with Vote #2<br/>→ H3's prev_hash ≠ H2<br/>→ Chain breaks<br/>→ Auto-quarantined"
 ```
 
-### Naming conventions
+## Verify Vote
 
-- **File system:** kebab-case folders and files (`elections-list/`, `app-layout.tsx`)
-- **Inertia routes:** PascalCase reference (`Inertia::render('App/Elections/VotingForm')`)
-- **Page entry point:** always `index.tsx` inside its page folder
-
-## Constraints
-
-- One vote per student per election (unique constraint on user_id + election_id)
-- Votes are anonymous — vote table stores user_id but frontend never exposes it
-- Election is read-only once user has voted
-- Results visible only when election is closed OR user has voted
+```mermaid
+flowchart LR
+    V[Voter] -->|Paste receipt| P[Verify Page<br/>GET /verify?token=HTU-...]
+    P -->|"EXISTS query"| DB[(evote_votes)]
+    DB -->|found + valid| P
+    P -->|"✅ Vote Verified<br/>Election: SRC 2026<br/>No ballot choices shown"| V
+    note for P "Only confirms existence + validity<br/>Never reveals candidate choices"
+```
