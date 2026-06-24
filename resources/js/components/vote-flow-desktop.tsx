@@ -8,8 +8,8 @@ import {
 import { HugeiconsIcon } from '@hugeicons/react';
 import { Link } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
-import { Skeleton } from '@/components/ui/skeleton';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
+import { Skeleton } from '@/components/ui/skeleton';
 import { useBallot } from '@/hooks/use-ballot';
 import type { Candidate } from '@/hooks/use-ballot';
 import { verify as verifyRoute } from '@/routes';
@@ -154,9 +154,12 @@ export function VoteFlowDesktop({ election, open, onClose, onVoted }: Props) {
                 ) : loading ? (
                     <div className="flex flex-col">
                         <div className="relative shrink-0 bg-gradient-to-b from-muted/20 to-transparent pt-16 pb-6">
-                            <div className="flex gap-3 overflow-x-auto px-8 scrollbar-none">
+                            <div className="flex scrollbar-none gap-3 overflow-x-auto px-8">
                                 {[1, 2, 3].map((i) => (
-                                    <div key={i} className="flex shrink-0 flex-col items-center gap-2 w-28">
+                                    <div
+                                        key={i}
+                                        className="flex w-28 shrink-0 flex-col items-center gap-2"
+                                    >
                                         <Skeleton className="h-24 w-24 rounded-2xl" />
                                         <Skeleton className="h-3 w-16" />
                                     </div>
@@ -164,18 +167,24 @@ export function VoteFlowDesktop({ election, open, onClose, onVoted }: Props) {
                             </div>
                             <div className="mt-4 flex items-center justify-center gap-1.5">
                                 {[1, 2, 3].map((i) => (
-                                    <div key={i} className="h-1.5 w-1.5 rounded-full bg-muted" />
+                                    <div
+                                        key={i}
+                                        className="h-1.5 w-1.5 rounded-full bg-muted"
+                                    />
                                 ))}
                             </div>
                         </div>
-                        <div className="relative -mt-4 flex flex-1 flex-col rounded-t-3xl bg-muted/60 dark:bg-card border-t border-x border-border/30 shadow-lg shadow-black/5 dark:border-border/10 overflow-hidden">
+                        <div className="relative -mt-4 flex flex-1 flex-col overflow-hidden rounded-t-3xl border-x border-t border-border/30 bg-muted/60 shadow-lg shadow-black/5 dark:border-border/10 dark:bg-card">
                             <div className="space-y-3 px-6 pt-6">
                                 <Skeleton className="h-6 w-40" />
                                 <Skeleton className="h-4 w-56" />
                             </div>
                             <div className="flex-1 space-y-2 px-4 py-3">
                                 {[1, 2, 3].map((i) => (
-                                    <div key={i} className="flex items-center gap-4 rounded-2xl border border-border/50 p-4">
+                                    <div
+                                        key={i}
+                                        className="flex items-center gap-4 rounded-2xl border border-border/50 p-4"
+                                    >
                                         <Skeleton className="h-24 w-24 shrink-0 rounded-2xl" />
                                         <div className="flex-1 space-y-2">
                                             <Skeleton className="h-4 w-36" />
@@ -189,7 +198,7 @@ export function VoteFlowDesktop({ election, open, onClose, onVoted }: Props) {
                             <div className="shrink-0 space-y-3 border-t border-border/40 px-6 py-4">
                                 <Skeleton className="h-3 w-48" />
                                 <div className="flex gap-2">
-                                    <Skeleton className="h-11 w-12 rounded-xl shrink-0" />
+                                    <Skeleton className="h-11 w-12 shrink-0 rounded-xl" />
                                     <Skeleton className="h-11 flex-1 rounded-xl" />
                                 </div>
                             </div>

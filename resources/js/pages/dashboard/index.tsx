@@ -133,9 +133,10 @@ function ActiveElectionCard({
 }) {
     const [sheetOpen, setSheetOpen] = useState(false);
     const isMobile = useIsMobile();
-    const pct = election.total_voters > 0
-        ? Math.round((election.voter_count / election.total_voters) * 100)
-        : 0;
+    const pct =
+        election.total_voters > 0
+            ? Math.round((election.voter_count / election.total_voters) * 100)
+            : 0;
 
     const VoteComponent = isMobile ? VoteFlowMobile : VoteFlowDesktop;
 
@@ -256,8 +257,8 @@ function ActiveElectionCard({
                             </Link>
                         </Button>
                     )}
-            </CardContent>
-        </Card>
+                </CardContent>
+            </Card>
 
             <VoteComponent
                 election={election}
@@ -305,51 +306,54 @@ function UpcomingElectionCard({ election }: { election: Election }) {
 }
 
 /* ─── Past Election Card ─── */
-function PastElectionCard({
-    election,
-}: {
-    election: Election;
-}) {
-    const pct = election.total_voters > 0
-        ? Math.round((election.voter_count / election.total_voters) * 100)
-        : 0;
+function PastElectionCard({ election }: { election: Election }) {
+    const pct =
+        election.total_voters > 0
+            ? Math.round((election.voter_count / election.total_voters) * 100)
+            : 0;
 
     return (
-        <Link href={results({ election: election.id })} className="group block opacity-80 transition-all duration-200 hover:-translate-y-0.5 hover:opacity-100">
-        <Card className="hover:shadow-md">
-            <CardContent className="p-4">
-                <div className="flex items-center gap-4">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-muted text-muted-foreground">
-                        <HugeiconsIcon icon={Analytics01Icon} size={18} />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                        <p className="truncate text-sm leading-tight font-semibold">
-                            {election.title}
-                        </p>
-                        <p className="mt-0.5 text-xs text-muted-foreground">
-                            {election.scope} · {election.candidate_count}{' '}
-                            candidate{election.candidate_count !== 1 ? 's' : ''}
-                        </p>
-                    </div>
-                    <div className="shrink-0 space-y-1 text-right">
-                        {election.has_voted ? (
-                            <div className="flex items-center gap-1 text-xs text-green-500">
-                                <HugeiconsIcon
-                                    icon={CheckmarkCircle01Icon}
-                                    size={12}
-                                />
-                                Voted
-                            </div>
-                        ) : (
-                            <p className="text-xs text-muted-foreground">
-                                Not voted
+        <Link
+            href={results({ election: election.id })}
+            className="group block opacity-80 transition-all duration-200 hover:-translate-y-0.5 hover:opacity-100"
+        >
+            <Card className="hover:shadow-md">
+                <CardContent className="p-4">
+                    <div className="flex items-center gap-4">
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-muted text-muted-foreground">
+                            <HugeiconsIcon icon={Analytics01Icon} size={18} />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                            <p className="truncate text-sm leading-tight font-semibold">
+                                {election.title}
                             </p>
-                        )}
-                        <p className="text-xs font-semibold">{pct}% turnout</p>
+                            <p className="mt-0.5 text-xs text-muted-foreground">
+                                {election.scope} · {election.candidate_count}{' '}
+                                candidate
+                                {election.candidate_count !== 1 ? 's' : ''}
+                            </p>
+                        </div>
+                        <div className="shrink-0 space-y-1 text-right">
+                            {election.has_voted ? (
+                                <div className="flex items-center gap-1 text-xs text-green-500">
+                                    <HugeiconsIcon
+                                        icon={CheckmarkCircle01Icon}
+                                        size={12}
+                                    />
+                                    Voted
+                                </div>
+                            ) : (
+                                <p className="text-xs text-muted-foreground">
+                                    Not voted
+                                </p>
+                            )}
+                            <p className="text-xs font-semibold">
+                                {pct}% turnout
+                            </p>
+                        </div>
                     </div>
-                </div>
-            </CardContent>
-        </Card>
+                </CardContent>
+            </Card>
         </Link>
     );
 }
@@ -398,8 +402,11 @@ export default function DashboardPage({
         votedIds.has(e.id) ? { ...e, has_voted: true } : e,
     );
 
-    const totalVoted = [...active, ...pastElections].filter((e) => e.has_voted).length;
-    const totalElections = active.length + upcomingElections.length + pastElections.length;
+    const totalVoted = [...active, ...pastElections].filter(
+        (e) => e.has_voted,
+    ).length;
+    const totalElections =
+        active.length + upcomingElections.length + pastElections.length;
 
     const markVoted = (id: number) => setVotedIds((s) => new Set(s).add(id));
 
@@ -555,10 +562,7 @@ export default function DashboardPage({
                     ) : (
                         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                             {pastElections.map((e) => (
-                                <PastElectionCard
-                                    key={e.id}
-                                    election={e}
-                                />
+                                <PastElectionCard key={e.id} election={e} />
                             ))}
                         </div>
                     )}

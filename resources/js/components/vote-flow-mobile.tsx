@@ -138,9 +138,12 @@ export function VoteFlowMobile({ election, open, onClose, onVoted }: Props) {
             ) : loading ? (
                 <div className="flex flex-col">
                     <div className="relative shrink-0 bg-gradient-to-b from-muted/20 to-transparent pt-12 pb-6">
-                        <div className="flex gap-3 overflow-x-auto px-8 scrollbar-none">
+                        <div className="flex scrollbar-none gap-3 overflow-x-auto px-8">
                             {[1, 2, 3].map((i) => (
-                                <div key={i} className="flex shrink-0 flex-col items-center gap-2 w-20">
+                                <div
+                                    key={i}
+                                    className="flex w-20 shrink-0 flex-col items-center gap-2"
+                                >
                                     <Skeleton className="h-18 w-18 rounded-2xl" />
                                     <Skeleton className="h-3 w-14" />
                                 </div>
@@ -148,18 +151,24 @@ export function VoteFlowMobile({ election, open, onClose, onVoted }: Props) {
                         </div>
                         <div className="mt-4 flex items-center justify-center gap-1.5">
                             {[1, 2, 3].map((i) => (
-                                <div key={i} className="h-1.5 w-1.5 rounded-full bg-muted" />
+                                <div
+                                    key={i}
+                                    className="h-1.5 w-1.5 rounded-full bg-muted"
+                                />
                             ))}
                         </div>
                     </div>
-                    <div className="relative -mt-4 flex flex-1 flex-col rounded-t-3xl bg-muted/60 dark:bg-card border-t border-x border-border/30 shadow-lg shadow-black/5 dark:border-border/10 overflow-hidden">
+                    <div className="relative -mt-4 flex flex-1 flex-col overflow-hidden rounded-t-3xl border-x border-t border-border/30 bg-muted/60 shadow-lg shadow-black/5 dark:border-border/10 dark:bg-card">
                         <div className="space-y-3 px-6 pt-6">
                             <Skeleton className="h-6 w-40" />
                             <Skeleton className="h-4 w-56" />
                         </div>
                         <div className="flex-1 space-y-2 px-4 py-3">
                             {[1, 2, 3].map((i) => (
-                                <div key={i} className="flex items-center gap-3 rounded-2xl border border-border/50 p-3.5">
+                                <div
+                                    key={i}
+                                    className="flex items-center gap-3 rounded-2xl border border-border/50 p-3.5"
+                                >
                                     <Skeleton className="h-18 w-18 shrink-0 rounded-2xl" />
                                     <div className="flex-1 space-y-2">
                                         <Skeleton className="h-4 w-32" />
