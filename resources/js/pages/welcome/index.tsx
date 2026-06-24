@@ -55,7 +55,7 @@ export default function Welcome() {
 
     return (
         <>
-            <Head title="Welcome — HTU E-Voting" />
+            <Head title="Welcome" />
             <div className="flex min-h-screen flex-col bg-background">
                 <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
                     <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">

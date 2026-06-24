@@ -15,7 +15,7 @@ const pages = import.meta.glob('./pages/**/*.tsx');
 initializeTheme();
 
 createInertiaApp({
-    title: (title) => (title ? `${title} - ${appName}` : appName),
+    title: (title) => (title ? `${title} — ${appName}` : appName),
     resolve: (name) => {
         const exact = `./pages/${name}.tsx`;
         const folder = `./pages/${name}/index.tsx`;
