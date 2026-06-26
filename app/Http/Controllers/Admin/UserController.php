@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Enums\Role;
 use App\Http\Controllers\Controller;
+use App\Models\AdminAuditLog;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -59,6 +60,15 @@ class UserController extends Controller
         $oldRole = $user->role->label();
         $user->update(['role' => $request->input('role')]);
         $newRole = $user->fresh()->role->label();
+
+        AdminAuditLog::create([
+            'admin_id' => $request->user()->id,
+            'action' => 'user_role_changed',
+            'description' => "User \"{$user->first_name} {$user->last_name}\" role changed from {$oldRole} to {$newRole}.",
+            'metadata' => ['user_id' => $user->id, 'from' => $oldRole, 'to' => $newRole],
+            'ip_address' => $request->ip(),
+            'created_at' => now(),
+        ]);
 
         return back()->with('toast', [
             'type' => 'success',
