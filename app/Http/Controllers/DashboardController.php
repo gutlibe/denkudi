@@ -6,6 +6,7 @@ use App\Exceptions\ElectionPausedException;
 use App\Models\Candidate;
 use App\Models\Election;
 use App\Models\Position;
+use App\Models\User;
 use App\Models\Vote;
 use App\Services\VotingService;
 use Illuminate\Http\JsonResponse;
@@ -39,7 +40,7 @@ class DashboardController extends Controller
                 'position_count' => $election->positions->count(),
                 'candidate_count' => $election->positions->sum(fn ($p) => $p->candidates->count()),
                 'voter_count' => $voting->turnout($election),
-                'total_voters' => \App\Models\User::count(),
+                'total_voters' => User::count(),
             ]);
 
         $now = now();
@@ -172,7 +173,7 @@ class DashboardController extends Controller
         }
     }
 
-    public function verify(Request $request): Response
+    public function verify(Request $request, VotingService $voting): Response
     {
         $token = $request->query('token');
         $result = null;
@@ -183,14 +184,29 @@ class DashboardController extends Controller
             if (! $vote) {
                 $result = ['found' => false];
             } else {
-                $valid = Vote::where('receipt_token', $token)
-                    ->where('status', 'valid')
-                    ->exists();
+                $votes = Vote::with(['candidate', 'position'])
+                    ->where('receipt_token', $token)
+                    ->get();
+
+                $allValid = true;
+                $chainBroken = false;
+
+                foreach ($votes as $v) {
+                    if ($v->status !== 'valid') {
+                        $allValid = false;
+                        break;
+                    }
+                }
+
+                if ($allValid && $votes->isNotEmpty()) {
+                    $integrity = $voting->verifyVoteIntegrity($votes->first());
+                    $chainBroken = ! $integrity['valid'];
+                }
 
                 $result = [
                     'found' => true,
-                    'valid' => $valid,
-                    'election' => $vote->election?->title ?? 'Unknown election',
+                    'valid' => $allValid && ! $chainBroken,
+                    'election' => optional($vote->election)->title ?? 'Unknown election',
                 ];
             }
         }
