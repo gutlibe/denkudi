@@ -1,7 +1,7 @@
 import {
-    PlusSignIcon,
-    PencilEdit02Icon,
     Delete01Icon,
+    PencilEdit02Icon,
+    PlusSignIcon,
     Settings01Icon,
 } from '@hugeicons/core-free-icons';
 import { HugeiconsIcon } from '@hugeicons/react';
@@ -24,6 +24,7 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Separator } from '@/components/ui/separator';
 import { Spinner } from '@/components/ui/spinner';
 import {
     Tooltip,
@@ -98,157 +99,135 @@ export default function ElectionManage({ election }: Props) {
         <>
             <Head title={`Manage — ${election.title}`} />
             <div className="space-y-6">
-                <div>
-                    <h2 className="text-2xl font-bold tracking-tight">
-                        {election.title}
-                    </h2>
-                    <p className="mt-1 text-muted-foreground">
-                        {election.scope}
-                    </p>
-                </div>
-
-                <div className="flex items-center justify-between">
-                    <p className="text-sm text-muted-foreground">
-                        {election.positions.length} position
-                        {election.positions.length !== 1 ? 's' : ''}
-                    </p>
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                        <h2 className="text-2xl font-bold tracking-tight">{election.title}</h2>
+                        <p className="mt-1 text-sm text-muted-foreground">{election.scope} &middot; {election.positions.length} position{election.positions.length !== 1 ? 's' : ''}</p>
+                    </div>
                     <Button size="sm" onClick={() => openPosDialog(null)}>
-                        <HugeiconsIcon
-                            icon={PlusSignIcon}
-                            size={14}
-                            className="mr-1"
-                        />
+                        <HugeiconsIcon icon={PlusSignIcon} size={14} className="mr-1.5" />
                         Add Position
                     </Button>
                 </div>
 
+                <Separator />
+
                 {election.positions.length === 0 ? (
                     <Card>
-                        <CardContent className="flex flex-col items-center justify-center py-12 text-center">
-                            <CardTitle className="text-base">
-                                No positions yet
-                            </CardTitle>
-                            <CardDescription className="mt-1">
-                                Add positions like President, VP, Treasurer.
-                            </CardDescription>
+                        <CardContent className="flex flex-col items-center justify-center gap-3 py-16">
+                            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-muted">
+                                <HugeiconsIcon icon={Settings01Icon} size={22} className="text-muted-foreground" />
+                            </div>
+                            <div className="text-center">
+                                <CardTitle className="text-base">No positions yet</CardTitle>
+                                <CardDescription className="mt-1">
+                                    Add positions like President, VP, Treasurer.
+                                </CardDescription>
+                            </div>
                         </CardContent>
                     </Card>
                 ) : (
-                    <Card>
-                        <CardContent className="overflow-x-auto p-0">
-                            <table className="w-full whitespace-nowrap">
-                                <thead>
-                                    <tr className="border-b text-left text-sm text-muted-foreground">
-                                        <th className="px-6 py-3 font-medium">
-                                            Position
-                                        </th>
-                                        <th className="px-6 py-3 font-medium">
-                                            Selections
-                                        </th>
-                                        <th className="px-6 py-3 font-medium">
-                                            Candidates
-                                        </th>
-                                        <th className="px-6 py-3 text-right font-medium">
-                                            Actions
-                                        </th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {election.positions.map((pos) => (
-                                        <tr
-                                            key={pos.id}
-                                            className="border-b text-sm last:border-0"
-                                        >
-                                            <td className="px-6 py-3 font-medium">
-                                                {pos.title}
-                                            </td>
-                                            <td className="px-6 py-3 text-muted-foreground">
-                                                {pos.max_selections === 1
-                                                    ? 'Single choice'
-                                                    : `Up to ${pos.max_selections}`}
-                                            </td>
-                                            <td className="px-6 py-3 text-muted-foreground">
-                                                {pos.candidate_count}
-                                            </td>
-                                            <td className="px-6 py-3 text-right">
-                                                <div className="flex items-center justify-end gap-1">
-                                                    <Tooltip>
-                                                        <TooltipTrigger asChild>
-                                                            <Button
-                                                                asChild
-                                                                variant="ghost"
-                                                                size="icon-sm"
-                                                            >
-                                                                <Link
-                                                                    href={`/admin/elections/${election.id}/positions/${pos.id}/candidates`}
+                    <Card className="py-0">
+                        <CardContent className="p-0">
+                            <div className="overflow-x-auto">
+                                <table className="w-full">
+                                    <thead>
+                                        <tr className="border-b bg-muted/30">
+                                            <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                                                Position
+                                            </th>
+                                            <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                                                Selections
+                                            </th>
+                                            <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                                                Candidates
+                                            </th>
+                                            <th className="px-4 py-3 text-right text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                                                Actions
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y">
+                                        {election.positions.map((pos) => (
+                                            <tr
+                                                key={pos.id}
+                                                className="transition-colors hover:bg-muted/30"
+                                            >
+                                                <td className="px-4 py-3 text-sm font-medium">
+                                                    {pos.title}
+                                                </td>
+                                                <td className="px-4 py-3 text-sm text-muted-foreground">
+                                                    {pos.max_selections === 1
+                                                        ? 'Single choice'
+                                                        : `Up to ${pos.max_selections}`}
+                                                </td>
+                                                <td className="px-4 py-3 text-sm text-muted-foreground">
+                                                    {pos.candidate_count}
+                                                </td>
+                                                <td className="px-4 py-3 text-right">
+                                                    <div className="flex items-center justify-end gap-1">
+                                                        <Tooltip>
+                                                            <TooltipTrigger asChild>
+                                                                <Button
+                                                                    asChild
+                                                                    variant="ghost"
+                                                                    size="icon-sm"
+                                                                >
+                                                                    <Link
+                                                                        href={`/admin/elections/${election.id}/positions/${pos.id}/candidates`}
+                                                                    >
+                                                                        <HugeiconsIcon
+                                                                            icon={Settings01Icon}
+                                                                            size={15}
+                                                                        />
+                                                                    </Link>
+                                                                </Button>
+                                                            </TooltipTrigger>
+                                                            <TooltipContent>
+                                                                Candidates
+                                                            </TooltipContent>
+                                                        </Tooltip>
+                                                        <Tooltip>
+                                                            <TooltipTrigger asChild>
+                                                                <Button
+                                                                    variant="ghost"
+                                                                    size="icon-sm"
+                                                                    onClick={() => openPosDialog(pos)}
                                                                 >
                                                                     <HugeiconsIcon
-                                                                        icon={
-                                                                            Settings01Icon
-                                                                        }
-                                                                        size={
-                                                                            15
-                                                                        }
+                                                                        icon={PencilEdit02Icon}
+                                                                        size={14}
                                                                     />
-                                                                </Link>
-                                                            </Button>
-                                                        </TooltipTrigger>
-                                                        <TooltipContent>
-                                                            Candidates
-                                                        </TooltipContent>
-                                                    </Tooltip>
-                                                    <Tooltip>
-                                                        <TooltipTrigger asChild>
-                                                            <Button
-                                                                variant="ghost"
-                                                                size="icon-sm"
-                                                                onClick={() =>
-                                                                    openPosDialog(
-                                                                        pos,
-                                                                    )
-                                                                }
-                                                            >
-                                                                <HugeiconsIcon
-                                                                    icon={
-                                                                        PencilEdit02Icon
-                                                                    }
-                                                                    size={14}
-                                                                />
-                                                            </Button>
-                                                        </TooltipTrigger>
-                                                        <TooltipContent>
-                                                            Edit
-                                                        </TooltipContent>
-                                                    </Tooltip>
-                                                    <Tooltip>
-                                                        <TooltipTrigger asChild>
-                                                            <Button
-                                                                variant="ghost"
-                                                                size="icon-sm"
-                                                                onClick={() =>
-                                                                    setDeletePosId(
-                                                                        pos.id,
-                                                                    )
-                                                                }
-                                                            >
-                                                                <HugeiconsIcon
-                                                                    icon={
-                                                                        Delete01Icon
-                                                                    }
-                                                                    size={14}
-                                                                />
-                                                            </Button>
-                                                        </TooltipTrigger>
-                                                        <TooltipContent>
-                                                            Delete
-                                                        </TooltipContent>
-                                                    </Tooltip>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
+                                                                </Button>
+                                                            </TooltipTrigger>
+                                                            <TooltipContent>
+                                                                Edit
+                                                            </TooltipContent>
+                                                        </Tooltip>
+                                                        <Tooltip>
+                                                            <TooltipTrigger asChild>
+                                                                <Button
+                                                                    variant="ghost"
+                                                                    size="icon-sm"
+                                                                    onClick={() => setDeletePosId(pos.id)}
+                                                                >
+                                                                    <HugeiconsIcon
+                                                                        icon={Delete01Icon}
+                                                                        size={14}
+                                                                    />
+                                                                </Button>
+                                                            </TooltipTrigger>
+                                                            <TooltipContent>
+                                                                Delete
+                                                            </TooltipContent>
+                                                        </Tooltip>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
                         </CardContent>
                     </Card>
                 )}

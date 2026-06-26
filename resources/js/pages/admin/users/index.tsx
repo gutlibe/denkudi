@@ -1,4 +1,4 @@
-import { Shield01Icon, Search01Icon } from '@hugeicons/core-free-icons';
+import { Search01Icon, Shield01Icon } from '@hugeicons/core-free-icons';
 import { HugeiconsIcon } from '@hugeicons/react';
 import { Head, router } from '@inertiajs/react';
 import { useState } from 'react';
@@ -66,6 +66,13 @@ export default function UsersIndex({
             { preserveState: true, replace: true },
         );
 
+    const goToPage = (page: number) =>
+        router.get(
+            '/admin/users',
+            { search, page: String(page) },
+            { preserveState: true },
+        );
+
     const openRoleDialog = (user: User) =>
         setRoleDialog({
             user,
@@ -87,167 +94,156 @@ export default function UsersIndex({
         );
     };
 
+    const pages: number[] = [];
+    const maxPages = 5;
+    let startPage = Math.max(1, pagination.current_page - Math.floor(maxPages / 2));
+    const endPage = Math.min(pagination.last_page, startPage + maxPages - 1);
+    startPage = Math.max(1, endPage - maxPages + 1);
+
+    for (let i = startPage; i <= endPage; i++) {
+        pages.push(i);
+    }
+
     return (
         <>
             <Head title="User Management" />
             <div className="space-y-6">
-                <div>
-                    <h2 className="text-2xl font-bold tracking-tight">
-                        User Management
-                    </h2>
-                    <p className="mt-1 text-muted-foreground">
-                        {pagination.total} registered user
-                        {pagination.total !== 1 ? 's' : ''}
-                    </p>
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                        <h2 className="text-2xl font-bold tracking-tight">User Management</h2>
+                        <p className="mt-1 text-sm text-muted-foreground">
+                            {pagination.total} registered user{pagination.total !== 1 ? 's' : ''}
+                        </p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <Input
+                            placeholder="Search name, ID or email..."
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                            onKeyDown={(e) => e.key === 'Enter' && applySearch()}
+                            className="w-64"
+                        />
+                        <Button variant="outline" size="sm" onClick={applySearch}>
+                            <HugeiconsIcon icon={Search01Icon} size={14} className="mr-1.5" />
+                            Search
+                        </Button>
+                    </div>
                 </div>
 
-                <Card>
-                    <CardContent className="flex items-end gap-4 p-3">
-                        <div className="grid flex-1 gap-1.5">
-                            <Label htmlFor="search" className="text-xs">
-                                Search
-                            </Label>
-                            <div className="relative">
-                                <HugeiconsIcon
-                                    icon={Search01Icon}
-                                    size={14}
-                                    className="absolute top-1/2 left-2.5 -translate-y-1/2 text-muted-foreground"
-                                />
-                                <Input
-                                    id="search"
-                                    placeholder="Name, ID or email..."
-                                    value={search}
-                                    onChange={(e) => setSearch(e.target.value)}
-                                    onKeyDown={(e) =>
-                                        e.key === 'Enter' && applySearch()
-                                    }
-                                    className="pl-8"
-                                />
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
-
-                <Card>
-                    <CardContent className="overflow-x-auto p-0">
-                        <table className="w-full whitespace-nowrap">
-                            <thead>
-                                <tr className="border-b text-left text-sm text-muted-foreground">
-                                    <th className="px-6 py-3 font-medium">
-                                        Name
-                                    </th>
-                                    <th className="px-6 py-3 font-medium">
-                                        Student ID
-                                    </th>
-                                    <th className="px-6 py-3 font-medium">
-                                        Email
-                                    </th>
-                                    <th className="px-6 py-3 font-medium">
-                                        Role
-                                    </th>
-                                    <th className="px-6 py-3 font-medium">
-                                        Joined
-                                    </th>
-                                    <th className="px-6 py-3 text-right font-medium">
-                                        Actions
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {users.map((user) => (
-                                    <tr
-                                        key={user.id}
-                                        className="border-b text-sm last:border-0"
-                                    >
-                                        <td className="px-6 py-3 font-medium">
-                                            {user.first_name} {user.last_name}
-                                        </td>
-                                        <td className="px-6 py-3 font-mono text-xs">
-                                            {user.student_id}
-                                        </td>
-                                        <td className="px-6 py-3 text-muted-foreground">
-                                            {user.email}
-                                        </td>
-                                        <td className="px-6 py-3">
-                                            <Badge
-                                                variant="outline"
-                                                className={
-                                                    user.role === 'admin'
-                                                        ? 'border-primary/20 bg-primary/10 text-primary'
-                                                        : 'bg-muted text-muted-foreground'
-                                                }
-                                            >
-                                                <HugeiconsIcon
-                                                    icon={Shield01Icon}
-                                                    size={12}
-                                                    className="mr-1"
-                                                />
-                                                {user.role_label}
-                                            </Badge>
-                                        </td>
-                                        <td className="px-6 py-3 text-muted-foreground">
-                                            {new Date(
-                                                user.created_at,
-                                            ).toLocaleDateString()}
-                                        </td>
-                                        <td className="px-6 py-3 text-right">
-                                            <Button
-                                                variant="outline"
-                                                size="sm"
-                                                onClick={() =>
-                                                    openRoleDialog(user)
-                                                }
-                                            >
-                                                Change Role
-                                            </Button>
-                                        </td>
+                <Card className="py-0">
+                    <CardContent className="p-0">
+                        <div className="overflow-x-auto">
+                            <table className="w-full min-w-[600px]">
+                                <thead>
+                                    <tr className="border-b bg-muted/30">
+                                        <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                                            Name
+                                        </th>
+                                        <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                                            Student ID
+                                        </th>
+                                        <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                                            Email
+                                        </th>
+                                        <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                                            Role
+                                        </th>
+                                        <th className="hidden px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider md:table-cell">
+                                            Joined
+                                        </th>
+                                        <th className="px-4 py-3 text-right text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                                            Actions
+                                        </th>
                                     </tr>
-                                ))}
-                                {users.length === 0 && (
-                                    <tr>
-                                        <td
-                                            colSpan={6}
-                                            className="px-6 py-12 text-center text-sm text-muted-foreground"
+                                </thead>
+                                <tbody className="divide-y">
+                                    {users.map((user) => (
+                                        <tr
+                                            key={user.id}
+                                            className="transition-colors hover:bg-muted/30"
                                         >
-                                            No users found.
-                                        </td>
-                                    </tr>
-                                )}
-                            </tbody>
-                        </table>
+                                            <td className="px-4 py-3 text-sm font-medium whitespace-nowrap">
+                                                {user.first_name} {user.last_name}
+                                            </td>
+                                            <td className="px-4 py-3 font-mono text-xs whitespace-nowrap">
+                                                {user.student_id}
+                                            </td>
+                                            <td className="px-4 py-3 text-sm text-muted-foreground whitespace-nowrap">
+                                                {user.email}
+                                            </td>
+                                            <td className="px-4 py-3 whitespace-nowrap">
+                                                <Badge
+                                                    variant={user.role === 'admin' ? 'default' : 'secondary'}
+                                                    className="gap-1 text-[11px]"
+                                                >
+                                                    <HugeiconsIcon icon={Shield01Icon} size={11} />
+                                                    {user.role_label}
+                                                </Badge>
+                                            </td>
+                                            <td className="hidden px-4 py-3 text-sm text-muted-foreground whitespace-nowrap md:table-cell">
+                                                {new Date(user.created_at).toLocaleDateString('en-GB', {
+                                                    day: '2-digit',
+                                                    month: 'short',
+                                                    year: 'numeric',
+                                                })}
+                                            </td>
+                                            <td className="px-4 py-3 text-right whitespace-nowrap">
+                                                <Button
+                                                    variant="outline"
+                                                    size="sm"
+                                                    onClick={() => openRoleDialog(user)}
+                                                >
+                                                    Change Role
+                                                </Button>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                    {users.length === 0 && (
+                                        <tr>
+                                            <td colSpan={6} className="px-4 py-16 text-center">
+                                                <p className="text-sm text-muted-foreground">No users found.</p>
+                                            </td>
+                                        </tr>
+                                    )}
+                                </tbody>
+                            </table>
+                        </div>
                     </CardContent>
                 </Card>
 
                 {pagination.last_page > 1 && (
                     <div className="flex items-center justify-between">
                         <p className="text-sm text-muted-foreground">
-                            Showing {pagination.from}–{pagination.to} of{' '}
-                            {pagination.total}
+                            Page {pagination.current_page} of {pagination.last_page}
                         </p>
-                        <div className="flex gap-1">
-                            {Array.from(
-                                { length: pagination.last_page },
-                                (_, i) => i + 1,
-                            ).map((p) => (
+                        <div className="flex items-center gap-1">
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                disabled={pagination.current_page === 1}
+                                onClick={() => goToPage(pagination.current_page - 1)}
+                            >
+                                Prev
+                            </Button>
+                            {pages.map((page) => (
                                 <Button
-                                    key={p}
-                                    variant={
-                                        p === pagination.current_page
-                                            ? 'default'
-                                            : 'outline'
-                                    }
-                                    size="icon-sm"
-                                    onClick={() =>
-                                        router.get(
-                                            '/admin/users',
-                                            { search, page: p },
-                                            { preserveState: true },
-                                        )
-                                    }
+                                    key={page}
+                                    variant={page === pagination.current_page ? 'default' : 'outline'}
+                                    size="sm"
+                                    onClick={() => goToPage(page)}
+                                    className="min-w-9"
                                 >
-                                    {p}
+                                    {page}
                                 </Button>
                             ))}
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                disabled={pagination.current_page === pagination.last_page}
+                                onClick={() => goToPage(pagination.current_page + 1)}
+                            >
+                                Next
+                            </Button>
                         </div>
                     </div>
                 )}
@@ -265,8 +261,7 @@ export default function UsersIndex({
                                 <>
                                     Update role for{' '}
                                     <strong>
-                                        {roleDialog.user.first_name}{' '}
-                                        {roleDialog.user.last_name}
+                                        {roleDialog.user.first_name} {roleDialog.user.last_name}
                                     </strong>{' '}
                                     ({roleDialog.user.student_id}).
                                 </>
@@ -296,10 +291,7 @@ export default function UsersIndex({
                                 <SelectContent>
                                     {Object.entries(roles).map(
                                         ([value, label]) => (
-                                            <SelectItem
-                                                key={value}
-                                                value={value}
-                                            >
+                                            <SelectItem key={value} value={value}>
                                                 {label}
                                             </SelectItem>
                                         ),
