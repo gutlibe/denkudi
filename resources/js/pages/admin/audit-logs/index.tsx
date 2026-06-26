@@ -1,6 +1,16 @@
+import { Search01Icon } from '@hugeicons/core-free-icons';
+import { HugeiconsIcon } from '@hugeicons/react';
 import { Head, router } from '@inertiajs/react';
+import { useState } from 'react';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipTrigger,
+} from '@/components/ui/tooltip';
 import { dashboard } from '@/routes/admin';
 
 type LogEntry = {
@@ -24,122 +34,211 @@ type Props = {
     };
 };
 
-const actionLabel = (action: string) => {
-    const labels: Record<string, string> = {
-        election_created: 'Created',
-        election_updated: 'Updated',
-        election_deleted: 'Deleted',
-        election_status_changed: 'Status Changed',
-        results_released: 'Results Released',
-        results_withdrawn: 'Results Withdrawn',
-        election_resumed: 'Resumed',
+const actionBadge = (action: string) => {
+    const m: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }> = {
+        election_created: { label: 'Created', variant: 'default' },
+        election_updated: { label: 'Updated', variant: 'secondary' },
+        election_deleted: { label: 'Deleted', variant: 'destructive' },
+        election_status_changed: { label: 'Status', variant: 'outline' },
+        results_released: { label: 'Results', variant: 'default' },
+        results_withdrawn: { label: 'Withdrawn', variant: 'secondary' },
+        election_resumed: { label: 'Resumed', variant: 'default' },
+        election_auto_closed: { label: 'Auto Closed', variant: 'secondary' },
+        user_role_changed: { label: 'Role', variant: 'outline' },
+        quarantine_dismissed: { label: 'Dismissed', variant: 'secondary' },
+        candidate_created: { label: 'Candidate', variant: 'default' },
+        candidate_updated: { label: 'Candidate', variant: 'secondary' },
+        candidate_deleted: { label: 'Candidate', variant: 'destructive' },
+        position_created: { label: 'Position', variant: 'default' },
+        position_updated: { label: 'Position', variant: 'secondary' },
+        position_deleted: { label: 'Position', variant: 'destructive' },
     };
 
-    return labels[action] ?? action.replace(/_/g, ' ');
+    return m[action] ?? { label: action.replace(/_/g, ' '), variant: 'secondary' as const };
 };
 
 export default function AuditLogsPage({ logs, pagination }: Props) {
+    const [search, setSearch] = useState('');
+
+    const pages = [];
+    const maxPages = 5;
+    let startPage = Math.max(1, pagination.current_page - Math.floor(maxPages / 2));
+    const endPage = Math.min(pagination.last_page, startPage + maxPages - 1);
+    startPage = Math.max(1, endPage - maxPages + 1);
+
+    for (let i = startPage; i <= endPage; i++) {
+        pages.push(i);
+    }
+
+    const goToPage = (page: number) => {
+        const params: Record<string, string | number> = { page: String(page) };
+
+        if (search) {
+            params.search = search;
+        }
+
+        router.get('/admin/audit-logs', params, {
+            preserveState: true,
+            replace: true,
+        });
+    };
+
+    const handleSearch = () => {
+        router.get('/admin/audit-logs', { search: search || undefined, page: '1' }, {
+            preserveState: true,
+            replace: true,
+        });
+    };
+
     return (
         <>
             <Head title="Audit Logs" />
 
             <div className="space-y-6">
-                <div>
-                    <h2 className="text-xl font-bold tracking-tight">
-                        Audit Logs
-                    </h2>
-                    <p className="mt-1 text-sm text-muted-foreground">
-                        {pagination.total} total records &middot; showing{' '}
-                        {pagination.from}–{pagination.to}
-                    </p>
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                        <h2 className="text-2xl font-bold tracking-tight">Audit Logs</h2>
+                        <p className="mt-1 text-sm text-muted-foreground">
+                            {pagination.total} total records &middot; Showing {pagination.from}&ndash;{pagination.to}
+                        </p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <Input
+                            placeholder="Search logs..."
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                            onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                            className="w-48"
+                        />
+                        <Button variant="outline" size="sm" onClick={handleSearch}>
+                            <HugeiconsIcon icon={Search01Icon} size={14} className="mr-1.5" />
+                            Search
+                        </Button>
+                    </div>
                 </div>
 
                 <Card>
                     <CardContent className="p-0">
                         {logs.length === 0 ? (
-                            <p className="py-16 text-center text-sm text-muted-foreground">
-                                No audit logs yet.
-                            </p>
+                            <div className="flex flex-col items-center justify-center gap-2 py-20">
+                                <HugeiconsIcon
+                                    icon={Search01Icon}
+                                    size={32}
+                                    className="text-muted-foreground/40"
+                                />
+                                <p className="text-sm text-muted-foreground">
+                                    No audit logs found.
+                                </p>
+                            </div>
                         ) : (
-                            <table className="w-full">
-                                <thead>
-                                    <tr className="border-b text-xs text-muted-foreground">
-                                        <th className="px-6 py-3 text-left font-medium">
-                                            Admin
-                                        </th>
-                                        <th className="px-6 py-3 text-left font-medium">
-                                            Action
-                                        </th>
-                                        <th className="hidden px-6 py-3 text-left font-medium md:table-cell">
-                                            Description
-                                        </th>
-                                        <th className="hidden px-6 py-3 text-right font-medium lg:table-cell">
-                                            Date
-                                        </th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {logs.map((log) => (
-                                        <tr
-                                            key={log.id}
-                                            className="border-b text-sm last:border-0"
-                                        >
-                                            <td className="px-6 py-3 font-medium whitespace-nowrap">
-                                                {log.admin}
-                                            </td>
-                                            <td className="px-6 py-3">
-                                                <span className="inline-flex items-center rounded-full bg-muted px-2 py-0.5 text-xs font-medium">
-                                                    {actionLabel(log.action)}
-                                                </span>
-                                            </td>
-                                            <td className="hidden max-w-sm truncate px-6 py-3 text-muted-foreground md:table-cell">
-                                                {log.description}
-                                            </td>
-                                            <td className="hidden px-6 py-3 text-right whitespace-nowrap text-muted-foreground lg:table-cell">
-                                                {new Date(
-                                                    log.created_at,
-                                                ).toLocaleString('en-GB')}
-                                            </td>
+                            <div className="overflow-x-auto">
+                                <table className="w-full min-w-[700px]">
+                                    <thead>
+                                        <tr className="border-b bg-muted/30">
+                                            <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                                                Admin
+                                            </th>
+                                            <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                                                Action
+                                            </th>
+                                            <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                                                Description
+                                            </th>
+                                            <th className="hidden px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider md:table-cell">
+                                                IP
+                                            </th>
+                                            <th className="px-4 py-3 text-right text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                                                Date
+                                            </th>
                                         </tr>
-                                    ))}
-                                </tbody>
-                            </table>
+                                    </thead>
+                                    <tbody className="divide-y">
+                                        {logs.map((log) => {
+                                            const badge = actionBadge(log.action);
+
+                                            return (
+                                                <tr
+                                                    key={log.id}
+                                                    className="transition-colors hover:bg-muted/30"
+                                                >
+                                                    <td className="px-4 py-3 text-sm font-medium whitespace-nowrap">
+                                                        {log.admin}
+                                                    </td>
+                                                    <td className="px-4 py-3 whitespace-nowrap">
+                                                        <Badge variant={badge.variant} className="text-[11px] capitalize">
+                                                            {badge.label}
+                                                        </Badge>
+                                                    </td>
+                                                    <td className="px-4 py-3 text-sm text-muted-foreground max-w-xs">
+                                                        <Tooltip>
+                                                            <TooltipTrigger asChild>
+                                                                <p className="truncate cursor-default">{log.description}</p>
+                                                            </TooltipTrigger>
+                                                            <TooltipContent side="top" className="max-w-sm">
+                                                                <p className="text-xs">{log.description}</p>
+                                                            </TooltipContent>
+                                                        </Tooltip>
+                                                    </td>
+                                                    <td className="hidden px-4 py-3 font-mono text-xs text-muted-foreground whitespace-nowrap md:table-cell">
+                                                        {log.ip_address ?? '—'}
+                                                    </td>
+                                                    <td className="px-4 py-3 text-right text-sm text-muted-foreground whitespace-nowrap">
+                                                        {new Date(log.created_at).toLocaleDateString('en-GB', {
+                                                            day: '2-digit',
+                                                            month: 'short',
+                                                            year: 'numeric',
+                                                        })}
+                                                        <span className="ml-1.5 text-xs opacity-60">
+                                                            {new Date(log.created_at).toLocaleTimeString('en-GB', {
+                                                                hour: '2-digit',
+                                                                minute: '2-digit',
+                                                            })}
+                                                        </span>
+                                                    </td>
+                                                </tr>
+                                            );
+                                        })}
+                                    </tbody>
+                                </table>
+                            </div>
                         )}
                     </CardContent>
                 </Card>
 
                 {pagination.last_page > 1 && (
-                    <div className="flex items-center justify-center gap-2">
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            disabled={pagination.current_page === 1}
-                            onClick={() =>
-                                router.get('/admin/audit-logs', {
-                                    page: pagination.current_page - 1,
-                                })
-                            }
-                        >
-                            Previous
-                        </Button>
-                        <span className="text-sm text-muted-foreground">
-                            Page {pagination.current_page} of{' '}
-                            {pagination.last_page}
-                        </span>
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            disabled={
-                                pagination.current_page === pagination.last_page
-                            }
-                            onClick={() =>
-                                router.get('/admin/audit-logs', {
-                                    page: pagination.current_page + 1,
-                                })
-                            }
-                        >
-                            Next
-                        </Button>
+                    <div className="flex items-center justify-between">
+                        <p className="text-sm text-muted-foreground">
+                            Page {pagination.current_page} of {pagination.last_page}
+                        </p>
+                        <div className="flex items-center gap-1">
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                disabled={pagination.current_page === 1}
+                                onClick={() => goToPage(pagination.current_page - 1)}
+                            >
+                                Prev
+                            </Button>
+                            {pages.map((page) => (
+                                <Button
+                                    key={page}
+                                    variant={page === pagination.current_page ? 'default' : 'outline'}
+                                    size="sm"
+                                    onClick={() => goToPage(page)}
+                                    className="min-w-9"
+                                >
+                                    {page}
+                                </Button>
+                            ))}
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                disabled={pagination.current_page === pagination.last_page}
+                                onClick={() => goToPage(pagination.current_page + 1)}
+                            >
+                                Next
+                            </Button>
+                        </div>
                     </div>
                 )}
             </div>

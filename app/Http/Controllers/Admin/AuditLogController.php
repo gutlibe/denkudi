@@ -12,9 +12,16 @@ class AuditLogController extends Controller
 {
     public function index(Request $request): Response
     {
-        $logs = AdminAuditLog::with('admin')
-            ->orderBy('created_at', 'desc')
-            ->paginate(50)
+        $query = AdminAuditLog::with('admin')->orderBy('created_at', 'desc');
+
+        if ($request->filled('search')) {
+            $search = $request->input('search');
+            $query->where('description', 'like', "%{$search}%")
+                ->orWhere('action', 'like', "%{$search}%")
+                ->orWhere('ip_address', 'like', "%{$search}%");
+        }
+
+        $logs = $query->paginate(50)
             ->through(fn ($log) => [
                 'id' => $log->id,
                 'admin' => $log->admin?->first_name.' '.$log->admin?->last_name,

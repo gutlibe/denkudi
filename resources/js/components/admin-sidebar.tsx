@@ -1,6 +1,7 @@
 import {
     Analytics01Icon,
     DashboardSquare02Icon,
+    File02Icon,
     PanelLeftOpenIcon,
     Shield01Icon,
     UserGroup02Icon,
@@ -27,7 +28,7 @@ import {
     TooltipContent,
     TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { dashboard } from '@/routes/admin';
+import { auditLogs, dashboard } from '@/routes/admin';
 import type { NavItem } from '@/types';
 
 const mainNavItems: NavItem[] = [
@@ -45,6 +46,11 @@ const mainNavItems: NavItem[] = [
         title: 'Users',
         href: '/admin/users',
         icon: () => <HugeiconsIcon icon={UserGroup02Icon} size={18} />,
+    },
+    {
+        title: 'Audit Logs',
+        href: auditLogs(),
+        icon: () => <HugeiconsIcon icon={File02Icon} size={18} />,
     },
 ];
 
