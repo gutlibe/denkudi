@@ -1,8 +1,9 @@
 import {
-    PlusSignIcon,
-    PencilEdit02Icon,
-    Delete01Icon,
     Analytics01Icon,
+    Delete01Icon,
+    MoreHorizontalCircle01Icon,
+    PencilEdit02Icon,
+    PlusSignIcon,
     Search01Icon,
     Settings01Icon,
     Shield01Icon,

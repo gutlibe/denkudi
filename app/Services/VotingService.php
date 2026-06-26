@@ -44,6 +44,12 @@ class VotingService
      */
     public function castBallot(Election $election, string $studentId, array $ballot): array
     {
+        if (DB::transactionLevel() > 0) {
+            throw new \RuntimeException(
+                'castBallot called inside an active transaction — durability would be compromised.'
+            );
+        }
+
         $hashedId = $this->hashStudentId($studentId);
 
         // ── Pre-flight checks (fast, no transaction needed) ──────────
@@ -443,6 +449,45 @@ class VotingService
             'broken' => count($brokenVotes),
             'quarantined' => $quarantined,
             'details' => $brokenVotes,
+        ];
+    }
+
+    /**
+     * Verify the hash chain integrity of a single vote.
+     *
+     * Checks self-consistency (does the row hash to its own current_hash?)
+     * and cross-row linkage (does previous_hash match the actual preceding
+     * valid row's current_hash?).
+     *
+     * @return array{valid: bool, failures: array<int, string>}
+     */
+    public function verifyVoteIntegrity(Vote $vote): array
+    {
+        $failures = [];
+
+        $expected = $this->computeHash(
+            $vote->receipt_token,
+            $vote->candidate_id,
+            $vote->previous_hash
+        );
+
+        if ($expected !== $vote->current_hash) {
+            $failures[] = 'self_consistency';
+        }
+
+        $predecessor = Vote::where('election_id', $vote->election_id)
+            ->where('status', 'valid')
+            ->where('id', '<', $vote->id)
+            ->orderBy('id', 'desc')
+            ->first();
+
+        if ($predecessor && $vote->previous_hash !== $predecessor->current_hash) {
+            $failures[] = 'chain_link';
+        }
+
+        return [
+            'valid' => empty($failures),
+            'failures' => $failures,
         ];
     }
 

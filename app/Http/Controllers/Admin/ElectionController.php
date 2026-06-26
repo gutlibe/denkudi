@@ -356,7 +356,7 @@ class ElectionController extends Controller
         ]);
     }
 
-    public function dismissQuarantine(Request $request, Election $election, Vote $vote): RedirectResponse
+    public function dismissQuarantine(Request $request, Election $election, Vote $vote, VotingService $voting): RedirectResponse
     {
         if ($vote->election_id !== $election->id) {
             return back()->with('toast', [
@@ -372,13 +372,22 @@ class ElectionController extends Controller
             ]);
         }
 
+        $integrity = $voting->verifyVoteIntegrity($vote);
+
+        if (! $integrity['valid']) {
+            return back()->with('toast', [
+                'type' => 'error',
+                'message' => 'Cannot dismiss: hash chain verification still fails for this vote. Failures: '.implode(', ', $integrity['failures']).'.',
+            ]);
+        }
+
         $vote->update(['status' => 'valid']);
         $election->decrement('quarantine_count');
 
         AdminAuditLog::create([
             'admin_id' => $request->user()->id,
             'action' => 'quarantine_dismissed',
-            'description' => "Quarantined vote #{$vote->id} dismissed (restored to valid) for election \"{$election->title}\".",
+            'description' => "Quarantined vote #{$vote->id} dismissed (restored to valid) for election \"{$election->title}\" after chain re-verification passed.",
             'metadata' => ['election_id' => $election->id, 'vote_id' => $vote->id],
             'ip_address' => $request->ip(),
             'created_at' => now(),
@@ -386,7 +395,7 @@ class ElectionController extends Controller
 
         return back()->with('toast', [
             'type' => 'success',
-            'message' => 'Vote restored to valid status.',
+            'message' => 'Vote restored to valid status after chain integrity re-verification.',
         ]);
     }
 
