@@ -52,7 +52,8 @@ class CandidateController extends Controller
         try {
             Log::info('Candidate store attempt', [
                 'election_id' => $election->id,
-                'all_data' => $request->all(),
+                'name' => $request->input('name'),
+                'position_id' => $request->input('position_id'),
                 'has_file' => $request->hasFile('photo'),
             ]);
 
