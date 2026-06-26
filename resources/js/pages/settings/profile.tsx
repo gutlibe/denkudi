@@ -54,7 +54,7 @@ export default function Profile({
                                     <Input
                                         id="first_name"
                                         className="mt-1 block w-full"
-                                        defaultValue={auth.user.first_name}
+                                        defaultValue={auth.user?.first_name ?? ''}
                                         name="first_name"
                                         required
                                         autoComplete="given-name"
@@ -73,7 +73,7 @@ export default function Profile({
                                     <Input
                                         id="last_name"
                                         className="mt-1 block w-full"
-                                        defaultValue={auth.user.last_name}
+                                        defaultValue={auth.user?.last_name ?? ''}
                                         name="last_name"
                                         required
                                         autoComplete="family-name"
@@ -93,7 +93,7 @@ export default function Profile({
                                 <Input
                                     id="student_id"
                                     className="mt-1 block w-full"
-                                    defaultValue={auth.user.student_id}
+                                    defaultValue={auth.user?.student_id ?? ''}
                                     name="student_id"
                                     required
                                     maxLength={10}
@@ -113,7 +113,7 @@ export default function Profile({
                                     id="email"
                                     type="email"
                                     className="mt-1 block w-full"
-                                    defaultValue={auth.user.email}
+                                    defaultValue={auth.user?.email ?? ''}
                                     disabled
                                     name="email"
                                     placeholder="Email address"
@@ -126,7 +126,7 @@ export default function Profile({
                             </div>
 
                             {mustVerifyEmail &&
-                                auth.user.email_verified_at === null && (
+                                auth.user?.email_verified_at === null && (
                                     <div>
                                         <p className="-mt-4 text-sm text-muted-foreground">
                                             Your email address is unverified.{' '}

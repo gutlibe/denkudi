@@ -10,10 +10,16 @@ declare module 'react' {
 declare module '@inertiajs/core' {
     export interface InertiaConfig {
         sharedPageProps: {
-            name: string;
             auth: Auth;
+            name: string;
             sidebarOpen: boolean;
-            [key: string]: unknown;
         };
     }
+}
+
+export interface AppSharedProps {
+    auth: Auth;
+    name: string;
+    sidebarOpen: boolean;
+    [key: string]: unknown;
 }

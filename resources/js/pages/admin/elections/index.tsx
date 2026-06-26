@@ -1,7 +1,6 @@
 import {
     Analytics01Icon,
     Delete01Icon,
-    MoreHorizontalCircle01Icon,
     PencilEdit02Icon,
     PlusSignIcon,
     Search01Icon,
