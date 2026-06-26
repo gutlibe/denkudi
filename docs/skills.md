@@ -34,6 +34,18 @@ style: fix card spacing
 
 > Keep it short. No period. Imperative mood (`add` not `added`).
 
+## Shadcn/UI Overrides
+
+Common gotchas when using shadcn components.
+
+| Component | Default behavior | Override |
+|-----------|-----------------|----------|
+| `Card` | Has `py-(--card-spacing)` top/bottom padding | Add `py-0` to remove |
+| `CardContent` | Has `px-(--card-spacing)` horizontal padding | Add `p-0` or `px-0` to remove |
+| Table inside Card | Both Card + CardContent add padding | `className="py-0"` on Card + `className="p-0"` on CardContent for edge-to-edge tables |
+
+> Always check `resources/js/components/ui/*.tsx` for built-in padding/spacing before assuming `p-0` on just CardContent is enough.
+
 ## Verification Checks
 
 Only run when explicitly asked. Project uses PHP (Laravel) + TypeScript (React/Inertia).

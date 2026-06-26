@@ -117,7 +117,7 @@ export default function AuditLogsPage({ logs, pagination }: Props) {
                     </div>
                 </div>
 
-                <Card>
+                <Card className="py-0">
                     <CardContent className="p-0">
                         {logs.length === 0 ? (
                             <div className="flex flex-col items-center justify-center gap-2 py-20">
