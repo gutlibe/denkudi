@@ -155,7 +155,7 @@ return [];
                     <div>
                         <h2 className="text-2xl font-bold tracking-tight">Dashboard</h2>
                         <p className="mt-1 text-sm text-muted-foreground">
-                            Welcome back — here&apos;s what&apos;s happening.
+                            Your command center for election integrity.
                         </p>
                     </div>
                     <div className="flex items-center gap-2">
