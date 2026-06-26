@@ -9,7 +9,6 @@ use App\Models\Election;
 use App\Models\Position;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -49,50 +48,32 @@ class CandidateController extends Controller
             ]);
         }
 
-        try {
-            Log::info('Candidate store attempt', [
-                'election_id' => $election->id,
-                'name' => $request->input('name'),
-                'position_id' => $request->input('position_id'),
-                'has_file' => $request->hasFile('photo'),
-            ]);
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'position_id' => ['required', 'exists:evote_positions,id'],
+            'department' => ['nullable', 'string', 'max:255'],
+            'manifesto' => ['nullable', 'string', 'max:5000'],
+            'photo' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120', 'dimensions:min_width=100,min_height=100,max_width=4000,max_height=4000'],
+        ]);
 
-            $validated = $request->validate([
-                'name' => ['required', 'string', 'max:255'],
-                'position_id' => ['required', 'exists:evote_positions,id'],
-                'department' => ['nullable', 'string', 'max:255'],
-                'manifesto' => ['nullable', 'string', 'max:5000'],
-                'photo' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120', 'dimensions:min_width=100,min_height=100,max_width=4000,max_height=4000'],
-            ]);
+        $data = $request->only(['name', 'position_id', 'department', 'manifesto']);
 
-            $data = $request->only(['name', 'position_id', 'department', 'manifesto']);
-
-            if ($request->hasFile('photo')) {
-                $data['photo_url'] = $request->file('photo')->store('candidates', 'public');
-                Log::info('Photo stored', ['path' => $data['photo_url']]);
-            }
-
-            $candidate = $election->candidates()->create($data);
-
-            Log::info('Candidate created', ['id' => $candidate->id]);
-
-            AdminAuditLog::create([
-                'admin_id' => $request->user()->id,
-                'action' => 'candidate_created',
-                'description' => "Candidate \"{$candidate->name}\" added to election \"{$election->title}\".",
-                'metadata' => ['election_id' => $election->id, 'candidate_id' => $candidate->id],
-                'ip_address' => $request->ip(),
-                'created_at' => now(),
-            ]);
-
-            return back()->with('toast', ['type' => 'success', 'message' => 'Candidate added.']);
-        } catch (\Throwable $e) {
-            Log::error('Candidate store failed', [
-                'message' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-            ]);
-            throw $e;
+        if ($request->hasFile('photo')) {
+            $data['photo_url'] = $request->file('photo')->store('candidates', 'public');
         }
+
+        $candidate = $election->candidates()->create($data);
+
+        AdminAuditLog::create([
+            'admin_id' => $request->user()->id,
+            'action' => 'candidate_created',
+            'description' => "Candidate \"{$candidate->name}\" added to election \"{$election->title}\".",
+            'metadata' => ['election_id' => $election->id, 'candidate_id' => $candidate->id],
+            'ip_address' => $request->ip(),
+            'created_at' => now(),
+        ]);
+
+        return back()->with('toast', ['type' => 'success', 'message' => 'Candidate added.']);
     }
 
     public function update(Request $request, Election $election, Candidate $candidate): RedirectResponse
