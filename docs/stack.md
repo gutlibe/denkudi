@@ -1,6 +1,6 @@
 # Tech Stack — Denkudi (HTU E-Voting)
 
-> Updated: 2026-06-24
+> Updated: 2026-06-26
 
 ## Core
 
@@ -10,6 +10,7 @@
 | Frontend    | React (TSX)             | 19.2.7  |
 | Language    | TypeScript              | 6.0.3   |
 | Bridge      | Inertia.js              | 3.4.0   |
+| Types       | Inertia.js Core         | 3.4.0   |
 | Database    | MariaDB                 | 11.4    |
 | UI Kit      | shadcn/ui (radix-maia)  | 4.11    |
 | CSS         | Tailwind CSS            | 4.3.1   |

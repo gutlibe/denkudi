@@ -79,8 +79,10 @@ flowchart LR
     A[Voter pastes receipt] --> B{Token exists?}
     B -->|Yes| C{Status valid?}
     B -->|No| D[Not Found]
-    C -->|Yes| E[Verified: election name only<br/>No ballot choices revealed]
-    C -->|No| F[Quarantined]
+    C -->|Yes| E{Chain integrity?}
+    C -->|No| F[Quarantined / Tampered]
+    E -->|Pass| G[Verified: election name only<br/>No ballot choices revealed]
+    E -->|Fail| F
 ```
 
 ---
@@ -173,8 +175,13 @@ Two students submit ballots at the exact same time. The database transaction loc
 
 ### Scenario 4: Receipt Verification
 
-A voter wants to prove their vote was counted. They paste their receipt token on the verify page. The system confirms the vote exists in the chain without revealing who they voted for.
+A voter wants to prove their vote was counted. They paste their receipt token on the verify page. The system confirms the vote exists, checks its status, and verifies hash chain integrity — without revealing who they voted for.
 **Result:** Trust without compromising anonymity.
+
+### Scenario 5: Admin Quarantine Dismissal
+
+An administrator reviews a quarantined vote and attempts to restore it. The system re-verifies the hash chain integrity (self-consistency and cross-row linkage) before allowing dismissal. If the chain is still broken, dismissal is blocked.
+**Result:** Tampered votes cannot be silently restored by a rogue admin.
 
 ### Scenario 5: Admin Audit
 
