@@ -2,6 +2,23 @@
 
 Secure, anonymous, blockchain-verified e-voting for student elections. Built with Laravel, React, and shadcn/ui.
 
+## Live Demo
+
+The latest code in this repository is live at:
+
+**🔗 [https://ev.aigh.dev](https://ev.aigh.dev)**
+
+No setup required — see the voting system in action.
+
+### Demo Credentials
+
+| Role | Student ID | Password |
+|------|-----------|----------|
+| Admin | `0000000001` | `admin123` |
+| Voter | Register with any 10-digit ID | Your choice |
+
+The admin can manage elections, view results, audit the hash chain, and promote other users to admin via the User Management page.
+
 ## Architecture
 
 Every vote is linked into a hash chain using HMAC-SHA256. Tampering with a single vote breaks the chain and triggers automatic quarantine. Voter identity is separated from ballot choices — no user ID is stored in the votes table.
