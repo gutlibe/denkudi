@@ -87,15 +87,15 @@ export default function Profile({
                                 </div>
                             </div>
 
-                            <div className="grid gap-2">
+                             <div className="grid gap-2">
                                 <Label htmlFor="student_id">Student ID</Label>
 
                                 <Input
                                     id="student_id"
-                                    className="mt-1 block w-full"
+                                    className="mt-1 block w-full text-muted-foreground"
                                     defaultValue={auth.user?.student_id ?? ''}
                                     name="student_id"
-                                    required
+                                    disabled
                                     maxLength={10}
                                     placeholder="0000000000"
                                 />
