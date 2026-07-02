@@ -51,8 +51,8 @@ createInertiaApp({
             </TooltipProvider>,
         );
 
-        router.on('finish', (event: any) => {
-            const p = event.detail.visit.page?.props?.toast as
+        router.on('success', (event: any) => {
+            const p = event.detail.page?.props?.toast as
                 | {
                       type: 'success' | 'error' | 'info' | 'warning';
                       message: string;
