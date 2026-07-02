@@ -42,4 +42,12 @@ class Position extends Model
     {
         return $this->hasMany(Candidate::class);
     }
+
+    /**
+     * @return HasMany<Vote, $this>
+     */
+    public function votes(): HasMany
+    {
+        return $this->hasMany(Vote::class);
+    }
 }

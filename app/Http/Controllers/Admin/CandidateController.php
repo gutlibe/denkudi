@@ -125,6 +125,13 @@ class CandidateController extends Controller
             ]);
         }
 
+        if ($candidate->votes()->where('status', 'valid')->count() > 0) {
+            return back()->with('toast', [
+                'type' => 'error',
+                'message' => 'Cannot delete candidate with existing votes.',
+            ]);
+        }
+
         $name = $candidate->name;
         $candidate->delete();
 

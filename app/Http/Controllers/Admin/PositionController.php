@@ -78,6 +78,13 @@ class PositionController extends Controller
             ]);
         }
 
+        if ($position->votes()->where('status', 'valid')->count() > 0) {
+            return back()->with('toast', [
+                'type' => 'error',
+                'message' => 'Cannot delete position with existing votes.',
+            ]);
+        }
+
         $title = $position->title;
         $position->delete();
 
