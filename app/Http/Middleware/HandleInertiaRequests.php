@@ -51,6 +51,7 @@ class HandleInertiaRequests extends Middleware
             ],
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
             'pastElections' => $pastElections,
+            'toast' => fn () => $request->session()->get('toast'),
         ];
     }
 }
