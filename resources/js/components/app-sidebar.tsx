@@ -41,7 +41,7 @@ export function AppSidebar() {
             ends_at: string | null;
         }[];
     }>();
-    const { state, setOpen } = useSidebar();
+    const { state, setOpen, setOpenMobile } = useSidebar();
 
     const mainNavItems: NavItem[] = [
         {
@@ -132,6 +132,9 @@ export function AppSidebar() {
                                                         election: e.id,
                                                     })}
                                                     className="flex-col items-start gap-0.5"
+                                                    onClick={() =>
+                                                        setOpenMobile(false)
+                                                    }
                                                 >
                                                     <span className="line-clamp-1 text-xs leading-tight font-medium group-data-[collapsible=icon]:hidden">
                                                         {e.title}
