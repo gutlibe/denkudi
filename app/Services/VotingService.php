@@ -291,16 +291,17 @@ class VotingService
             );
         }
 
-        $vote->update(['status' => 'quarantined']);
+        $affected = Vote::where('id', $vote->id)->where('status', 'valid')->update(['status' => 'quarantined']);
 
-        // Atomic increment — safe under concurrent calls; the live value is
-        // re-read by getLatestValidVote each iteration via $election->fresh().
-        $election->increment('quarantine_count');
+        if ($affected) {
+            $election->increment('quarantine_count');
+        }
 
         Log::critical('Vote tampering detected and quarantined.', [
             'vote_id' => $vote->id,
             'election_id' => $election->id,
             'total_quarantined' => $count,
+            'already_quarantined' => $affected === 0,
         ]);
     }
 
