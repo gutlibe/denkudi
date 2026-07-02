@@ -1,7 +1,7 @@
 import { Analytics01Icon, ArrowLeft02Icon, CrownIcon, UserGroupIcon } from '@hugeicons/core-free-icons';
 import { HugeiconsIcon } from '@hugeicons/react';
 import { Head, Link } from '@inertiajs/react';
-import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from 'recharts';
+import { Bar, BarChart, CartesianGrid, Cell, XAxis, YAxis } from 'recharts';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -219,13 +219,14 @@ export default function ResultsPage({ election, positions }: Props) {
                                             <ChartContainer
                                                 config={chartConfig}
                                                 style={{ height: `${Math.max(80, chartData.length * 44)}px` }}
-                                                className="w-full"
+                                                className="w-full select-none"
                                             >
                                                 <BarChart
                                                     data={chartData}
                                                     layout="vertical"
                                                     margin={{ top: 0, right: 0, bottom: 0, left: 0 }}
                                                     barCategoryGap={8}
+                                                    accessibilityLayer={false}
                                                 >
                                                     <CartesianGrid horizontal={false} strokeDasharray="4" />
                                                     <YAxis
@@ -247,9 +248,9 @@ export default function ResultsPage({ election, positions }: Props) {
                                                             />
                                                         }
                                                     />
-                                                    <Bar dataKey="votes" radius={[0, 6, 6, 0]} barSize={26}>
+                                                    <Bar dataKey="votes" radius={[0, 6, 6, 0]} barSize={26} activeBar={false}>
                                                         {chartData.map((entry, i) => (
-                                                            <rect key={i} fill={COLORS[i % COLORS.length]} rx={6} />
+                                                            <Cell key={`cell-${entry.name}-${i}`} fill={COLORS[i % COLORS.length]} />
                                                         ))}
                                                     </Bar>
                                                 </BarChart>
