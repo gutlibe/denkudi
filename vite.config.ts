@@ -8,6 +8,12 @@ import { defineConfig } from 'vite';
 
 export default defineConfig({
     logLevel: 'error',
+    server: {
+        host: '0.0.0.0',
+        hmr: {
+            host: 'localhost',
+        },
+    },
     plugins: [
         laravel({
             input: ['resources/css/app.css', 'resources/js/app.tsx'],
