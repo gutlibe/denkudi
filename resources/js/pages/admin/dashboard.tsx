@@ -86,7 +86,13 @@ type Props = {
 };
 
 const actionBadge = (action: string) => {
-    const m: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }> = {
+    const m: Record<
+        string,
+        {
+            label: string;
+            variant: 'default' | 'secondary' | 'destructive' | 'outline';
+        }
+    > = {
         election_created: { label: 'Created', variant: 'default' },
         election_updated: { label: 'Updated', variant: 'secondary' },
         election_deleted: { label: 'Deleted', variant: 'destructive' },
@@ -105,7 +111,12 @@ const actionBadge = (action: string) => {
         position_deleted: { label: 'Position', variant: 'destructive' },
     };
 
-    return m[action] ?? { label: action.replace(/_/g, ' '), variant: 'secondary' as const };
+    return (
+        m[action] ?? {
+            label: action.replace(/_/g, ' '),
+            variant: 'secondary' as const,
+        }
+    );
 };
 
 export default function AdminDashboard({
@@ -119,18 +130,30 @@ export default function AdminDashboard({
 
     const filteredActivity = (() => {
         if (activity.length === 0) {
-return [];
-}
+            return [];
+        }
 
         const ref = new Date(activity[activity.length - 1].date);
-        const days = period === '7d' ? 7 : period === '30d' ? 30 : period === '90d' ? 90 : 365;
+        const days =
+            period === '7d'
+                ? 7
+                : period === '30d'
+                  ? 30
+                  : period === '90d'
+                    ? 90
+                    : 365;
         const start = new Date(ref);
         start.setDate(start.getDate() - days);
 
         return activity.filter((a) => new Date(a.date) >= start);
     })();
 
-    const totalElections = election_distribution.draft + election_distribution.scheduled + election_distribution.active + election_distribution.paused + election_distribution.closed;
+    const totalElections =
+        election_distribution.draft +
+        election_distribution.scheduled +
+        election_distribution.active +
+        election_distribution.paused +
+        election_distribution.closed;
 
     const distColors: Record<string, string> = {
         draft: 'bg-muted-foreground/30',
@@ -153,7 +176,9 @@ return [];
             <div className="space-y-8">
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                     <div>
-                        <h2 className="text-2xl font-bold tracking-tight">Dashboard</h2>
+                        <h2 className="text-2xl font-bold tracking-tight">
+                            Dashboard
+                        </h2>
                         <p className="mt-1 text-sm text-muted-foreground">
                             Your command center for election integrity.
                         </p>
@@ -161,13 +186,21 @@ return [];
                     <div className="flex items-center gap-2">
                         <Button asChild variant="outline" size="sm">
                             <Link href="/admin/elections/create">
-                                <HugeiconsIcon icon={PlusSignIcon} size={14} className="mr-1.5" />
+                                <HugeiconsIcon
+                                    icon={PlusSignIcon}
+                                    size={14}
+                                    className="mr-1.5"
+                                />
                                 New Election
                             </Link>
                         </Button>
                         <Button asChild variant="outline" size="sm">
                             <Link href="/admin/elections">
-                                <HugeiconsIcon icon={Settings01Icon} size={14} className="mr-1.5" />
+                                <HugeiconsIcon
+                                    icon={Settings01Icon}
+                                    size={14}
+                                    className="mr-1.5"
+                                />
                                 Manage
                             </Link>
                         </Button>
@@ -179,22 +212,35 @@ return [];
                         <div className="absolute top-0 right-0 h-20 w-20 translate-x-6 -translate-y-6 rounded-full bg-primary/10" />
                         <div className="relative flex items-center gap-3">
                             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-sm">
-                                <HugeiconsIcon icon={Analytics01Icon} size={18} />
+                                <HugeiconsIcon
+                                    icon={Analytics01Icon}
+                                    size={18}
+                                />
                             </div>
                             <div className="min-w-0">
-                                <p className="text-xs text-muted-foreground">Total Votes</p>
-                                <p className="text-2xl font-bold tabular-nums">{stats.total_votes}</p>
+                                <p className="text-xs text-muted-foreground">
+                                    Total Votes
+                                </p>
+                                <p className="text-2xl font-bold tabular-nums">
+                                    {stats.total_votes}
+                                </p>
                             </div>
                         </div>
                         <div className="relative mt-3 flex items-center gap-2 border-t pt-2 text-xs text-muted-foreground">
                             <span className="flex items-center gap-1 text-emerald-600">
-                                <HugeiconsIcon icon={CheckmarkCircle01Icon} size={11} />
+                                <HugeiconsIcon
+                                    icon={CheckmarkCircle01Icon}
+                                    size={11}
+                                />
                                 {stats.total_valid_votes} valid
                             </span>
                             {stats.total_quarantined > 0 && (
                                 <span className="flex items-center gap-1 text-yellow-600">
                                     &middot;
-                                    <HugeiconsIcon icon={AlertCircleIcon} size={11} />
+                                    <HugeiconsIcon
+                                        icon={AlertCircleIcon}
+                                        size={11}
+                                    />
                                     {stats.total_quarantined} quarantined
                                 </span>
                             )}
@@ -207,13 +253,20 @@ return [];
                                 <HugeiconsIcon icon={UserGroupIcon} size={18} />
                             </div>
                             <div className="min-w-0">
-                                <p className="text-xs text-muted-foreground">Registered Voters</p>
-                                <p className="text-2xl font-bold tabular-nums">{stats.total_students}</p>
+                                <p className="text-xs text-muted-foreground">
+                                    Registered Voters
+                                </p>
+                                <p className="text-2xl font-bold tabular-nums">
+                                    {stats.total_students}
+                                </p>
                             </div>
                         </div>
                         <div className="mt-3 flex items-center gap-1 border-t pt-2 text-xs text-muted-foreground">
                             <span>{stats.turnout_pct}% participation</span>
-                            <Separator orientation="vertical" className="mx-1 h-3" />
+                            <Separator
+                                orientation="vertical"
+                                className="mx-1 h-3"
+                            />
                             <span>{stats.voters_today} today</span>
                         </div>
                     </Card>
@@ -224,8 +277,12 @@ return [];
                                 <HugeiconsIcon icon={Shield01Icon} size={18} />
                             </div>
                             <div className="min-w-0">
-                                <p className="text-xs text-muted-foreground">Chain Health</p>
-                                <p className="text-2xl font-bold tabular-nums">{stats.chain_health}%</p>
+                                <p className="text-xs text-muted-foreground">
+                                    Chain Health
+                                </p>
+                                <p className="text-2xl font-bold tabular-nums">
+                                    {stats.chain_health}%
+                                </p>
                             </div>
                         </div>
                         <div className="mt-3 border-t pt-2">
@@ -234,32 +291,48 @@ return [];
                                     className="h-full rounded-full transition-all"
                                     style={{
                                         width: `${stats.chain_health}%`,
-                                        background: stats.chain_health >= 99
-                                            ? 'var(--emerald-500)'
-                                            : stats.chain_health >= 95
-                                              ? 'var(--yellow-500)'
-                                              : 'var(--destructive)',
+                                        background:
+                                            stats.chain_health >= 99
+                                                ? 'var(--emerald-500)'
+                                                : stats.chain_health >= 95
+                                                  ? 'var(--yellow-500)'
+                                                  : 'var(--destructive)',
                                     }}
                                 />
                             </div>
                         </div>
                     </Card>
 
-                    <Card className={`p-4 ${stats.paused_elections > 0 ? 'ring-1 ring-yellow-500/40' : ''}`}>
+                    <Card
+                        className={`p-4 ${stats.paused_elections > 0 ? 'ring-1 ring-yellow-500/40' : ''}`}
+                    >
                         <div className="flex items-center gap-3">
                             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-violet-500/10 text-violet-500 shadow-sm">
-                                <HugeiconsIcon icon={Calendar01Icon} size={18} />
+                                <HugeiconsIcon
+                                    icon={Calendar01Icon}
+                                    size={18}
+                                />
                             </div>
                             <div className="min-w-0">
-                                <p className="text-xs text-muted-foreground">Active Elections</p>
-                                <p className="text-2xl font-bold tabular-nums">{stats.active_elections}</p>
+                                <p className="text-xs text-muted-foreground">
+                                    Active Elections
+                                </p>
+                                <p className="text-2xl font-bold tabular-nums">
+                                    {stats.active_elections}
+                                </p>
                             </div>
                         </div>
                         <div className="mt-3 flex items-center gap-1 border-t pt-2 text-xs text-muted-foreground">
                             <span>{totalElections} total</span>
-                            <Separator orientation="vertical" className="mx-1 h-3" />
+                            <Separator
+                                orientation="vertical"
+                                className="mx-1 h-3"
+                            />
                             <span>{stats.paused_elections} paused</span>
-                            <Separator orientation="vertical" className="mx-1 h-3" />
+                            <Separator
+                                orientation="vertical"
+                                className="mx-1 h-3"
+                            />
                             <span>{stats.voters_today} today</span>
                         </div>
                     </Card>
@@ -269,13 +342,21 @@ return [];
                     <CardHeader className="pb-3">
                         <div className="flex items-center justify-between">
                             <div>
-                                <CardTitle className="text-base">Active Elections</CardTitle>
-                                <CardDescription>Currently running elections</CardDescription>
+                                <CardTitle className="text-base">
+                                    Active Elections
+                                </CardTitle>
+                                <CardDescription>
+                                    Currently running elections
+                                </CardDescription>
                             </div>
                             <Button asChild variant="ghost" size="sm">
                                 <Link href="/admin/elections">
                                     View all
-                                    <HugeiconsIcon icon={ArrowRight01Icon} size={13} className="ml-1" />
+                                    <HugeiconsIcon
+                                        icon={ArrowRight01Icon}
+                                        size={13}
+                                        className="ml-1"
+                                    />
                                 </Link>
                             </Button>
                         </div>
@@ -283,10 +364,23 @@ return [];
                     <CardContent>
                         {active_elections.length === 0 ? (
                             <div className="flex flex-col items-center justify-center gap-2 rounded-lg border border-dashed py-12">
-                                <HugeiconsIcon icon={SourceCodeSquareIcon} size={28} className="text-muted-foreground/50" />
-                                <p className="text-sm text-muted-foreground">No elections currently active.</p>
-                                <Button asChild variant="outline" size="sm" className="mt-2">
-                                    <Link href="/admin/elections/create">Create one</Link>
+                                <HugeiconsIcon
+                                    icon={SourceCodeSquareIcon}
+                                    size={28}
+                                    className="text-muted-foreground/50"
+                                />
+                                <p className="text-sm text-muted-foreground">
+                                    No elections currently active.
+                                </p>
+                                <Button
+                                    asChild
+                                    variant="outline"
+                                    size="sm"
+                                    className="mt-2"
+                                >
+                                    <Link href="/admin/elections/create">
+                                        Create one
+                                    </Link>
                                 </Button>
                             </div>
                         ) : (
@@ -303,29 +397,52 @@ return [];
                                                     {e.title}
                                                 </p>
                                                 <div className="mt-1 flex flex-wrap items-center gap-1.5 text-[11px] text-muted-foreground">
-                                                    <Badge variant="secondary" className="text-[10px]">{e.type}</Badge>
-                                                    <span>{e.position_count} position{e.position_count !== 1 ? 's' : ''}</span>
+                                                    <Badge
+                                                        variant="secondary"
+                                                        className="text-[10px]"
+                                                    >
+                                                        {e.type}
+                                                    </Badge>
+                                                    <span>
+                                                        {e.position_count}{' '}
+                                                        position
+                                                        {e.position_count !== 1
+                                                            ? 's'
+                                                            : ''}
+                                                    </span>
                                                 </div>
                                             </div>
                                         </div>
                                         <div className="mt-3 flex items-end justify-between">
                                             <div>
-                                                <p className="text-xl font-bold tabular-nums">{e.vote_count}</p>
-                                                <p className="text-[11px] text-muted-foreground">{e.voter_count} voter{e.voter_count !== 1 ? 's' : ''}</p>
+                                                <p className="text-xl font-bold tabular-nums">
+                                                    {e.vote_count}
+                                                </p>
+                                                <p className="text-[11px] text-muted-foreground">
+                                                    {e.voter_count} voter
+                                                    {e.voter_count !== 1
+                                                        ? 's'
+                                                        : ''}
+                                                </p>
                                             </div>
-                                            <p className="text-xs font-medium tabular-nums text-muted-foreground">
+                                            <p className="text-xs font-medium text-muted-foreground tabular-nums">
                                                 {e.turnout_pct}%
                                             </p>
                                         </div>
                                         <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-muted">
                                             <div
                                                 className="h-full rounded-full bg-primary transition-all"
-                                                style={{ width: `${Math.min(e.turnout_pct, 100)}%` }}
+                                                style={{
+                                                    width: `${Math.min(e.turnout_pct, 100)}%`,
+                                                }}
                                             />
                                         </div>
                                         {e.quarantined > 0 && (
                                             <p className="mt-2 flex items-center gap-1 text-[11px] text-yellow-600">
-                                                <HugeiconsIcon icon={AlertCircleIcon} size={11} />
+                                                <HugeiconsIcon
+                                                    icon={AlertCircleIcon}
+                                                    size={11}
+                                                />
                                                 {e.quarantined} quarantined
                                             </p>
                                         )}
@@ -341,13 +458,21 @@ return [];
                         <CardHeader className="pb-3">
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <CardTitle className="text-sm font-medium">Recent Activity</CardTitle>
-                                    <CardDescription>Latest admin actions</CardDescription>
+                                    <CardTitle className="text-sm font-medium">
+                                        Recent Activity
+                                    </CardTitle>
+                                    <CardDescription>
+                                        Latest admin actions
+                                    </CardDescription>
                                 </div>
                                 <Button asChild variant="ghost" size="sm">
                                     <Link href="/admin/audit-logs">
                                         View all
-                                        <HugeiconsIcon icon={ArrowRight01Icon} size={13} className="ml-1" />
+                                        <HugeiconsIcon
+                                            icon={ArrowRight01Icon}
+                                            size={13}
+                                            className="ml-1"
+                                        />
                                     </Link>
                                 </Button>
                             </div>
@@ -355,8 +480,14 @@ return [];
                         <CardContent className="flex-1">
                             {recent_logs.length === 0 ? (
                                 <div className="flex h-full flex-col items-center justify-center gap-2 rounded-lg border border-dashed py-8">
-                                    <HugeiconsIcon icon={File02Icon} size={24} className="text-muted-foreground/50" />
-                                    <p className="text-sm text-muted-foreground">No activity yet.</p>
+                                    <HugeiconsIcon
+                                        icon={File02Icon}
+                                        size={24}
+                                        className="text-muted-foreground/50"
+                                    />
+                                    <p className="text-sm text-muted-foreground">
+                                        No activity yet.
+                                    </p>
                                 </div>
                             ) : (
                                 <div className="space-y-2">
@@ -364,15 +495,31 @@ return [];
                                         const badge = actionBadge(log.action);
 
                                         return (
-                                            <div key={log.id} className="flex items-start gap-3 rounded-lg p-2.5 transition-colors hover:bg-muted/50">
-                                                <Badge variant={badge.variant} className="mt-0.5 shrink-0 text-[10px] capitalize">
+                                            <div
+                                                key={log.id}
+                                                className="flex items-start gap-3 rounded-lg p-2.5 transition-colors hover:bg-muted/50"
+                                            >
+                                                <Badge
+                                                    variant={badge.variant}
+                                                    className="mt-0.5 shrink-0 text-[10px] capitalize"
+                                                >
                                                     {badge.label}
                                                 </Badge>
                                                 <div className="min-w-0 flex-1">
-                                                    <p className="truncate text-xs leading-tight">{log.description}</p>
+                                                    <p className="truncate text-xs leading-tight">
+                                                        {log.description}
+                                                    </p>
                                                     <p className="mt-1 text-[11px] text-muted-foreground">
                                                         {log.admin} &middot;{' '}
-                                                        {new Date(log.created_at).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}
+                                                        {new Date(
+                                                            log.created_at,
+                                                        ).toLocaleTimeString(
+                                                            'en-GB',
+                                                            {
+                                                                hour: '2-digit',
+                                                                minute: '2-digit',
+                                                            },
+                                                        )}
                                                     </p>
                                                 </div>
                                             </div>
@@ -385,34 +532,57 @@ return [];
 
                     <Card>
                         <CardHeader className="pb-3">
-                            <CardTitle className="text-sm font-medium">Election Distribution</CardTitle>
+                            <CardTitle className="text-sm font-medium">
+                                Election Distribution
+                            </CardTitle>
                             <CardDescription>Status breakdown</CardDescription>
                         </CardHeader>
                         <CardContent>
                             {totalElections === 0 ? (
                                 <div className="flex flex-col items-center justify-center gap-2 rounded-lg border border-dashed py-12">
-                                    <HugeiconsIcon icon={File02Icon} size={28} className="text-muted-foreground/50" />
-                                    <p className="text-sm text-muted-foreground">No elections created yet.</p>
+                                    <HugeiconsIcon
+                                        icon={File02Icon}
+                                        size={28}
+                                        className="text-muted-foreground/50"
+                                    />
+                                    <p className="text-sm text-muted-foreground">
+                                        No elections created yet.
+                                    </p>
                                 </div>
                             ) : (
                                 <div className="space-y-5">
-                                    {Object.entries(distColors).map(([key, color]) => (
-                                        <div key={key} className="flex items-center gap-3">
-                                            <div className="flex items-center gap-2">
-                                                <span className={`h-3 w-3 rounded-sm ${color}`} />
-                                                <span className="w-16 text-sm capitalize">{distLabels[key]}</span>
+                                    {Object.entries(distColors).map(
+                                        ([key, color]) => (
+                                            <div
+                                                key={key}
+                                                className="flex items-center gap-3"
+                                            >
+                                                <div className="flex items-center gap-2">
+                                                    <span
+                                                        className={`h-3 w-3 rounded-sm ${color}`}
+                                                    />
+                                                    <span className="w-16 text-sm capitalize">
+                                                        {distLabels[key]}
+                                                    </span>
+                                                </div>
+                                                <div className="h-2.5 flex-1 overflow-hidden rounded-full bg-muted">
+                                                    <div
+                                                        className={`h-full rounded-full transition-all ${color}`}
+                                                        style={{
+                                                            width: `${totalElections > 0 ? (election_distribution[key as keyof typeof election_distribution] / totalElections) * 100 : 0}%`,
+                                                        }}
+                                                    />
+                                                </div>
+                                                <span className="w-8 text-right text-sm font-medium tabular-nums">
+                                                    {
+                                                        election_distribution[
+                                                            key as keyof typeof election_distribution
+                                                        ]
+                                                    }
+                                                </span>
                                             </div>
-                                            <div className="h-2.5 flex-1 overflow-hidden rounded-full bg-muted">
-                                                <div
-                                                    className={`h-full rounded-full transition-all ${color}`}
-                                                    style={{ width: `${totalElections > 0 ? (election_distribution[key as keyof typeof election_distribution] / totalElections) * 100 : 0}%` }}
-                                                />
-                                            </div>
-                                            <span className="w-8 text-right text-sm font-medium tabular-nums">
-                                                {election_distribution[key as keyof typeof election_distribution]}
-                                            </span>
-                                        </div>
-                                    ))}
+                                        ),
+                                    )}
                                 </div>
                             )}
                         </CardContent>
@@ -422,8 +592,12 @@ return [];
                 <Card>
                     <div className="flex items-center justify-between px-6 pt-6 pb-4">
                         <div>
-                            <CardTitle className="text-base">Voting Activity</CardTitle>
-                            <CardDescription>Votes cast over time</CardDescription>
+                            <CardTitle className="text-base">
+                                Voting Activity
+                            </CardTitle>
+                            <CardDescription>
+                                Votes cast over time
+                            </CardDescription>
                         </div>
                         <Select value={period} onValueChange={setPeriod}>
                             <SelectTrigger className="w-[140px]">
@@ -431,8 +605,12 @@ return [];
                             </SelectTrigger>
                             <SelectContent>
                                 <SelectItem value="7d">Last 7 days</SelectItem>
-                                <SelectItem value="30d">Last 30 days</SelectItem>
-                                <SelectItem value="90d">Last 90 days</SelectItem>
+                                <SelectItem value="30d">
+                                    Last 30 days
+                                </SelectItem>
+                                <SelectItem value="90d">
+                                    Last 90 days
+                                </SelectItem>
                                 <SelectItem value="all">All time</SelectItem>
                             </SelectContent>
                         </Select>
@@ -440,31 +618,70 @@ return [];
                     <CardContent className="pt-0">
                         {activity.length === 0 ? (
                             <div className="flex h-[300px] flex-col items-center justify-center gap-2 rounded-lg border border-dashed">
-                                <HugeiconsIcon icon={Analytics01Icon} size={28} className="text-muted-foreground/50" />
-                                <p className="text-sm text-muted-foreground">No voting activity yet.</p>
+                                <HugeiconsIcon
+                                    icon={Analytics01Icon}
+                                    size={28}
+                                    className="text-muted-foreground/50"
+                                />
+                                <p className="text-sm text-muted-foreground">
+                                    No voting activity yet.
+                                </p>
                             </div>
                         ) : (
                             <ChartContainer
-                                config={{ votes: { label: 'Votes', color: 'var(--chart-1)' } } satisfies ChartConfig}
+                                config={
+                                    {
+                                        votes: {
+                                            label: 'Votes',
+                                            color: 'var(--chart-1)',
+                                        },
+                                    } satisfies ChartConfig
+                                }
                                 className="aspect-auto h-[300px] w-full"
                             >
                                 <AreaChart data={filteredActivity}>
                                     <defs>
-                                        <linearGradient id="fillVotes" x1="0" y1="0" x2="0" y2="1">
-                                            <stop offset="5%" stopColor="var(--color-votes)" stopOpacity={0.8} />
-                                            <stop offset="95%" stopColor="var(--color-votes)" stopOpacity={0.05} />
+                                        <linearGradient
+                                            id="fillVotes"
+                                            x1="0"
+                                            y1="0"
+                                            x2="0"
+                                            y2="1"
+                                        >
+                                            <stop
+                                                offset="5%"
+                                                stopColor="var(--color-votes)"
+                                                stopOpacity={0.8}
+                                            />
+                                            <stop
+                                                offset="95%"
+                                                stopColor="var(--color-votes)"
+                                                stopOpacity={0.05}
+                                            />
                                         </linearGradient>
                                     </defs>
-                                    <CartesianGrid vertical={false} strokeDasharray="4" />
+                                    <CartesianGrid
+                                        vertical={false}
+                                        strokeDasharray="4"
+                                    />
                                     <XAxis
                                         dataKey="date"
                                         tickLine={false}
                                         axisLine={false}
                                         tickMargin={8}
                                         minTickGap={40}
-                                        tick={{ fontSize: 12, fill: 'var(--muted-foreground)' }}
+                                        tick={{
+                                            fontSize: 12,
+                                            fill: 'var(--muted-foreground)',
+                                        }}
                                         tickFormatter={(v) =>
-                                            new Date(v).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+                                            new Date(v).toLocaleDateString(
+                                                'en-US',
+                                                {
+                                                    month: 'short',
+                                                    day: 'numeric',
+                                                },
+                                            )
                                         }
                                     />
                                     <ChartTooltip
@@ -472,13 +689,27 @@ return [];
                                         content={
                                             <ChartTooltipContent
                                                 labelFormatter={(v) =>
-                                                    new Date(v).toLocaleDateString('en-US', { month: 'long', day: 'numeric' })
+                                                    new Date(
+                                                        v,
+                                                    ).toLocaleDateString(
+                                                        'en-US',
+                                                        {
+                                                            month: 'long',
+                                                            day: 'numeric',
+                                                        },
+                                                    )
                                                 }
                                                 indicator="dot"
                                             />
                                         }
                                     />
-                                    <Area dataKey="votes" type="natural" fill="url(#fillVotes)" stroke="var(--color-votes)" strokeWidth={2} />
+                                    <Area
+                                        dataKey="votes"
+                                        type="natural"
+                                        fill="url(#fillVotes)"
+                                        stroke="var(--color-votes)"
+                                        strokeWidth={2}
+                                    />
                                 </AreaChart>
                             </ChartContainer>
                         )}

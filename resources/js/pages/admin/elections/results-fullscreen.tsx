@@ -98,8 +98,8 @@ export default function ResultsFullscreen({
 
     useEffect(() => {
         if (paused || positions.length <= 1) {
-return;
-}
+            return;
+        }
 
         intervalRef.current = setInterval(() => {
             setActiveIdx((prev) => (prev + 1) % positions.length);
@@ -107,8 +107,8 @@ return;
 
         return () => {
             if (intervalRef.current) {
-clearInterval(intervalRef.current);
-}
+                clearInterval(intervalRef.current);
+            }
         };
     }, [paused, positions.length]);
 
@@ -278,7 +278,7 @@ clearInterval(intervalRef.current);
                                     onClick={() => setPaused(!paused)}
                                     title={paused ? 'Resume' : 'Pause'}
                                 >
-                                    <span className="text-xs font-mono tabular-nums">
+                                    <span className="font-mono text-xs tabular-nums">
                                         {paused ? '||' : '||'}
                                     </span>
                                 </Button>
@@ -358,8 +358,7 @@ clearInterval(intervalRef.current);
                                                         indicator="line"
                                                         labelFormatter={(
                                                             label,
-                                                        ) =>
-                                                            label as string}
+                                                        ) => label as string}
                                                     />
                                                 }
                                             />
@@ -515,7 +514,9 @@ clearInterval(intervalRef.current);
                     <div className="flex items-center gap-2 text-xs text-muted-foreground">
                         <span className="hidden sm:inline">
                             Auto-rotating{' '}
-                            {paused ? '(paused)' : `every ${AUTO_ROTATE_MS / 1000}s`}
+                            {paused
+                                ? '(paused)'
+                                : `every ${AUTO_ROTATE_MS / 1000}s`}
                         </span>
                     </div>
                 </footer>

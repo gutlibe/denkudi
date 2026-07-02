@@ -10,9 +10,9 @@ use App\Models\Election;
 use App\Models\Position;
 use App\Models\User;
 use App\Models\Vote;
-use App\Models\VoterParticipation;
 use App\Services\VotingService;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
@@ -152,9 +152,9 @@ class DemoSeeder extends Seeder
     }
 
     /**
-     * @return \Illuminate\Support\Collection<int, User>
+     * @return Collection<int, User>
      */
-    private function createStudents(): \Illuminate\Support\Collection
+    private function createStudents(): Collection
     {
         $studentIds = [
             ['first_name' => 'Akua',     'last_name' => 'Mensah',    'sid' => '0325010001'],
@@ -219,9 +219,9 @@ class DemoSeeder extends Seeder
     }
 
     /**
-     * @return \Illuminate\Support\Collection<int, Position>
+     * @return Collection<int, Position>
      */
-    private function createPositions(Election $election): \Illuminate\Support\Collection
+    private function createPositions(Election $election): Collection
     {
         $data = [
             ['title' => 'President',           'max_selections' => 1, 'sort_order' => 1],
@@ -247,10 +247,10 @@ class DemoSeeder extends Seeder
     }
 
     /**
-     * @param  \Illuminate\Support\Collection<int, Position>  $positions
-     * @return \Illuminate\Support\Collection<int, Candidate>
+     * @param  Collection<int, Position>  $positions
+     * @return Collection<int, Candidate>
      */
-    private function createCandidates(Election $election, \Illuminate\Support\Collection $positions): \Illuminate\Support\Collection
+    private function createCandidates(Election $election, Collection $positions): Collection
     {
         $slate = [
             'President' => [

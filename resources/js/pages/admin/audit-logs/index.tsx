@@ -35,7 +35,13 @@ type Props = {
 };
 
 const actionBadge = (action: string) => {
-    const m: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }> = {
+    const m: Record<
+        string,
+        {
+            label: string;
+            variant: 'default' | 'secondary' | 'destructive' | 'outline';
+        }
+    > = {
         election_created: { label: 'Created', variant: 'default' },
         election_updated: { label: 'Updated', variant: 'secondary' },
         election_deleted: { label: 'Deleted', variant: 'destructive' },
@@ -54,7 +60,12 @@ const actionBadge = (action: string) => {
         position_deleted: { label: 'Position', variant: 'destructive' },
     };
 
-    return m[action] ?? { label: action.replace(/_/g, ' '), variant: 'secondary' as const };
+    return (
+        m[action] ?? {
+            label: action.replace(/_/g, ' '),
+            variant: 'secondary' as const,
+        }
+    );
 };
 
 export default function AuditLogsPage({ logs, pagination }: Props) {
@@ -62,7 +73,10 @@ export default function AuditLogsPage({ logs, pagination }: Props) {
 
     const pages = [];
     const maxPages = 5;
-    let startPage = Math.max(1, pagination.current_page - Math.floor(maxPages / 2));
+    let startPage = Math.max(
+        1,
+        pagination.current_page - Math.floor(maxPages / 2),
+    );
     const endPage = Math.min(pagination.last_page, startPage + maxPages - 1);
     startPage = Math.max(1, endPage - maxPages + 1);
 
@@ -84,10 +98,14 @@ export default function AuditLogsPage({ logs, pagination }: Props) {
     };
 
     const handleSearch = () => {
-        router.get('/admin/audit-logs', { search: search || undefined, page: '1' }, {
-            preserveState: true,
-            replace: true,
-        });
+        router.get(
+            '/admin/audit-logs',
+            { search: search || undefined, page: '1' },
+            {
+                preserveState: true,
+                replace: true,
+            },
+        );
     };
 
     return (
@@ -97,9 +115,12 @@ export default function AuditLogsPage({ logs, pagination }: Props) {
             <div className="space-y-6">
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                     <div>
-                        <h2 className="text-2xl font-bold tracking-tight">Audit Logs</h2>
+                        <h2 className="text-2xl font-bold tracking-tight">
+                            Audit Logs
+                        </h2>
                         <p className="mt-1 text-sm text-muted-foreground">
-                            {pagination.total} total records &middot; Showing {pagination.from}&ndash;{pagination.to}
+                            {pagination.total} total records &middot; Showing{' '}
+                            {pagination.from}&ndash;{pagination.to}
                         </p>
                     </div>
                     <div className="flex items-center gap-2">
@@ -107,11 +128,21 @@ export default function AuditLogsPage({ logs, pagination }: Props) {
                             placeholder="Search logs..."
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
-                            onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                            onKeyDown={(e) =>
+                                e.key === 'Enter' && handleSearch()
+                            }
                             className="w-48"
                         />
-                        <Button variant="outline" size="sm" onClick={handleSearch}>
-                            <HugeiconsIcon icon={Search01Icon} size={14} className="mr-1.5" />
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={handleSearch}
+                        >
+                            <HugeiconsIcon
+                                icon={Search01Icon}
+                                size={14}
+                                className="mr-1.5"
+                            />
                             Search
                         </Button>
                     </div>
@@ -135,26 +166,28 @@ export default function AuditLogsPage({ logs, pagination }: Props) {
                                 <table className="w-full min-w-[700px]">
                                     <thead>
                                         <tr className="border-b bg-muted/30">
-                                            <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                                            <th className="px-4 py-3 text-left text-xs font-semibold tracking-wider text-muted-foreground uppercase">
                                                 Admin
                                             </th>
-                                            <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                                            <th className="px-4 py-3 text-left text-xs font-semibold tracking-wider text-muted-foreground uppercase">
                                                 Action
                                             </th>
-                                            <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                                            <th className="px-4 py-3 text-left text-xs font-semibold tracking-wider text-muted-foreground uppercase">
                                                 Description
                                             </th>
-                                            <th className="hidden px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider md:table-cell">
+                                            <th className="hidden px-4 py-3 text-left text-xs font-semibold tracking-wider text-muted-foreground uppercase md:table-cell">
                                                 IP
                                             </th>
-                                            <th className="px-4 py-3 text-right text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                                            <th className="px-4 py-3 text-right text-xs font-semibold tracking-wider text-muted-foreground uppercase">
                                                 Date
                                             </th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y">
                                         {logs.map((log) => {
-                                            const badge = actionBadge(log.action);
+                                            const badge = actionBadge(
+                                                log.action,
+                                            );
 
                                             return (
                                                 <tr
@@ -165,34 +198,62 @@ export default function AuditLogsPage({ logs, pagination }: Props) {
                                                         {log.admin}
                                                     </td>
                                                     <td className="px-4 py-3 whitespace-nowrap">
-                                                        <Badge variant={badge.variant} className="text-[11px] capitalize">
+                                                        <Badge
+                                                            variant={
+                                                                badge.variant
+                                                            }
+                                                            className="text-[11px] capitalize"
+                                                        >
                                                             {badge.label}
                                                         </Badge>
                                                     </td>
-                                                    <td className="px-4 py-3 text-sm text-muted-foreground max-w-xs">
+                                                    <td className="max-w-xs px-4 py-3 text-sm text-muted-foreground">
                                                         <Tooltip>
-                                                            <TooltipTrigger asChild>
-                                                                <p className="truncate cursor-default">{log.description}</p>
+                                                            <TooltipTrigger
+                                                                asChild
+                                                            >
+                                                                <p className="cursor-default truncate">
+                                                                    {
+                                                                        log.description
+                                                                    }
+                                                                </p>
                                                             </TooltipTrigger>
-                                                            <TooltipContent side="top" className="max-w-sm">
-                                                                <p className="text-xs">{log.description}</p>
+                                                            <TooltipContent
+                                                                side="top"
+                                                                className="max-w-sm"
+                                                            >
+                                                                <p className="text-xs">
+                                                                    {
+                                                                        log.description
+                                                                    }
+                                                                </p>
                                                             </TooltipContent>
                                                         </Tooltip>
                                                     </td>
-                                                    <td className="hidden px-4 py-3 font-mono text-xs text-muted-foreground whitespace-nowrap md:table-cell">
+                                                    <td className="hidden px-4 py-3 font-mono text-xs whitespace-nowrap text-muted-foreground md:table-cell">
                                                         {log.ip_address ?? '—'}
                                                     </td>
-                                                    <td className="px-4 py-3 text-right text-sm text-muted-foreground whitespace-nowrap">
-                                                        {new Date(log.created_at).toLocaleDateString('en-GB', {
-                                                            day: '2-digit',
-                                                            month: 'short',
-                                                            year: 'numeric',
-                                                        })}
+                                                    <td className="px-4 py-3 text-right text-sm whitespace-nowrap text-muted-foreground">
+                                                        {new Date(
+                                                            log.created_at,
+                                                        ).toLocaleDateString(
+                                                            'en-GB',
+                                                            {
+                                                                day: '2-digit',
+                                                                month: 'short',
+                                                                year: 'numeric',
+                                                            },
+                                                        )}
                                                         <span className="ml-1.5 text-xs opacity-60">
-                                                            {new Date(log.created_at).toLocaleTimeString('en-GB', {
-                                                                hour: '2-digit',
-                                                                minute: '2-digit',
-                                                            })}
+                                                            {new Date(
+                                                                log.created_at,
+                                                            ).toLocaleTimeString(
+                                                                'en-GB',
+                                                                {
+                                                                    hour: '2-digit',
+                                                                    minute: '2-digit',
+                                                                },
+                                                            )}
                                                         </span>
                                                     </td>
                                                 </tr>
@@ -208,21 +269,28 @@ export default function AuditLogsPage({ logs, pagination }: Props) {
                 {pagination.last_page > 1 && (
                     <div className="flex items-center justify-between">
                         <p className="text-sm text-muted-foreground">
-                            Page {pagination.current_page} of {pagination.last_page}
+                            Page {pagination.current_page} of{' '}
+                            {pagination.last_page}
                         </p>
                         <div className="flex items-center gap-1">
                             <Button
                                 variant="outline"
                                 size="sm"
                                 disabled={pagination.current_page === 1}
-                                onClick={() => goToPage(pagination.current_page - 1)}
+                                onClick={() =>
+                                    goToPage(pagination.current_page - 1)
+                                }
                             >
                                 Prev
                             </Button>
                             {pages.map((page) => (
                                 <Button
                                     key={page}
-                                    variant={page === pagination.current_page ? 'default' : 'outline'}
+                                    variant={
+                                        page === pagination.current_page
+                                            ? 'default'
+                                            : 'outline'
+                                    }
                                     size="sm"
                                     onClick={() => goToPage(page)}
                                     className="min-w-9"
@@ -233,8 +301,13 @@ export default function AuditLogsPage({ logs, pagination }: Props) {
                             <Button
                                 variant="outline"
                                 size="sm"
-                                disabled={pagination.current_page === pagination.last_page}
-                                onClick={() => goToPage(pagination.current_page + 1)}
+                                disabled={
+                                    pagination.current_page ===
+                                    pagination.last_page
+                                }
+                                onClick={() =>
+                                    goToPage(pagination.current_page + 1)
+                                }
                             >
                                 Next
                             </Button>

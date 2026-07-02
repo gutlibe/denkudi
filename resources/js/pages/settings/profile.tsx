@@ -54,7 +54,9 @@ export default function Profile({
                                     <Input
                                         id="first_name"
                                         className="mt-1 block w-full"
-                                        defaultValue={auth.user?.first_name ?? ''}
+                                        defaultValue={
+                                            auth.user?.first_name ?? ''
+                                        }
                                         name="first_name"
                                         required
                                         autoComplete="given-name"
@@ -73,7 +75,9 @@ export default function Profile({
                                     <Input
                                         id="last_name"
                                         className="mt-1 block w-full"
-                                        defaultValue={auth.user?.last_name ?? ''}
+                                        defaultValue={
+                                            auth.user?.last_name ?? ''
+                                        }
                                         name="last_name"
                                         required
                                         autoComplete="family-name"
@@ -87,7 +91,7 @@ export default function Profile({
                                 </div>
                             </div>
 
-                             <div className="grid gap-2">
+                            <div className="grid gap-2">
                                 <Label htmlFor="student_id">Student ID</Label>
 
                                 <Input

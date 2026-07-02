@@ -91,16 +91,25 @@ export default function VerifyPage({ result, token: initialToken }: Props) {
                                             className={`flex h-7 w-7 items-center justify-center rounded-full ${result.valid ? 'bg-green-500/15 text-green-500' : 'bg-yellow-500/15 text-yellow-500'}`}
                                         >
                                             <HugeiconsIcon
-                                                icon={result.valid ? CheckmarkCircle01Icon : AlertDiamondIcon}
+                                                icon={
+                                                    result.valid
+                                                        ? CheckmarkCircle01Icon
+                                                        : AlertDiamondIcon
+                                                }
                                                 size={16}
                                             />
                                         </div>
-                                        {result.valid ? 'Vote Verified' : 'Vote Quarantined'}
+                                        {result.valid
+                                            ? 'Vote Verified'
+                                            : 'Vote Quarantined'}
                                     </>
                                 ) : (
                                     <>
                                         <div className="flex h-7 w-7 items-center justify-center rounded-full bg-destructive/15 text-destructive">
-                                            <HugeiconsIcon icon={Cancel01Icon} size={16} />
+                                            <HugeiconsIcon
+                                                icon={Cancel01Icon}
+                                                size={16}
+                                            />
                                         </div>
                                         Token Not Found
                                     </>
@@ -112,27 +121,37 @@ export default function VerifyPage({ result, token: initialToken }: Props) {
                                 <div className="space-y-3">
                                     {result.election && (
                                         <div className="rounded-lg bg-muted/50 px-3 py-2.5">
-                                            <p className="text-[10px] tracking-wide text-muted-foreground uppercase">Election</p>
-                                            <p className="mt-0.5 text-sm font-medium">{result.election}</p>
+                                            <p className="text-[10px] tracking-wide text-muted-foreground uppercase">
+                                                Election
+                                            </p>
+                                            <p className="mt-0.5 text-sm font-medium">
+                                                {result.election}
+                                            </p>
                                         </div>
                                     )}
                                     {result.valid ? (
                                         <p className="text-xs text-muted-foreground">
-                                            This receipt corresponds to a valid ballot. Vote integrity verified.
+                                            This receipt corresponds to a valid
+                                            ballot. Vote integrity verified.
                                         </p>
                                     ) : (
                                         <p className="text-xs text-yellow-600 dark:text-yellow-500">
-                                            This receipt has been flagged for integrity review. Contact the election administrator.
+                                            This receipt has been flagged for
+                                            integrity review. Contact the
+                                            election administrator.
                                         </p>
                                     )}
                                     <p className="text-[10px] text-muted-foreground/60">
-                                        No ballot choices are displayed — your vote remains anonymous.
+                                        No ballot choices are displayed — your
+                                        vote remains anonymous.
                                     </p>
                                 </div>
                             ) : (
                                 <div className="py-4 text-center">
                                     <p className="text-sm text-muted-foreground">
-                                        No vote found with this token. Double-check the receipt code and try again.
+                                        No vote found with this token.
+                                        Double-check the receipt code and try
+                                        again.
                                     </p>
                                 </div>
                             )}

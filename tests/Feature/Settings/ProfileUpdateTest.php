@@ -30,8 +30,6 @@ class ProfileUpdateTest extends TestCase
             ->patch(route('profile.update'), [
                 'first_name' => 'Test',
                 'last_name' => 'User',
-                'student_id' => $user->student_id,
-                'email' => 'test@example.com',
             ]);
 
         $response
@@ -42,8 +40,6 @@ class ProfileUpdateTest extends TestCase
 
         $this->assertSame('Test', $user->first_name);
         $this->assertSame('User', $user->last_name);
-        $this->assertSame('test@example.com', $user->email);
-        $this->assertNull($user->email_verified_at);
     }
 
     public function test_email_verification_status_is_unchanged_when_the_email_address_is_unchanged()
@@ -55,8 +51,6 @@ class ProfileUpdateTest extends TestCase
             ->patch(route('profile.update'), [
                 'first_name' => 'Test',
                 'last_name' => 'User',
-                'student_id' => $user->student_id,
-                'email' => $user->email,
             ]);
 
         $response

@@ -67,20 +67,36 @@ export default function BallotPage({ election, alreadyVoted, receipt }: Props) {
                         {receipt && (
                             <div className="mt-6 rounded-lg bg-muted px-6 py-3">
                                 <p className="mb-1 text-xs text-muted-foreground">
-                                    Your receipt token{copied && <span className="text-green-600"> — Copied</span>}
+                                    Your receipt token
+                                    {copied && (
+                                        <span className="text-green-600">
+                                            {' '}
+                                            — Copied
+                                        </span>
+                                    )}
                                 </p>
                                 <div className="flex items-center justify-center gap-2">
-                                    <p className="font-mono text-xl font-bold tracking-wider">{receipt}</p>
+                                    <p className="font-mono text-xl font-bold tracking-wider">
+                                        {receipt}
+                                    </p>
                                     <Button
                                         variant="ghost"
                                         size="icon-sm"
                                         onClick={() => {
-                                            navigator.clipboard.writeText(receipt);
+                                            navigator.clipboard.writeText(
+                                                receipt,
+                                            );
                                             setCopied(true);
-                                            setTimeout(() => setCopied(false), 2000);
+                                            setTimeout(
+                                                () => setCopied(false),
+                                                2000,
+                                            );
                                         }}
                                     >
-                                        <HugeiconsIcon icon={ClipboardCopyIcon} size={16} />
+                                        <HugeiconsIcon
+                                            icon={ClipboardCopyIcon}
+                                            size={16}
+                                        />
                                     </Button>
                                 </div>
                                 <p className="mt-2 text-xs text-muted-foreground">

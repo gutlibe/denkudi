@@ -96,7 +96,10 @@ export default function UsersIndex({
 
     const pages: number[] = [];
     const maxPages = 5;
-    let startPage = Math.max(1, pagination.current_page - Math.floor(maxPages / 2));
+    let startPage = Math.max(
+        1,
+        pagination.current_page - Math.floor(maxPages / 2),
+    );
     const endPage = Math.min(pagination.last_page, startPage + maxPages - 1);
     startPage = Math.max(1, endPage - maxPages + 1);
 
@@ -110,9 +113,12 @@ export default function UsersIndex({
             <div className="space-y-6">
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                     <div>
-                        <h2 className="text-2xl font-bold tracking-tight">User Management</h2>
+                        <h2 className="text-2xl font-bold tracking-tight">
+                            User Management
+                        </h2>
                         <p className="mt-1 text-sm text-muted-foreground">
-                            {pagination.total} registered user{pagination.total !== 1 ? 's' : ''}
+                            {pagination.total} registered user
+                            {pagination.total !== 1 ? 's' : ''}
                         </p>
                     </div>
                     <div className="flex items-center gap-2">
@@ -120,11 +126,21 @@ export default function UsersIndex({
                             placeholder="Search name, ID or email..."
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
-                            onKeyDown={(e) => e.key === 'Enter' && applySearch()}
+                            onKeyDown={(e) =>
+                                e.key === 'Enter' && applySearch()
+                            }
                             className="w-64"
                         />
-                        <Button variant="outline" size="sm" onClick={applySearch}>
-                            <HugeiconsIcon icon={Search01Icon} size={14} className="mr-1.5" />
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={applySearch}
+                        >
+                            <HugeiconsIcon
+                                icon={Search01Icon}
+                                size={14}
+                                className="mr-1.5"
+                            />
                             Search
                         </Button>
                     </div>
@@ -136,22 +152,22 @@ export default function UsersIndex({
                             <table className="w-full min-w-[600px]">
                                 <thead>
                                     <tr className="border-b bg-muted/30">
-                                        <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                                        <th className="px-4 py-3 text-left text-xs font-semibold tracking-wider text-muted-foreground uppercase">
                                             Name
                                         </th>
-                                        <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                                        <th className="px-4 py-3 text-left text-xs font-semibold tracking-wider text-muted-foreground uppercase">
                                             Student ID
                                         </th>
-                                        <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                                        <th className="px-4 py-3 text-left text-xs font-semibold tracking-wider text-muted-foreground uppercase">
                                             Email
                                         </th>
-                                        <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                                        <th className="px-4 py-3 text-left text-xs font-semibold tracking-wider text-muted-foreground uppercase">
                                             Role
                                         </th>
-                                        <th className="hidden px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider md:table-cell">
+                                        <th className="hidden px-4 py-3 text-left text-xs font-semibold tracking-wider text-muted-foreground uppercase md:table-cell">
                                             Joined
                                         </th>
-                                        <th className="px-4 py-3 text-right text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                                        <th className="px-4 py-3 text-right text-xs font-semibold tracking-wider text-muted-foreground uppercase">
                                             Actions
                                         </th>
                                     </tr>
@@ -163,25 +179,35 @@ export default function UsersIndex({
                                             className="transition-colors hover:bg-muted/30"
                                         >
                                             <td className="px-4 py-3 text-sm font-medium whitespace-nowrap">
-                                                {user.first_name} {user.last_name}
+                                                {user.first_name}{' '}
+                                                {user.last_name}
                                             </td>
                                             <td className="px-4 py-3 font-mono text-xs whitespace-nowrap">
                                                 {user.student_id}
                                             </td>
-                                            <td className="px-4 py-3 text-sm text-muted-foreground whitespace-nowrap">
+                                            <td className="px-4 py-3 text-sm whitespace-nowrap text-muted-foreground">
                                                 {user.email}
                                             </td>
                                             <td className="px-4 py-3 whitespace-nowrap">
                                                 <Badge
-                                                    variant={user.role === 'admin' ? 'default' : 'secondary'}
+                                                    variant={
+                                                        user.role === 'admin'
+                                                            ? 'default'
+                                                            : 'secondary'
+                                                    }
                                                     className="gap-1 text-[11px]"
                                                 >
-                                                    <HugeiconsIcon icon={Shield01Icon} size={11} />
+                                                    <HugeiconsIcon
+                                                        icon={Shield01Icon}
+                                                        size={11}
+                                                    />
                                                     {user.role_label}
                                                 </Badge>
                                             </td>
-                                            <td className="hidden px-4 py-3 text-sm text-muted-foreground whitespace-nowrap md:table-cell">
-                                                {new Date(user.created_at).toLocaleDateString('en-GB', {
+                                            <td className="hidden px-4 py-3 text-sm whitespace-nowrap text-muted-foreground md:table-cell">
+                                                {new Date(
+                                                    user.created_at,
+                                                ).toLocaleDateString('en-GB', {
                                                     day: '2-digit',
                                                     month: 'short',
                                                     year: 'numeric',
@@ -191,7 +217,9 @@ export default function UsersIndex({
                                                 <Button
                                                     variant="outline"
                                                     size="sm"
-                                                    onClick={() => openRoleDialog(user)}
+                                                    onClick={() =>
+                                                        openRoleDialog(user)
+                                                    }
                                                 >
                                                     Change Role
                                                 </Button>
@@ -200,8 +228,13 @@ export default function UsersIndex({
                                     ))}
                                     {users.length === 0 && (
                                         <tr>
-                                            <td colSpan={6} className="px-4 py-16 text-center">
-                                                <p className="text-sm text-muted-foreground">No users found.</p>
+                                            <td
+                                                colSpan={6}
+                                                className="px-4 py-16 text-center"
+                                            >
+                                                <p className="text-sm text-muted-foreground">
+                                                    No users found.
+                                                </p>
                                             </td>
                                         </tr>
                                     )}
@@ -214,21 +247,28 @@ export default function UsersIndex({
                 {pagination.last_page > 1 && (
                     <div className="flex items-center justify-between">
                         <p className="text-sm text-muted-foreground">
-                            Page {pagination.current_page} of {pagination.last_page}
+                            Page {pagination.current_page} of{' '}
+                            {pagination.last_page}
                         </p>
                         <div className="flex items-center gap-1">
                             <Button
                                 variant="outline"
                                 size="sm"
                                 disabled={pagination.current_page === 1}
-                                onClick={() => goToPage(pagination.current_page - 1)}
+                                onClick={() =>
+                                    goToPage(pagination.current_page - 1)
+                                }
                             >
                                 Prev
                             </Button>
                             {pages.map((page) => (
                                 <Button
                                     key={page}
-                                    variant={page === pagination.current_page ? 'default' : 'outline'}
+                                    variant={
+                                        page === pagination.current_page
+                                            ? 'default'
+                                            : 'outline'
+                                    }
                                     size="sm"
                                     onClick={() => goToPage(page)}
                                     className="min-w-9"
@@ -239,8 +279,13 @@ export default function UsersIndex({
                             <Button
                                 variant="outline"
                                 size="sm"
-                                disabled={pagination.current_page === pagination.last_page}
-                                onClick={() => goToPage(pagination.current_page + 1)}
+                                disabled={
+                                    pagination.current_page ===
+                                    pagination.last_page
+                                }
+                                onClick={() =>
+                                    goToPage(pagination.current_page + 1)
+                                }
                             >
                                 Next
                             </Button>
@@ -261,7 +306,8 @@ export default function UsersIndex({
                                 <>
                                     Update role for{' '}
                                     <strong>
-                                        {roleDialog.user.first_name} {roleDialog.user.last_name}
+                                        {roleDialog.user.first_name}{' '}
+                                        {roleDialog.user.last_name}
                                     </strong>{' '}
                                     ({roleDialog.user.student_id}).
                                 </>
@@ -291,7 +337,10 @@ export default function UsersIndex({
                                 <SelectContent>
                                     {Object.entries(roles).map(
                                         ([value, label]) => (
-                                            <SelectItem key={value} value={value}>
+                                            <SelectItem
+                                                key={value}
+                                                value={value}
+                                            >
                                                 {label}
                                             </SelectItem>
                                         ),
