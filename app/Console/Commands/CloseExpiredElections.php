@@ -15,7 +15,11 @@ class CloseExpiredElections extends Command
 
     public function handle(): int
     {
-        $expired = Election::where('status', ElectionStatus::Active->value)
+        $expired = Election::whereIn('status', [
+            ElectionStatus::Active->value,
+            ElectionStatus::Scheduled->value,
+            ElectionStatus::PausedForReview->value,
+        ])
             ->whereNotNull('ends_at')
             ->where('ends_at', '<', now())
             ->get();
@@ -27,6 +31,7 @@ class CloseExpiredElections extends Command
         }
 
         foreach ($expired as $election) {
+            $fromStatus = $election->status;
             $election->update(['status' => ElectionStatus::Closed]);
 
             AdminAuditLog::create([
@@ -35,14 +40,16 @@ class CloseExpiredElections extends Command
                 'description' => "Election \"{$election->title}\" automatically closed (end date passed).",
                 'metadata' => [
                     'election_id' => $election->id,
+                    'previous_status' => $fromStatus,
                     'ends_at' => $election->ends_at,
                 ],
                 'created_at' => now(),
             ]);
 
-            $this->info("Closed: {$election->title}");
+            $this->info("Closed ({$fromStatus} -> closed): {$election->title}");
         }
 
+        $this->info(count($expired).' election(s) closed.');
+
         return self::SUCCESS;
-    }
 }

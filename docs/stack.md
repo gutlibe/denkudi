@@ -66,7 +66,8 @@
 | ---------- | ------------------------------- |
 | Server     | Hestia CP (Ubuntu 24.04 LTS)    |
 | PHP        | 8.4 (FPM)                       |
-| Queue      | Database driver                 |
+| Queue      | Database driver, supervisor     |
+| Scheduler  | Cron (every minute)             |
 | Storage    | Local disk (shared symlink)     |
 | CI/CD      | GitHub Actions                  |
 | Deploy     | Zero-downtime (releases/ symlink swap) |
