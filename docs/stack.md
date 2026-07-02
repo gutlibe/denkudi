@@ -1,6 +1,6 @@
 # Tech Stack — Denkudi (HTU E-Voting)
 
-> Updated: 2026-06-26
+> Updated: 2026-07-02
 
 ## Core
 
@@ -17,7 +17,7 @@
 | Icons       | Hugeicons Core Free     | 4.2.1   |
 | Icons       | Lucide React            | 1.21.0  |
 | Auth        | Laravel Fortify         | 1.37.2  |
-| Passkeys    | Laravel Passkeys (WebAuthn) | 0.2.0 |
+| Passkeys    | Laravel Passkeys (WebAuthn) | 0.2.1 |
 | Bundler     | Vite                    | 8.0.16  |
 
 ## Frontend Libraries
@@ -52,12 +52,13 @@
 | Format    | Prettier (JS/TS)         | 3.8     |
 | Lint      | ESLint (JS/TS)           | 9.39    |
 | Lint      | typescript-eslint        | 8.61    |
-| Types     | Larastan (PHPStan)       | 3.9     |
+| Types     | Larastan (PHPStan)       | 3.10.0  |
 | Types     | tsc (TypeScript)         | 6.0.3   |
 | Pkg Mgr   | Composer (PHP)           | latest  |
-| Pkg Mgr   | pnpm (JS)                | 10.33   |
+| Pkg Mgr   | pnpm (JS)                | 11.9    |
 | Build     | Vite                     | 8.0.16  |
-| Routing   | Laravel Wayfinder        | 0.1.3   |
+| Routing   | Laravel Wayfinder (PHP)  | 0.1.20  |
+| Routing   | @laravel/vite-plugin-wayfinder (JS) | 0.1.7 |
 
 ## Infrastructure
 

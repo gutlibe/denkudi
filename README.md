@@ -72,7 +72,7 @@ Visit `http://denkudi.test`. Herd must be running.
 - **Live results** — Admin-gated release
 
 ### Admin
-- **Election lifecycle** — Draft → Scheduled → Active → Closed
+- **Election lifecycle** — Draft → Scheduled → Active → Closed (auto-pauses for review if tampering is detected)
 - **Chain audit** — Validate hash integrity per election
 - **Audit logs** — Every admin action recorded
 - **User management** — Role assignment
@@ -118,6 +118,6 @@ denkudi/
 
 ## Deployment
 
-Zero-downtime deployment via GitHub Actions to Hestia CP. Uses atomic symlink swap — new release tested in isolation, then activated in <1ms. PHP-FPM restart clears Opcache.
+Zero-downtime deployment via GitHub Actions to Hestia CP, hosted on aigh.dev infrastructure. Uses atomic symlink swap — new release tested in isolation, then activated in <1ms. PHP-FPM restart clears Opcache.
 
 📖 **Deploy guide** available on request (not in public repo).

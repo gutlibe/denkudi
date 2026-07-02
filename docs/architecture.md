@@ -99,18 +99,26 @@ flowchart LR
 6. The system gives them a receipt token like `HTU-XXXX-XXXX-XXXX`
 7. They can use this receipt later to verify their vote was counted
 
+> This describes the swipeable step-by-step ballot opened from the dashboard
+> (`vote-flow-mobile.tsx` / `vote-flow-desktop.tsx`, via `use-ballot.ts`).
+> There's also a standalone full-page ballot at `/elections/{election}/vote`
+> (`elections/ballot.tsx`) with a simpler single-page UI (all positions shown
+> at once, "Review Ballot" then "Confirm & Submit") — both submit to the same
+> `VotingService::castBallot()` and produce the same receipt.
+
 ### What Happens Behind the Scenes
 
-When a ballot is submitted, several things happen inside a single database transaction:
+When a ballot is submitted:
 
-1. The system checks the hash chain for any previously tampered votes
-2. It locks the election row so no other ballot can interfere
-3. It reads the last valid vote's hash as the "previous hash"
-4. For each candidate selected, it creates a vote row that links to the previous one
-5. It records that the student has voted (using a hashed student ID)
-6. It generates a unique receipt token and returns it to the voter
+1. **Before any transaction opens**, the system checks the hash chain for previously tampered votes and quarantines/pauses as needed. This runs deliberately *outside* the transaction below — if it ran inside, a later failure in the ballot write would roll back the quarantine along with it, letting a detected tamper silently reappear as "valid."
+2. **Then, inside a single database transaction:**
+   - It locks the election row so no other ballot can interfere
+   - It reads the last valid vote's hash as the "previous hash"
+   - For each candidate selected, it creates a vote row that links to the previous one
+   - It records that the student has voted (using a hashed student ID)
+   - It generates a unique receipt token and returns it to the voter
 
-All of this happens atomically — either everything succeeds, or nothing is saved.
+The transactional part is atomic — either everything in step 2 succeeds, or nothing is saved. The integrity scan in step 1 is intentionally independent of that transaction, by design.
 
 ---
 
@@ -183,7 +191,7 @@ A voter wants to prove their vote was counted. They paste their receipt token on
 An administrator reviews a quarantined vote and attempts to restore it. The system re-verifies the hash chain integrity (self-consistency and cross-row linkage) before allowing dismissal. If the chain is still broken, dismissal is blocked.
 **Result:** Tampered votes cannot be silently restored by a rogue admin.
 
-### Scenario 5: Admin Audit
+### Scenario 6: Admin Audit
 
 After an election, administrators run a chain audit. The system validates every hash link. Broken links are flagged. A health status (valid/broken) is displayed with quarantine counts.
 **Result:** Transparent, verifiable election integrity.
