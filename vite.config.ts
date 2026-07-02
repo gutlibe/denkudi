@@ -14,10 +14,20 @@ export default defineConfig({
             host: 'localhost',
         },
     },
+    build: {
+        rollupOptions: {
+            output: {
+                assetFileNames: '[hash].[ext]',
+                chunkFileNames: '[hash].js',
+                entryFileNames: '[hash].js',
+            },
+        },
+    },
     plugins: [
         laravel({
             input: ['resources/css/app.css', 'resources/js/app.tsx'],
             refresh: true,
+            buildDirectory: 'assets',
             fonts: [
                 bunny('Instrument Sans', {
                     weights: [400, 500, 600],
