@@ -60,13 +60,9 @@ export function useBallot(
             });
 
             if (!res.ok) {
-                if (res.status === 403) {
-                    throw new Error(
-                        'You are not eligible to vote in this election.',
-                    );
-                }
+                const body = await res.json().catch(() => null);
 
-                throw new Error('Failed to load ballot data.');
+                throw new Error(body?.message ?? 'Failed to load ballot data.');
             }
 
             const data = await res.json();

@@ -5,11 +5,12 @@ import {
     AlertDiamondIcon,
 } from '@hugeicons/core-free-icons';
 import { HugeiconsIcon } from '@hugeicons/react';
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import { Spinner } from '@/components/ui/spinner';
 import { dashboard, verify as verifyRoute } from '@/routes';
 
 type Props = {
@@ -23,6 +24,7 @@ type Props = {
 
 export default function VerifyPage({ result, token: initialToken }: Props) {
     const [token, setToken] = useState(initialToken || '');
+    const [verifying, setVerifying] = useState(false);
 
     return (
         <>
@@ -51,11 +53,21 @@ export default function VerifyPage({ result, token: initialToken }: Props) {
                             onSubmit={(e) => {
                                 e.preventDefault();
 
-                                if (token.trim()) {
-                                    window.location.href = verifyRoute.url({
-                                        query: { token: token.trim() },
-                                    });
+                                if (!token.trim()) {
+                                    return;
                                 }
+
+                                setVerifying(true);
+                                router.get(
+                                    verifyRoute.url({
+                                        query: { token: token.trim() },
+                                    }),
+                                    {},
+                                    {
+                                        preserveState: true,
+                                        onFinish: () => setVerifying(false),
+                                    },
+                                );
                             }}
                             className="flex gap-2"
                         >
@@ -66,8 +78,11 @@ export default function VerifyPage({ result, token: initialToken }: Props) {
                                 className="font-mono text-sm"
                                 autoFocus
                             />
-                            <Button type="submit" disabled={!token.trim()}>
-                                Verify
+                            <Button
+                                type="submit"
+                                disabled={!token.trim() || verifying}
+                            >
+                                {verifying ? <Spinner /> : 'Verify'}
                             </Button>
                         </form>
                     </CardContent>
