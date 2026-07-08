@@ -66,6 +66,7 @@ export function VoteFlowMobile({ election, open, onClose, onVoted }: Props) {
         submitted,
         receipt,
         error,
+        submitError,
         currentStep,
         positions,
         currentPosition,
@@ -356,6 +357,11 @@ export function VoteFlowMobile({ election, open, onClose, onVoted }: Props) {
                                         : 'None selected'}
                                 </span>
                             </div>
+                            {submitError && (
+                                <p className="mb-3 rounded-lg bg-destructive/10 px-3 py-2 text-xs font-medium text-destructive">
+                                    {submitError}
+                                </p>
+                            )}
                             <div className="flex gap-2">
                                 {currentStep > 0 ? (
                                     <Button

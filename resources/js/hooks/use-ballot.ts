@@ -1,5 +1,12 @@
-import { router } from '@inertiajs/react';
 import { useState, useEffect, useCallback } from 'react';
+
+const xsrfToken = () =>
+    decodeURIComponent(
+        document.cookie.replace(
+            /(?:(?:^|.*;\s*)XSRF-TOKEN\s*=\s*([^;]*).*$)|^.*$/,
+            '$1',
+        ),
+    );
 
 type Candidate = {
     id: number;
@@ -36,6 +43,7 @@ export function useBallot(
     const [submitted, setSubmitted] = useState(false);
     const [receipt, setReceipt] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
+    const [submitError, setSubmitError] = useState<string | null>(null);
 
     const loadBallot = useCallback(async () => {
         setLoading(true);
@@ -46,12 +54,7 @@ export function useBallot(
                 headers: {
                     Accept: 'application/json',
                     'X-Requested-With': 'XMLHttpRequest',
-                    'X-XSRF-TOKEN': decodeURIComponent(
-                        document.cookie.replace(
-                            /(?:(?:^|.*;\s*)XSRF-TOKEN\s*=\s*([^;]*).*$)|^.*$/,
-                            '$1',
-                        ),
-                    ),
+                    'X-XSRF-TOKEN': xsrfToken(),
                 },
                 credentials: 'include',
             });
@@ -92,6 +95,7 @@ export function useBallot(
             setSelections({});
             setSubmitted(false);
             setReceipt(null);
+            setSubmitError(null);
             loadBallot();
         } else {
             setBallotData(null);
@@ -138,17 +142,19 @@ export function useBallot(
         setCurrentStep((s) => Math.max(0, s - 1));
     };
 
-    const submit = () => {
-        setSubmitting(true);
+    const submit = async () => {
         const allSelected = positions.every(
             (p) => (selections[p.id]?.length ?? 0) > 0,
         );
 
         if (!allSelected) {
-            setSubmitting(false);
+            setSubmitError('Please make a selection for every position.');
 
             return;
         }
+
+        setSubmitError(null);
+        setSubmitting(true);
 
         const ballot = Object.entries(selections).flatMap(([posId, candIds]) =>
             candIds.map((candId) => ({
@@ -157,21 +163,40 @@ export function useBallot(
             })),
         );
 
-        router.post(
-            `/elections/${election.id}/vote`,
-            { ballot },
-            {
-                preserveState: true,
-                onSuccess: (page) => {
-                    setSubmitted(true);
-                    setReceipt(
-                        (page.props as { receipt?: string }).receipt ?? null,
-                    );
-                    onVoted();
+        // A plain fetch (not Inertia's router) so a successful or failed
+        // submission never triggers a full Inertia page navigation away
+        // from the dashboard — the sheet stays in place either way.
+        try {
+            const res = await fetch(`/elections/${election.id}/vote`, {
+                method: 'POST',
+                headers: {
+                    Accept: 'application/json',
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-XSRF-TOKEN': xsrfToken(),
                 },
-                onFinish: () => setSubmitting(false),
-            },
-        );
+                credentials: 'include',
+                body: JSON.stringify({ ballot }),
+            });
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                setSubmitError(data.message ?? 'Failed to submit ballot.');
+
+                return;
+            }
+
+            setSubmitted(true);
+            setReceipt(data.receipt ?? null);
+            onVoted();
+        } catch {
+            setSubmitError(
+                'Failed to submit ballot. Check your connection and try again.',
+            );
+        } finally {
+            setSubmitting(false);
+        }
     };
 
     const positionsCompleted = positions.filter(
@@ -185,6 +210,7 @@ export function useBallot(
         receipt,
         error,
         setError,
+        submitError,
         currentStep,
         positions,
         currentPosition,

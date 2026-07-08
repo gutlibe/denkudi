@@ -64,17 +64,24 @@ const formatRelative = (d: string | null) => {
     }
 
     const diff = new Date(d).getTime() - Date.now();
-    const days = Math.ceil(diff / 86400000);
 
-    if (days < 0) {
+    if (diff < 0) {
         return 'Ended';
     }
 
-    if (days === 0) {
-        return 'Ends today';
+    const hours = Math.floor(diff / 3600000);
+
+    if (hours < 1) {
+        const minutes = Math.max(1, Math.floor(diff / 60000));
+
+        return `${minutes}m left`;
     }
 
-    return `${days}d left`;
+    if (hours < 24) {
+        return `${hours}h left`;
+    }
+
+    return `${Math.ceil(diff / 86400000)}d left`;
 };
 
 /* ─── Stat Card ─── */

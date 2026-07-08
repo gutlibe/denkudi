@@ -146,18 +146,32 @@ class DashboardController extends Controller
         ]);
     }
 
-    public function submitVote(Election $election, Request $request, VotingService $voting): Response|RedirectResponse
+    /**
+     * The dashboard's inline voting sheet submits via a plain fetch() (Accept:
+     * application/json) so it never triggers an Inertia page navigation away
+     * from the dashboard. The standalone ballot page still posts through
+     * Inertia's router, so both branches are kept.
+     */
+    public function submitVote(Election $election, Request $request, VotingService $voting): Response|RedirectResponse|JsonResponse
     {
         $user = $request->user();
 
         $ballot = $request->input('ballot', []);
 
         if (! is_array($ballot)) {
+            if ($request->wantsJson()) {
+                return response()->json(['message' => 'Invalid ballot format.'], 422);
+            }
+
             return back()->with('toast', ['type' => 'error', 'message' => 'Invalid ballot format.']);
         }
 
         try {
             $result = $voting->castBallot($election, $user->student_id, $ballot);
+
+            if ($request->wantsJson()) {
+                return response()->json($result);
+            }
 
             return Inertia::render('elections/ballot', [
                 'election' => ['id' => $election->id, 'title' => $election->title],
@@ -165,11 +179,19 @@ class DashboardController extends Controller
                 'receipt' => $result['receipt'],
             ])->with('toast', ['type' => 'success', 'message' => 'Vote submitted successfully.']);
         } catch (ElectionPausedException $e) {
+            if ($request->wantsJson()) {
+                return response()->json(['message' => $e->getMessage()], 423);
+            }
+
             return Inertia::render('elections/ballot', [
                 'election' => ['id' => $election->id, 'title' => $election->title],
                 'alreadyVoted' => false,
             ])->with('toast', ['type' => 'error', 'message' => $e->getMessage()]);
         } catch (\RuntimeException $e) {
+            if ($request->wantsJson()) {
+                return response()->json(['message' => $e->getMessage()], 422);
+            }
+
             return back()->with('toast', ['type' => 'error', 'message' => $e->getMessage()]);
         }
     }
