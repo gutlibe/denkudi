@@ -45,6 +45,7 @@ export default function BallotPage({ election, alreadyVoted, receipt }: Props) {
     const [selections, setSelections] = useState<Record<number, number[]>>({});
     const [reviewing, setReviewing] = useState(false);
     const [copied, setCopied] = useState(false);
+    const [submitting, setSubmitting] = useState(false);
 
     if (alreadyVoted) {
         return (
@@ -155,6 +156,8 @@ export default function BallotPage({ election, alreadyVoted, receipt }: Props) {
             ?.candidates.find((c) => c.id === cid);
 
     const submit = () => {
+        setSubmitting(true);
+
         const ballot = Object.entries(selections).flatMap(([posId, candIds]) =>
             candIds.map((candId) => ({
                 position_id: parseInt(posId),
@@ -164,7 +167,7 @@ export default function BallotPage({ election, alreadyVoted, receipt }: Props) {
         router.post(
             `/elections/${election.id}/vote`,
             { ballot },
-            { preserveState: true },
+            { preserveState: true, onFinish: () => setSubmitting(false) },
         );
     };
 
@@ -246,6 +249,7 @@ export default function BallotPage({ election, alreadyVoted, receipt }: Props) {
                             variant="outline"
                             size="lg"
                             className="flex-1"
+                            disabled={submitting}
                             onClick={() => setReviewing(false)}
                         >
                             <HugeiconsIcon
@@ -255,13 +259,18 @@ export default function BallotPage({ election, alreadyVoted, receipt }: Props) {
                             />
                             Go Back
                         </Button>
-                        <Button size="lg" className="flex-1" onClick={submit}>
+                        <Button
+                            size="lg"
+                            className="flex-1"
+                            disabled={submitting}
+                            onClick={submit}
+                        >
                             <HugeiconsIcon
                                 icon={CheckmarkCircle01Icon}
                                 size={14}
                                 className="mr-1.5"
                             />
-                            Confirm &amp; Submit
+                            {submitting ? 'Submitting…' : 'Confirm & Submit'}
                         </Button>
                     </div>
                 </div>
