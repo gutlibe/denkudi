@@ -249,10 +249,17 @@ export default function ResultsPage({ election, positions }: Props) {
                             ]),
                         ) satisfies ChartConfig;
 
+                        const topVotes =
+                            position.candidates[0]?.vote_count ?? 0;
+                        const tiedForFirst = position.candidates.filter(
+                            (c) => c.vote_count === topVotes,
+                        ).length;
                         const winner =
-                            position.total_votes > 0
+                            position.total_votes > 0 && tiedForFirst === 1
                                 ? position.candidates[0]
                                 : null;
+                        const isTie =
+                            position.total_votes > 0 && tiedForFirst > 1;
 
                         return (
                             <Card key={position.id}>
@@ -277,6 +284,14 @@ export default function ResultsPage({ election, positions }: Props) {
                                                     size={12}
                                                 />
                                                 {winner.name}
+                                            </Badge>
+                                        )}
+                                        {isTie && (
+                                            <Badge
+                                                variant="outline"
+                                                className="shrink-0"
+                                            >
+                                                Tied for first
                                             </Badge>
                                         )}
                                     </div>
