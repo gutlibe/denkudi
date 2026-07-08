@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Enums\ElectionStatus;
 use App\Exceptions\ElectionPausedException;
 use App\Models\AdminAuditLog;
 use App\Models\Candidate;
@@ -320,7 +321,7 @@ class VotingService
         }
 
         $election->update([
-            'status' => 'paused_for_review',
+            'status' => ElectionStatus::PausedForReview,
             'paused_at' => now(),
             'pause_reason' => "Halted: {$count} total tampered votes detected.",
         ]);
@@ -342,7 +343,7 @@ class VotingService
     {
         DB::transaction(function () use ($election, $adminId) {
             $election->update([
-                'status' => 'active',
+                'status' => ElectionStatus::Active,
                 'quarantine_count' => 0,
                 'resumed_at' => now(),
                 'resumed_by' => $adminId,
@@ -354,7 +355,7 @@ class VotingService
                 'description' => "Election \"{$election->title}\" resumed after integrity review.",
                 'metadata' => [
                     'election_id' => $election->id,
-                    'previous_status' => 'paused_for_review',
+                    'previous_status' => ElectionStatus::PausedForReview->value,
                     'pause_reason' => $election->pause_reason,
                 ],
                 'ip_address' => request()->ip(),

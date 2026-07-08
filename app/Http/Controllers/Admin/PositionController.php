@@ -13,10 +13,10 @@ class PositionController extends Controller
 {
     public function store(Request $request, Election $election): RedirectResponse
     {
-        if ($election->isActive()) {
+        if ($election->isLockedForEditing()) {
             return back()->with('toast', [
                 'type' => 'error',
-                'message' => 'Cannot add positions while voting is active.',
+                'message' => 'Cannot add positions while the election is active, paused, or closed.',
             ]);
         }
 
@@ -42,10 +42,10 @@ class PositionController extends Controller
 
     public function update(Request $request, Election $election, Position $position): RedirectResponse
     {
-        if ($election->isActive()) {
+        if ($election->isLockedForEditing()) {
             return back()->with('toast', [
                 'type' => 'error',
-                'message' => 'Cannot edit positions while voting is active.',
+                'message' => 'Cannot edit positions while the election is active, paused, or closed.',
             ]);
         }
 
@@ -71,10 +71,10 @@ class PositionController extends Controller
 
     public function destroy(Request $request, Election $election, Position $position): RedirectResponse
     {
-        if ($election->isActive()) {
+        if ($election->isLockedForEditing()) {
             return back()->with('toast', [
                 'type' => 'error',
-                'message' => 'Cannot delete positions while voting is active.',
+                'message' => 'Cannot delete positions while the election is active, paused, or closed.',
             ]);
         }
 

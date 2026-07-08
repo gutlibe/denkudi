@@ -46,10 +46,11 @@ class CloseExpiredElections extends Command
                 'created_at' => now(),
             ]);
 
-            $this->info("Closed ({$fromStatus} -> closed): {$election->title}");
+            $this->info("Closed ({$fromStatus->value} -> closed): {$election->title}");
         }
 
         $this->info(count($expired).' election(s) closed.');
 
         return self::SUCCESS;
+    }
 }

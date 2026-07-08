@@ -60,6 +60,7 @@ class ElectionController extends Controller
                 'search' => $request->input('search', ''),
             ],
             'statuses' => ElectionStatus::options(),
+            'statusTransitions' => ElectionStatus::transitionMap(),
         ]);
     }
 
@@ -143,10 +144,10 @@ class ElectionController extends Controller
 
     public function update(Request $request, Election $election): RedirectResponse
     {
-        if ($election->isActive() || $election->isClosed()) {
+        if ($election->isLockedForEditing()) {
             return back()->with('toast', [
                 'type' => 'error',
-                'message' => 'Cannot edit an election while voting is active or after it has been closed.',
+                'message' => 'Cannot edit an election while voting is active, paused, or after it has been closed.',
             ]);
         }
 
@@ -176,10 +177,10 @@ class ElectionController extends Controller
 
     public function destroy(Request $request, Election $election): RedirectResponse
     {
-        if ($election->isActive()) {
+        if ($election->isLockedForEditing()) {
             return back()->with('toast', [
                 'type' => 'error',
-                'message' => 'Cannot delete an election while voting is active. Close it first.',
+                'message' => 'Cannot delete an election while voting is active, paused, or after it has been closed.',
             ]);
         }
 
@@ -231,30 +232,24 @@ class ElectionController extends Controller
 
     public function updateStatus(Request $request, Election $election, VotingService $voting): RedirectResponse
     {
-        $validTransitions = [
-            ElectionStatus::Draft->value => [ElectionStatus::Scheduled->value],
-            ElectionStatus::Scheduled->value => [ElectionStatus::Active->value, ElectionStatus::Draft->value],
-            ElectionStatus::Active->value => [ElectionStatus::Closed->value, ElectionStatus::Draft->value],
-            ElectionStatus::Closed->value => [ElectionStatus::Active->value],
-            ElectionStatus::PausedForReview->value => [ElectionStatus::Active->value],
-        ];
+        $validated = $request->validate([
+            'status' => ['required', Rule::enum(ElectionStatus::class)],
+        ]);
 
-        $current = $election->status->value;
-        $newStatus = $request->input('status');
+        $current = $election->status;
+        $newStatus = ElectionStatus::from($validated['status']);
 
-        $allowed = $validTransitions[$current] ?? [];
-
-        if (! in_array($newStatus, $allowed)) {
+        if (! $current->canTransitionTo($newStatus)) {
             return back()->with('toast', [
                 'type' => 'error',
-                'message' => "Cannot transition from {$current} to {$newStatus}.",
+                'message' => "Cannot transition from {$current->label()} to {$newStatus->label()}.",
             ]);
         }
 
         // Resuming a paused election requires resetting the quarantine
         // counter and recording a dedicated audit entry — delegate to
         // VotingService::resumeElection() rather than a plain status flip.
-        if ($current === ElectionStatus::PausedForReview->value && $newStatus === ElectionStatus::Active->value) {
+        if ($current === ElectionStatus::PausedForReview && $newStatus === ElectionStatus::Active) {
             $voting->resumeElection($election, $request->user()->id);
 
             return back()->with('toast', [
@@ -263,21 +258,31 @@ class ElectionController extends Controller
             ]);
         }
 
-        $oldStatus = $current;
+        // Reopening a closed election with results already released would let
+        // published results and live voting coexist inconsistently — require
+        // withdrawing results first.
+        if ($current === ElectionStatus::Closed && $newStatus === ElectionStatus::Active && $election->results_released) {
+            return back()->with('toast', [
+                'type' => 'error',
+                'message' => 'Withdraw the released results before reopening this election.',
+            ]);
+        }
+
+        $oldStatus = $current->value;
         $election->update(['status' => $newStatus]);
 
         AdminAuditLog::create([
             'admin_id' => $request->user()->id,
             'action' => 'election_status_changed',
-            'description' => "Election \"{$election->title}\" moved from {$oldStatus} to {$newStatus}.",
-            'metadata' => ['election_id' => $election->id, 'from' => $oldStatus, 'to' => $newStatus],
+            'description' => "Election \"{$election->title}\" moved from {$oldStatus} to {$newStatus->value}.",
+            'metadata' => ['election_id' => $election->id, 'from' => $oldStatus, 'to' => $newStatus->value],
             'ip_address' => $request->ip(),
             'created_at' => now(),
         ]);
 
         return back()->with('toast', [
             'type' => 'success',
-            'message' => "Election status updated to {$newStatus}.",
+            'message' => "Election status updated to {$newStatus->label()}.",
         ]);
     }
 

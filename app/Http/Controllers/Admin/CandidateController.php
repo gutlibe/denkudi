@@ -41,10 +41,10 @@ class CandidateController extends Controller
 
     public function store(Request $request, Election $election): RedirectResponse
     {
-        if ($election->isActive()) {
+        if ($election->isLockedForEditing()) {
             return back()->with('toast', [
                 'type' => 'error',
-                'message' => 'Cannot add candidates while voting is active.',
+                'message' => 'Cannot add candidates while the election is active, paused, or closed.',
             ]);
         }
 
@@ -78,10 +78,10 @@ class CandidateController extends Controller
 
     public function update(Request $request, Election $election, Candidate $candidate): RedirectResponse
     {
-        if ($election->isActive()) {
+        if ($election->isLockedForEditing()) {
             return back()->with('toast', [
                 'type' => 'error',
-                'message' => 'Cannot edit candidates while voting is active.',
+                'message' => 'Cannot edit candidates while the election is active, paused, or closed.',
             ]);
         }
 
@@ -118,10 +118,10 @@ class CandidateController extends Controller
 
     public function destroy(Request $request, Election $election, Candidate $candidate): RedirectResponse
     {
-        if ($election->isActive()) {
+        if ($election->isLockedForEditing()) {
             return back()->with('toast', [
                 'type' => 'error',
-                'message' => 'Cannot delete candidates while voting is active.',
+                'message' => 'Cannot delete candidates while the election is active, paused, or closed.',
             ]);
         }
 

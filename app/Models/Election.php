@@ -120,4 +120,18 @@ class Election extends Model
     {
         return $this->status === ElectionStatus::PausedForReview;
     }
+
+    /**
+     * Whether the election's structure (dates, positions, candidates) is
+     * locked from editing because voting has started, is paused, or has
+     * concluded — based on status alone, not the starts_at/ends_at window.
+     */
+    public function isLockedForEditing(): bool
+    {
+        return in_array($this->status, [
+            ElectionStatus::Active,
+            ElectionStatus::PausedForReview,
+            ElectionStatus::Closed,
+        ], true);
+    }
 }

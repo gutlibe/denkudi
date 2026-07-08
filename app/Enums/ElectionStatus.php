@@ -31,4 +31,38 @@ enum ElectionStatus: string
             $status->value => $status->label(),
         ], []);
     }
+
+    /**
+     * The set of statuses this status may transition to.
+     *
+     * @return array<int, self>
+     */
+    public function allowedTransitions(): array
+    {
+        return match ($this) {
+            self::Draft => [self::Scheduled],
+            self::Scheduled => [self::Active, self::Draft],
+            self::Active => [self::Closed, self::Draft],
+            self::PausedForReview => [self::Active],
+            self::Closed => [self::Active],
+        };
+    }
+
+    public function canTransitionTo(self $target): bool
+    {
+        return in_array($target, $this->allowedTransitions(), true);
+    }
+
+    /**
+     * Serializable transition map (value => allowed next values) for the frontend.
+     *
+     * @return array<string, array<int, string>>
+     */
+    public static function transitionMap(): array
+    {
+        return array_reduce(self::cases(), fn ($carry, $status) => [
+            ...$carry,
+            $status->value => array_map(fn (self $s) => $s->value, $status->allowedTransitions()),
+        ], []);
+    }
 }

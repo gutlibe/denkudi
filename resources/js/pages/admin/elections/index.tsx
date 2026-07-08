@@ -62,22 +62,20 @@ type Props = {
     elections: Election[];
     filters: { status: string; search: string };
     statuses: Record<string, string>;
+    statusTransitions: Record<string, string[]>;
     pagination: { current_page: number; last_page: number; total: number };
 };
 
-const statusTransitions: Record<string, { value: string; label: string }[]> = {
-    draft: [{ value: 'scheduled', label: 'Schedule' }],
-    scheduled: [
-        { value: 'active', label: 'Activate' },
-        { value: 'draft', label: 'Revert to Draft' },
-    ],
-    active: [
-        { value: 'closed', label: 'Close' },
-        { value: 'draft', label: 'Revert to Draft' },
-    ],
-    paused_for_review: [{ value: 'active', label: 'Resume Voting' }],
-    closed: [],
+const transitionLabels: Record<string, Record<string, string>> = {
+    draft: { scheduled: 'Schedule' },
+    scheduled: { active: 'Activate', draft: 'Revert to Draft' },
+    active: { closed: 'Close', draft: 'Revert to Draft' },
+    paused_for_review: { active: 'Resume Voting' },
+    closed: { active: 'Reopen' },
 };
+
+const transitionLabel = (current: string, target: string): string =>
+    transitionLabels[current]?.[target] ?? `Move to ${target}`;
 
 const statusBadge = (status: string) => {
     const map: Record<string, string> = {
@@ -108,6 +106,7 @@ export default function ElectionsIndex({
     elections,
     filters,
     statuses,
+    statusTransitions,
     pagination,
 }: Props) {
     const [search, setSearch] = useState(filters.search);
@@ -264,26 +263,30 @@ export default function ElectionsIndex({
                                                         </DropdownMenuTrigger>
                                                         <DropdownMenuContent
                                                             align="start"
-                                                            className="w-32"
+                                                            className="w-40"
                                                         >
                                                             {statusTransitions[
                                                                 election.status
-                                                            ].map((t) => (
+                                                            ].map((target) => (
                                                                 <DropdownMenuItem
-                                                                    key={
-                                                                        t.value
-                                                                    }
+                                                                    key={target}
                                                                     onClick={() =>
                                                                         setStatusChange(
                                                                             {
                                                                                 id: election.id,
-                                                                                status: t.value,
-                                                                                label: t.label,
+                                                                                status: target,
+                                                                                label: transitionLabel(
+                                                                                    election.status,
+                                                                                    target,
+                                                                                ),
                                                                             },
                                                                         )
                                                                     }
                                                                 >
-                                                                    {t.label}
+                                                                    {transitionLabel(
+                                                                        election.status,
+                                                                        target,
+                                                                    )}
                                                                 </DropdownMenuItem>
                                                             ))}
                                                         </DropdownMenuContent>

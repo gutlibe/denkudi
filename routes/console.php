@@ -8,4 +8,5 @@ Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote');
 
+Schedule::command('elections:activate-scheduled')->everyMinute();
 Schedule::command('elections:close-expired')->everyMinute();
