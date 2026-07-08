@@ -9,7 +9,14 @@ import AppLayout from '@/layouts/app-layout';
 import AuthLayout from '@/layouts/auth-layout';
 import SettingsLayout from '@/layouts/settings/layout';
 
-const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
+// Read the app name from the initial page's shared props (set server-side
+// from config('app.name')) rather than a Vite build-time env var — the
+// production build runs in CI with no .env present, so VITE_APP_NAME is
+// always undefined there and would otherwise bake 'Laravel' into the bundle.
+const initialPage = JSON.parse(
+    document.getElementById('app')?.getAttribute('data-page') ?? '{}',
+);
+const appName = initialPage?.props?.name || 'HTU E-Voting';
 const pages = import.meta.glob('./pages/**/*.tsx');
 
 initializeTheme();

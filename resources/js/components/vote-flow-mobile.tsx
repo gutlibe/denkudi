@@ -4,9 +4,11 @@ import {
     ArrowLeft02Icon,
     UserIcon,
     Search01Icon,
+    ClipboardCopyIcon,
 } from '@hugeicons/core-free-icons';
 import { HugeiconsIcon } from '@hugeicons/react';
 import { Link } from '@inertiajs/react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useBallot } from '@/hooks/use-ballot';
@@ -60,6 +62,7 @@ function CandidatePhoto({
 }
 
 export function VoteFlowMobile({ election, open, onClose, onVoted }: Props) {
+    const [copied, setCopied] = useState(false);
     const {
         ballotData,
         loading,
@@ -107,10 +110,35 @@ export function VoteFlowMobile({ election, open, onClose, onVoted }: Props) {
                         <div className="w-full rounded-2xl border border-border/60 bg-muted/50 px-5 py-4">
                             <p className="mb-2 text-[10px] tracking-wider text-muted-foreground uppercase">
                                 Receipt Token
+                                {copied && (
+                                    <span className="text-green-600">
+                                        {' '}
+                                        — Copied
+                                    </span>
+                                )}
                             </p>
-                            <p className="font-mono text-xl font-bold tracking-widest text-primary">
-                                {receipt}
-                            </p>
+                            <div className="flex items-center justify-center gap-2">
+                                <p className="font-mono text-xl font-bold tracking-widest text-primary">
+                                    {receipt}
+                                </p>
+                                <Button
+                                    variant="ghost"
+                                    size="icon-sm"
+                                    onClick={() => {
+                                        navigator.clipboard.writeText(receipt);
+                                        setCopied(true);
+                                        setTimeout(
+                                            () => setCopied(false),
+                                            2000,
+                                        );
+                                    }}
+                                >
+                                    <HugeiconsIcon
+                                        icon={ClipboardCopyIcon}
+                                        size={16}
+                                    />
+                                </Button>
+                            </div>
                             <p className="mt-2 text-[10px] text-muted-foreground">
                                 Save this to verify your vote later.
                             </p>
