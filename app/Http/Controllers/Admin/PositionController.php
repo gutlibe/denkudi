@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Enums\VoteStatus;
 use App\Http\Controllers\Controller;
 use App\Models\AdminAuditLog;
 use App\Models\Election;
@@ -78,7 +79,7 @@ class PositionController extends Controller
             ]);
         }
 
-        if ($position->votes()->where('status', 'valid')->count() > 0) {
+        if ($position->votes()->where('status', VoteStatus::Valid)->count() > 0) {
             return back()->with('toast', [
                 'type' => 'error',
                 'message' => 'Cannot delete position with existing votes.',

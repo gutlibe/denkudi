@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Enums\ElectionStatus;
 use App\Enums\ElectionType;
+use App\Enums\VoteStatus;
 use App\Models\AdminAuditLog;
 use App\Models\Candidate;
 use App\Models\Election;
@@ -88,7 +89,7 @@ class DemoSeeder extends Seeder
 
         // ── Create one quarantined vote (tampered hash) ──
         $lastValidVote = Vote::where('election_id', $election->id)
-            ->where('status', 'valid')
+            ->where('status', VoteStatus::Valid)
             ->orderBy('id', 'desc')
             ->first();
 
@@ -100,7 +101,7 @@ class DemoSeeder extends Seeder
                 'receipt_token' => 'HTU-TAMP-ERED-DEMO',
                 'previous_hash' => $lastValidVote->current_hash,
                 'current_hash' => hash_hmac('sha256', 'tampered-data', 'wrong-key'),
-                'status' => 'valid',
+                'status' => VoteStatus::Valid,
             ]);
 
             $election->increment('quarantine_count');
@@ -114,7 +115,7 @@ class DemoSeeder extends Seeder
             ]);
 
             // Flag it so the integrity scan picks it up
-            $bogusVote->update(['status' => 'quarantined']);
+            $bogusVote->update(['status' => VoteStatus::Quarantined]);
             $this->command->warn(' 1 quarantined vote created (hash mismatch demo).');
         }
 

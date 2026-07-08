@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Enums\VoteStatus;
 use App\Http\Controllers\Controller;
 use App\Models\AdminAuditLog;
 use App\Models\Candidate;
@@ -125,7 +126,7 @@ class CandidateController extends Controller
             ]);
         }
 
-        if ($candidate->votes()->where('status', 'valid')->count() > 0) {
+        if ($candidate->votes()->where('status', VoteStatus::Valid)->count() > 0) {
             return back()->with('toast', [
                 'type' => 'error',
                 'message' => 'Cannot delete candidate with existing votes.',

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Enums\ElectionStatus;
+use App\Enums\VoteStatus;
 use App\Http\Controllers\Controller;
 use App\Models\AdminAuditLog;
 use App\Models\Election;
@@ -18,8 +19,8 @@ class DashboardController extends Controller
     public function index(): Response
     {
         $totalStudents = User::where('role', 'student')->count();
-        $totalValidVotes = Vote::where('status', 'valid')->count();
-        $totalQuarantined = Vote::where('status', 'quarantined')->count();
+        $totalValidVotes = Vote::where('status', VoteStatus::Valid)->count();
+        $totalQuarantined = Vote::where('status', VoteStatus::Quarantined)->count();
         $totalVotes = $totalValidVotes + $totalQuarantined;
 
         $today = now()->toDateString();
@@ -44,7 +45,7 @@ class DashboardController extends Controller
                 'type' => $election->type->label(),
                 'scope' => $election->scope,
                 'position_count' => $election->positions_count,
-                'vote_count' => Vote::where('election_id', $election->id)->where('status', 'valid')->count(),
+                'vote_count' => Vote::where('election_id', $election->id)->where('status', VoteStatus::Valid)->count(),
                 'voter_count' => VoterParticipation::where('election_id', $election->id)->count(),
                 'turnout_pct' => $totalStudents > 0
                     ? round((VoterParticipation::where('election_id', $election->id)->count() / $totalStudents) * 100, 1)

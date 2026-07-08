@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\VoteStatus;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -13,7 +14,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string $receipt_token
  * @property string|null $previous_hash
  * @property string $current_hash
- * @property string $status
+ * @property VoteStatus $status
  * @property-read Election|null $election
  * @property-read Position|null $position
  * @property-read Candidate|null $candidate
@@ -33,6 +34,13 @@ class Vote extends Model
         'current_hash',
         'status',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'status' => VoteStatus::class,
+        ];
+    }
 
     /**
      * @return BelongsTo<Election, $this>

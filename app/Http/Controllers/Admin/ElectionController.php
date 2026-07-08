@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Enums\ElectionStatus;
 use App\Enums\ElectionType;
+use App\Enums\VoteStatus;
 use App\Http\Controllers\Controller;
 use App\Models\AdminAuditLog;
 use App\Models\Election;
@@ -333,7 +334,7 @@ class ElectionController extends Controller
     {
         $query = Vote::with(['position', 'candidate'])
             ->where('election_id', $election->id)
-            ->where('status', 'quarantined')
+            ->where('status', VoteStatus::Quarantined)
             ->orderBy('id', 'desc');
 
         $votes = $query->paginate(20)
@@ -371,7 +372,7 @@ class ElectionController extends Controller
             ]);
         }
 
-        if ($vote->status !== 'quarantined') {
+        if ($vote->status !== VoteStatus::Quarantined) {
             return back()->with('toast', [
                 'type' => 'error',
                 'message' => 'Only quarantined votes can be dismissed.',
@@ -387,7 +388,7 @@ class ElectionController extends Controller
             ]);
         }
 
-        $vote->update(['status' => 'valid']);
+        $vote->update(['status' => VoteStatus::Valid]);
         $election->decrement('quarantine_count');
 
         AdminAuditLog::create([
@@ -449,13 +450,13 @@ class ElectionController extends Controller
         return $election->positions->map(function ($position) {
             $totalForPosition = Vote::where('election_id', $position->election_id)
                 ->where('position_id', $position->id)
-                ->where('status', 'valid')
+                ->where('status', VoteStatus::Valid)
                 ->count();
 
             $candidates = $position->candidates->map(function ($candidate) use ($totalForPosition) {
                 $count = Vote::where('position_id', $candidate->position_id)
                     ->where('candidate_id', $candidate->id)
-                    ->where('status', 'valid')
+                    ->where('status', VoteStatus::Valid)
                     ->count();
 
                 return [

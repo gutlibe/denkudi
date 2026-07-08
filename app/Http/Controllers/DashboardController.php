@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\VoteStatus;
 use App\Exceptions\ElectionPausedException;
 use App\Models\Candidate;
 use App\Models\Election;
@@ -192,7 +193,7 @@ class DashboardController extends Controller
                 $chainBroken = false;
 
                 foreach ($votes as $v) {
-                    if ($v->status !== 'valid') {
+                    if ($v->status !== VoteStatus::Valid) {
                         $allValid = false;
                         break;
                     }
@@ -230,7 +231,7 @@ class DashboardController extends Controller
                     $candidates = $position->candidates->map(function (Candidate $candidate) {
                         $count = Vote::where('position_id', $candidate->position_id)
                             ->where('candidate_id', $candidate->id)
-                            ->where('status', 'valid')
+                            ->where('status', VoteStatus::Valid)
                             ->count();
 
                         return [

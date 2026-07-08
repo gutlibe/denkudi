@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Enums\ElectionStatus;
+use App\Enums\VoteStatus;
 use App\Exceptions\ElectionPausedException;
 use App\Models\AdminAuditLog;
 use App\Models\Candidate;
@@ -146,7 +147,7 @@ class VotingService
             // Re-read the chain head NOW, under the lock, so it reflects
             // anything another voter committed while we were waiting.
             $lastVote = Vote::where('election_id', $_election->id)
-                ->where('status', 'valid')
+                ->where('status', VoteStatus::Valid)
                 ->orderBy('id', 'desc')
                 ->first();
 
@@ -183,7 +184,7 @@ class VotingService
                     'receipt_token' => $receipt,
                     'previous_hash' => $previousHash,
                     'current_hash' => $chain,
-                    'status' => 'valid',
+                    'status' => VoteStatus::Valid,
                 ]);
 
                 $previousHash = $chain;
@@ -239,7 +240,7 @@ class VotingService
             }
 
             $lastVote = Vote::where('election_id', $election->id)
-                ->where('status', 'valid')
+                ->where('status', VoteStatus::Valid)
                 ->orderBy('id', 'desc')
                 ->first();
 
@@ -257,7 +258,7 @@ class VotingService
             if ($expected === $lastVote->current_hash) {
                 // 2. Cross-row linkage
                 $predecessor = Vote::where('election_id', $election->id)
-                    ->where('status', 'valid')
+                    ->where('status', VoteStatus::Valid)
                     ->where('id', '<', $lastVote->id)
                     ->orderBy('id', 'desc')
                     ->first();
@@ -322,7 +323,7 @@ class VotingService
             );
         }
 
-        $affected = Vote::where('id', $vote->id)->where('status', 'valid')->update(['status' => 'quarantined']);
+        $affected = Vote::where('id', $vote->id)->where('status', VoteStatus::Valid)->update(['status' => VoteStatus::Quarantined]);
 
         if ($affected) {
             $election->increment('quarantine_count');
@@ -427,12 +428,12 @@ class VotingService
     public function verifyChain(Election $election): array
     {
         $votes = Vote::where('election_id', $election->id)
-            ->where('status', 'valid')
+            ->where('status', VoteStatus::Valid)
             ->orderBy('id')
             ->get();
 
         $quarantined = Vote::where('election_id', $election->id)
-            ->where('status', 'quarantined')
+            ->where('status', VoteStatus::Quarantined)
             ->count();
 
         if ($votes->isEmpty()) {
@@ -508,7 +509,7 @@ class VotingService
         }
 
         $predecessor = Vote::where('election_id', $vote->election_id)
-            ->where('status', 'valid')
+            ->where('status', VoteStatus::Valid)
             ->where('id', '<', $vote->id)
             ->orderBy('id', 'desc')
             ->first();
