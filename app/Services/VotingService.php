@@ -263,6 +263,36 @@ class VotingService
                     ->first();
 
                 if ($predecessor && $lastVote->previous_hash !== $predecessor->current_hash) {
+                    // A broken link is ambiguous: either lastVote's
+                    // previous_hash was forged, or predecessor's
+                    // current_hash was altered after the fact. Recompute
+                    // predecessor's own hash from its own fields to tell
+                    // them apart.
+                    $predecessorExpected = $this->computeHash(
+                        $predecessor->receipt_token,
+                        $predecessor->candidate_id,
+                        $predecessor->previous_hash
+                    );
+
+                    if ($predecessorExpected !== $predecessor->current_hash) {
+                        // predecessor was tampered after the fact — lastVote
+                        // correctly linked to predecessor's original hash at
+                        // cast time (still preserved in lastVote->previous_hash)
+                        // and is innocent. Quarantine only predecessor and
+                        // trust lastVote as-is: re-looping here would compare
+                        // lastVote against the *next* still-valid row instead
+                        // (skipping the now-quarantined gap), which it was
+                        // never actually linked to, producing a false mismatch.
+                        $this->quarantineRow($predecessor, $election, $currentQuarantineCount + 1);
+
+                        return $lastVote;
+                    }
+
+                    // predecessor is internally consistent, so the forged
+                    // link must be lastVote's own previous_hash (or the true
+                    // predecessor row was deleted outright). Either way
+                    // lastVote can't be trusted — quarantine it and
+                    // re-examine from the new tail.
                     $this->quarantineRow($lastVote, $election, $currentQuarantineCount + 1);
 
                     continue;
@@ -511,11 +541,11 @@ class VotingService
     }
 
     /**
-     * Hash a student ID with HMAC-SHA256 using the application key.
+     * Hash a student ID with HMAC-SHA256 using the vote chain key.
      */
     private function hashStudentId(string $studentId): string
     {
-        return hash_hmac('sha256', $studentId, config('app.key'));
+        return hash_hmac('sha256', $studentId, config('voting.chain_key'));
     }
 
     /**
@@ -534,12 +564,12 @@ class VotingService
     /**
      * Produce an HMAC-SHA256 hash linking a vote to its predecessor.
      *
-     * Uses the application key so that only the server can construct
+     * Uses the vote chain key so that only the server can construct
      * valid hashes. An attacker with raw database access cannot forge a
      * vote and recompute the hash to match without the key.
      */
     private function computeHash(string $receipt, int $candidateId, string $previousHash): string
     {
-        return hash_hmac('sha256', $receipt.$candidateId.$previousHash, config('app.key'));
+        return hash_hmac('sha256', $receipt.$candidateId.$previousHash, config('voting.chain_key'));
     }
 }
